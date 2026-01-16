@@ -1,0 +1,107 @@
+[
+  {
+    "id": "recKI925k2iGmYnzh",
+    "fields": {
+      "Name": "Hays",
+      "Short Name": "Hays",
+      "Website": "https://www.hays.co.uk/",
+      "Careers URL": "https://www.hays.co.uk/jobs",
+      "Tier": "2",
+      "Primary Service Areas": [
+        "General CID",
+        "Disclosure"
+      ],
+      "Notes": "Large generalist agency with framework access."
+    }
+  },
+  {
+    "id": "recKYlQXLjHMkqOA6",
+    "fields": {
+      "Name": "Adecco",
+      "Short Name": "Adecco",
+      "Website": "https://www.adecco.co.uk/",
+      "Careers URL": "https://www.adecco.co.uk/jobs",
+      "Tier": "2",
+      "Primary Service Areas": [
+        "General CID"
+      ],
+      "Notes": "Large generalist - often struggles with niche roles."
+    }
+  },
+  {
+    "id": "recf1apjcTE2JAIch",
+    "fields": {
+      "Name": "Service Care Solutions",
+      "Short Name": "Service Care",
+      "Website": "https://www.servicecare.org.uk/",
+      "Careers URL": "https://www.servicecare.org.uk/jobs",
+      "Tier": "3",
+      "Primary Service Areas": [
+        "Safeguarding",
+        "General CID"
+      ],
+      "Notes": "Niche player with some police sector focus."
+    }
+  },
+  {
+    "id": "rechRyt9TlF5AurUW",
+    "fields": {
+      "Name": "Investigo",
+      "Short Name": "Investigo",
+      "Website": "https://www.weareinvestigo.com/",
+      "Careers URL": "https://www.weareinvestigo.com/jobs",
+      "Tier": "1",
+      "Primary Service Areas": [
+        "Investigation",
+        "Intelligence",
+        "Digital Forensics"
+      ],
+      "Notes": "Direct competitor - Tier 1 threat. Strong in complex investigation work."
+    }
+  },
+  {
+    "id": "recmMr4J30lbMqCJI",
+    "fields": {
+      "Name": "Matrix SCM",
+      "Short Name": "Matrix SCM",
+      "Website": "https://www.matrixscm.com/",
+      "Careers URL": "https://www.matrixscm.com/",
+      "Tier": "3",
+      "Primary Service Areas": [
+        "General CID"
+      ],
+      "Notes": "Neutral vendor platform - not a direct competitor but tracks contractor market."
+    }
+  },
+  {
+    "id": "recrtAiTQeQQzDrJE",
+    "fields": {
+      "Name": "Reed",
+      "Short Name": "Reed",
+      "Website": "https://www.reed.co.uk/",
+      "Careers URL": "https://www.reed.co.uk/jobs",
+      "Tier": "2",
+      "Primary Service Areas": [
+        "General CID",
+        "Disclosure"
+      ],
+      "Notes": "Large generalist agency with some police sector presence."
+    }
+  },
+  {
+    "id": "recsZ3IMtwrbotkyT",
+    "fields": {
+      "Name": "Red Snapper Group",
+      "Short Name": "Red Snapper",
+      "Website": "https://rsg.ltd/",
+      "Careers URL": "https://rsg.ltd/jobs/",
+      "Tier": "1",
+      "Primary Service Areas": [
+        "Investigation",
+        "Disclosure",
+        "Intelligence"
+      ],
+      "Notes": "Direct competitor - Tier 1 threat. Strong presence in investigation services."
+    }
+  }
+]

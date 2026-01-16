@@ -1,0 +1,1034 @@
+[
+  {
+    "id": "rec0bqtzZ8soInSlH",
+    "fields": {
+      "Name": "Bedfordshire Police",
+      "Short Name": "Beds",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 900,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS",
+        "BCH"
+      ],
+      "Propensity Score": 25,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829104328,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 48
+    }
+  },
+  {
+    "id": "rec2OHVTqG0XrAeZq",
+    "fields": {
+      "Name": "Surrey Police",
+      "Short Name": "Surrey",
+      "Force Type": "Territorial",
+      "Region": "South East",
+      "Size Tier": "Medium",
+      "Officer Count": 2200,
+      "Staff Count": 1500,
+      "Budget Estimate": 92400000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "Surrey/Sussex"
+      ],
+      "Propensity Score": 25,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684732378,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 65
+    }
+  },
+  {
+    "id": "rec5HZZAjQuUqivkT",
+    "fields": {
+      "Name": "Warwickshire Police",
+      "Short Name": "Warks",
+      "Force Type": "Territorial",
+      "Region": "West Midlands",
+      "Size Tier": "Small",
+      "Officer Count": 1100,
+      "Staff Count": 700,
+      "Budget Estimate": 46200000,
+      "HMICFRS Status": "Requires Improvement",
+      "Collaboration": [
+        "Tri-Force"
+      ],
+      "Propensity Score": 40,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12829253109,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 60
+    }
+  },
+  {
+    "id": "rec5RgXmdRH273bK6",
+    "fields": {
+      "Name": "Lincolnshire Police",
+      "Short Name": "Lincs",
+      "Force Type": "Territorial",
+      "Region": "East Midlands",
+      "Size Tier": "Small",
+      "Officer Count": 1200,
+      "Staff Count": 700,
+      "Budget Estimate": 50400000,
+      "HMICFRS Status": "Engage",
+      "HMICFRS Engage": true,
+      "Collaboration": [
+        "East Midlands"
+      ],
+      "Propensity Score": 60,
+      "Segment": "Fixer",
+      "HubSpot Company ID": 12829020390,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 36
+    }
+  },
+  {
+    "id": "rec5uz0nqOT0YIvxp",
+    "fields": {
+      "Name": "Dyfed-Powys Police",
+      "Short Name": "DPP",
+      "Force Type": "Territorial",
+      "Region": "Wales",
+      "Size Tier": "Small",
+      "Officer Count": 1300,
+      "Staff Count": 700,
+      "Budget Estimate": 54600000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "All-Wales"
+      ],
+      "Propensity Score": 25,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829217769,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 27
+    }
+  },
+  {
+    "id": "rec7jg9uNNyDo8cDu",
+    "fields": {
+      "Name": "Essex Police",
+      "Short Name": "Essex",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Medium",
+      "Officer Count": 3800,
+      "Staff Count": 2100,
+      "Budget Estimate": 159600000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS"
+      ],
+      "Propensity Score": 25,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12683760621,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 103
+    }
+  },
+  {
+    "id": "rec8OWm5ztyHAXEqE",
+    "fields": {
+      "Name": "Metropolitan Police Service",
+      "Short Name": "Met",
+      "Force Type": "Territorial",
+      "Region": "London",
+      "Size Tier": "Large",
+      "Officer Count": 34647,
+      "Staff Count": 12500,
+      "Budget Estimate": 1455174000,
+      "HMICFRS Status": "Engage",
+      "HMICFRS Engage": true,
+      "Propensity Score": 80,
+      "Segment": "Fixer",
+      "HubSpot Company ID": 12683760620,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 672
+    }
+  },
+  {
+    "id": "rec9Gz9HBzoQCD89y",
+    "fields": {
+      "Name": "Hertfordshire Constabulary",
+      "Short Name": "Herts",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Medium",
+      "Officer Count": 2400,
+      "Staff Count": 1500,
+      "Budget Estimate": 100800000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS",
+        "BCH"
+      ],
+      "Propensity Score": 25,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829194719,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 78
+    }
+  },
+  {
+    "id": "rec9rmZo8VUslo6bm",
+    "fields": {
+      "Name": "National Crime Agency",
+      "Short Name": "NCA",
+      "Force Type": "National",
+      "Region": "National",
+      "Size Tier": "Small",
+      "Officer Count": 0,
+      "Staff Count": 5500,
+      "Budget Estimate": 0,
+      "HMICFRS Status": "Good",
+      "Propensity Score": 5,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829198783,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 27
+    }
+  },
+  {
+    "id": "recAhqkfAGWNuvbrT",
+    "fields": {
+      "Name": "Ministry of Defence Police",
+      "Short Name": "MDP",
+      "Force Type": "Specialist",
+      "Region": "National",
+      "Size Tier": "Medium",
+      "Officer Count": 2800,
+      "Staff Count": 400,
+      "Budget Estimate": 117600000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829262778,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 10
+    }
+  },
+  {
+    "id": "recAuYBS1BSU9dYeV",
+    "fields": {
+      "Name": "Derbyshire Constabulary",
+      "Short Name": "Derbys",
+      "Force Type": "Territorial",
+      "Region": "East Midlands",
+      "Size Tier": "Medium",
+      "Officer Count": 2100,
+      "Staff Count": 1200,
+      "Budget Estimate": 88200000,
+      "HMICFRS Status": "Requires Improvement",
+      "Collaboration": [
+        "East Midlands"
+      ],
+      "Propensity Score": 40,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12684643265,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-14",
+      "Contact Count": 47
+    }
+  },
+  {
+    "id": "recBSrNflcr5CoEsC",
+    "fields": {
+      "Name": "Staffordshire Police",
+      "Short Name": "Staffs",
+      "Force Type": "Territorial",
+      "Region": "West Midlands",
+      "Size Tier": "Medium",
+      "Officer Count": 2000,
+      "Staff Count": 1200,
+      "Budget Estimate": 84000000,
+      "HMICFRS Status": "Requires Improvement",
+      "Collaboration": [
+        "Tri-Force"
+      ],
+      "Propensity Score": 40,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12829062079,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 56
+    }
+  },
+  {
+    "id": "recCV8vuKRN9ttRkP",
+    "fields": {
+      "Name": "West Yorkshire Police",
+      "Short Name": "WYP",
+      "Force Type": "Territorial",
+      "Region": "Yorkshire",
+      "Size Tier": "Large",
+      "Officer Count": 6132,
+      "Staff Count": 3100,
+      "Budget Estimate": 257544000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 35,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684714712,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 89
+    }
+  },
+  {
+    "id": "recF18hzJGr2DKjx5",
+    "fields": {
+      "Name": "Civil Nuclear Constabulary",
+      "Short Name": "CNC",
+      "Force Type": "Specialist",
+      "Region": "National",
+      "Size Tier": "Small",
+      "Officer Count": 1500,
+      "Staff Count": 200,
+      "Budget Estimate": 63000000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 26077700329,
+      "Relationship Score": 60,
+      "Last Contact": "2026-01-10",
+      "Contact Count": 3
+    }
+  },
+  {
+    "id": "recFpvtsXvmXSyFZE",
+    "fields": {
+      "Name": "Durham Constabulary",
+      "Short Name": "Durham",
+      "Force Type": "Territorial",
+      "Region": "North East",
+      "Size Tier": "Small",
+      "Officer Count": 1300,
+      "Staff Count": 700,
+      "Budget Estimate": 54600000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 40,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12828617189,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 25
+    }
+  },
+  {
+    "id": "recIEi7yWzKvcsBvN",
+    "fields": {
+      "Name": "Northumbria Police",
+      "Short Name": "Northumbria",
+      "Force Type": "Territorial",
+      "Region": "North East",
+      "Size Tier": "Medium",
+      "Officer Count": 3600,
+      "Staff Count": 1800,
+      "Budget Estimate": 151200000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829194716,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 56
+    }
+  },
+  {
+    "id": "recJHOMZrlvj4KU1R",
+    "fields": {
+      "Name": "Thames Valley Police",
+      "Short Name": "TVP",
+      "Force Type": "Territorial",
+      "Region": "South East",
+      "Size Tier": "Medium",
+      "Officer Count": 4929,
+      "Staff Count": 2800,
+      "Budget Estimate": 207018000,
+      "HMICFRS Status": "Good",
+      "Collaboration": [
+        "TVP/Hants"
+      ],
+      "Propensity Score": 5,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684732382,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 124
+    }
+  },
+  {
+    "id": "recJZtbS7stEPbLZB",
+    "fields": {
+      "Name": "South Yorkshire Police",
+      "Short Name": "SYP",
+      "Force Type": "Territorial",
+      "Region": "Yorkshire",
+      "Size Tier": "Medium",
+      "Officer Count": 3180,
+      "Staff Count": 1800,
+      "Budget Estimate": 133560000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 30,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12829198577,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 56
+    }
+  },
+  {
+    "id": "recPkYufQT7MvYMct",
+    "fields": {
+      "Name": "Counter Terrorism Policing",
+      "Short Name": "CTP",
+      "Force Type": "National",
+      "Region": "National",
+      "Size Tier": "Small",
+      "Officer Count": 0,
+      "Staff Count": 2000,
+      "Budget Estimate": 0,
+      "HMICFRS Status": "Good",
+      "Propensity Score": 5,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828617190,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 5
+    }
+  },
+  {
+    "id": "recTMsfjlHftRZQlj",
+    "fields": {
+      "Name": "North Yorkshire Police",
+      "Short Name": "NYP",
+      "Force Type": "Territorial",
+      "Region": "Yorkshire",
+      "Size Tier": "Small",
+      "Officer Count": 1600,
+      "Staff Count": 1000,
+      "Budget Estimate": 67200000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829262782,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-14",
+      "Contact Count": 35
+    }
+  },
+  {
+    "id": "recU4VDsm8afYoGxC",
+    "fields": {
+      "Name": "Greater Manchester Police",
+      "Short Name": "GMP",
+      "Force Type": "Territorial",
+      "Region": "North West",
+      "Size Tier": "Large",
+      "Officer Count": 8291,
+      "Staff Count": 4200,
+      "Budget Estimate": 348222000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 40,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12683839708,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 162
+    }
+  },
+  {
+    "id": "recVRvPdUeiKuGhrI",
+    "fields": {
+      "Name": "North Wales Police",
+      "Short Name": "NWP",
+      "Force Type": "Territorial",
+      "Region": "Wales",
+      "Size Tier": "Small",
+      "Officer Count": 1600,
+      "Staff Count": 900,
+      "Budget Estimate": 67200000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "All-Wales"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828569060,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 30
+    }
+  },
+  {
+    "id": "recVdiEzReLhBvy7E",
+    "fields": {
+      "Name": "Devon & Cornwall Police",
+      "Short Name": "D&C",
+      "Force Type": "Territorial",
+      "Region": "South West",
+      "Size Tier": "Medium",
+      "Officer Count": 3400,
+      "Staff Count": 2000,
+      "Budget Estimate": 142800000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684755435,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 70
+    }
+  },
+  {
+    "id": "recVhkU2mkEDoZaVE",
+    "fields": {
+      "Name": "Suffolk Constabulary",
+      "Short Name": "Suffolk",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 900,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829205699,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 44
+    }
+  },
+  {
+    "id": "recVvoTGeYhxOvPez",
+    "fields": {
+      "Name": "Gloucestershire Constabulary",
+      "Short Name": "Glos",
+      "Force Type": "Territorial",
+      "Region": "South West",
+      "Size Tier": "Small",
+      "Officer Count": 1300,
+      "Staff Count": 800,
+      "Budget Estimate": 54600000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829253107,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-10",
+      "Contact Count": 24
+    }
+  },
+  {
+    "id": "reccrsCs5yw1YQwBt",
+    "fields": {
+      "Name": "Cumbria Constabulary",
+      "Short Name": "Cumbria",
+      "Force Type": "Territorial",
+      "Region": "North West",
+      "Size Tier": "Small",
+      "Officer Count": 1200,
+      "Staff Count": 700,
+      "Budget Estimate": 50400000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829253108,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 45
+    }
+  },
+  {
+    "id": "recfGEn75bJnftjIT",
+    "fields": {
+      "Name": "Dorset Police",
+      "Short Name": "Dorset",
+      "Force Type": "Territorial",
+      "Region": "South West",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 900,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829251307,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 31
+    }
+  },
+  {
+    "id": "recfz0sNrrSvB3ymO",
+    "fields": {
+      "Name": "British Transport Police",
+      "Short Name": "BTP",
+      "Force Type": "Specialist",
+      "Region": "National",
+      "Size Tier": "Medium",
+      "Officer Count": 3100,
+      "Staff Count": 1500,
+      "Budget Estimate": 130200000,
+      "HMICFRS Status": "Good",
+      "Propensity Score": 5,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828575936,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 101
+    }
+  },
+  {
+    "id": "rechvthIvS7EMNPRi",
+    "fields": {
+      "Name": "Sussex Police",
+      "Short Name": "Sussex",
+      "Force Type": "Territorial",
+      "Region": "South East",
+      "Size Tier": "Medium",
+      "Officer Count": 3000,
+      "Staff Count": 1800,
+      "Budget Estimate": 126000000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "Surrey/Sussex"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684618171,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-08",
+      "Contact Count": 84
+    }
+  },
+  {
+    "id": "reci2fePZcQwcroCZ",
+    "fields": {
+      "Name": "Avon and Somerset Police",
+      "Short Name": "A&S",
+      "Force Type": "Territorial",
+      "Region": "South West",
+      "Size Tier": "Medium",
+      "Officer Count": 3100,
+      "Staff Count": 1900,
+      "Budget Estimate": 130200000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828382665,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-13",
+      "Contact Count": 68
+    }
+  },
+  {
+    "id": "reciRs19eA409Okf9",
+    "fields": {
+      "Name": "Wiltshire Police",
+      "Short Name": "Wilts",
+      "Force Type": "Territorial",
+      "Region": "South West",
+      "Size Tier": "Small",
+      "Officer Count": 1200,
+      "Staff Count": 800,
+      "Budget Estimate": 50400000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829205701,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-09",
+      "Contact Count": 30
+    }
+  },
+  {
+    "id": "recjMDWVFd4HL63Me",
+    "fields": {
+      "Name": "Norfolk Constabulary",
+      "Short Name": "Norfolk",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Small",
+      "Officer Count": 1800,
+      "Staff Count": 1100,
+      "Budget Estimate": 75600000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828623829,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 40
+    }
+  },
+  {
+    "id": "recjcBD93qbXKIcpH",
+    "fields": {
+      "Name": "Northamptonshire Police",
+      "Short Name": "Northants",
+      "Force Type": "Territorial",
+      "Region": "East Midlands",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 800,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 30,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12829078982,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 36
+    }
+  },
+  {
+    "id": "reckxAas06CihyH2s",
+    "fields": {
+      "Name": "Leicestershire Police",
+      "Short Name": "Leics",
+      "Force Type": "Territorial",
+      "Region": "East Midlands",
+      "Size Tier": "Medium",
+      "Officer Count": 2200,
+      "Staff Count": 1300,
+      "Budget Estimate": 92400000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "East Midlands"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829262779,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-15",
+      "Contact Count": 48
+    }
+  },
+  {
+    "id": "recluTsTS0rB0m4Ko",
+    "fields": {
+      "Name": "South Wales Police",
+      "Short Name": "SWP",
+      "Force Type": "Territorial",
+      "Region": "Wales",
+      "Size Tier": "Medium",
+      "Officer Count": 3200,
+      "Staff Count": 1700,
+      "Budget Estimate": 134400000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "All-Wales"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829198575,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 46
+    }
+  },
+  {
+    "id": "reclud1rameEpQzZH",
+    "fields": {
+      "Name": "Cleveland Police",
+      "Short Name": "Cleveland",
+      "Force Type": "Territorial",
+      "Region": "North East",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 800,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 30,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12829326066,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 37
+    }
+  },
+  {
+    "id": "recmgdgJuXdiGngDF",
+    "fields": {
+      "Name": "West Midlands Police",
+      "Short Name": "WMP",
+      "Force Type": "Territorial",
+      "Region": "West Midlands",
+      "Size Tier": "Large",
+      "Officer Count": 7614,
+      "Staff Count": 3800,
+      "Budget Estimate": 319788000,
+      "HMICFRS Status": "Engage",
+      "HMICFRS Engage": true,
+      "Propensity Score": 50,
+      "Segment": "Fixer",
+      "HubSpot Company ID": 12829262584,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-14",
+      "Contact Count": 156
+    }
+  },
+  {
+    "id": "recnJUd4HQnd7h8Go",
+    "fields": {
+      "Name": "City of London Police",
+      "Short Name": "CoLP",
+      "Force Type": "Territorial",
+      "Region": "London",
+      "Size Tier": "Small",
+      "Officer Count": 1000,
+      "Staff Count": 500,
+      "Budget Estimate": 42000000,
+      "HMICFRS Status": "Good",
+      "Propensity Score": 5,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12683881169,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-14",
+      "Contact Count": 58
+    }
+  },
+  {
+    "id": "recp58rec24eSU61S",
+    "fields": {
+      "Name": "Lancashire Constabulary",
+      "Short Name": "Lancs",
+      "Force Type": "Territorial",
+      "Region": "North West",
+      "Size Tier": "Medium",
+      "Officer Count": 3500,
+      "Staff Count": 1900,
+      "Budget Estimate": 147000000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829198572,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-07",
+      "Contact Count": 46
+    }
+  },
+  {
+    "id": "recqGCl7PYxXRKcJN",
+    "fields": {
+      "Name": "West Mercia Police",
+      "Short Name": "West Mercia",
+      "Force Type": "Territorial",
+      "Region": "West Midlands",
+      "Size Tier": "Medium",
+      "Officer Count": 2400,
+      "Staff Count": 1400,
+      "Budget Estimate": 100800000,
+      "HMICFRS Status": "Requires Improvement",
+      "Collaboration": [
+        "Tri-Force"
+      ],
+      "Propensity Score": 50,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12683951340,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 73
+    }
+  },
+  {
+    "id": "recqdSYaGoVXxi6uU",
+    "fields": {
+      "Name": "Humberside Police",
+      "Short Name": "Humberside",
+      "Force Type": "Territorial",
+      "Region": "Yorkshire",
+      "Size Tier": "Medium",
+      "Officer Count": 2100,
+      "Staff Count": 1200,
+      "Budget Estimate": 88200000,
+      "HMICFRS Status": "Requires Improvement",
+      "Propensity Score": 30,
+      "Segment": "Recoverer",
+      "HubSpot Company ID": 12683873260,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 47
+    }
+  },
+  {
+    "id": "recsjvD5ja3VxGqln",
+    "fields": {
+      "Name": "Gwent Police",
+      "Short Name": "Gwent",
+      "Force Type": "Territorial",
+      "Region": "Wales",
+      "Size Tier": "Small",
+      "Officer Count": 1400,
+      "Staff Count": 800,
+      "Budget Estimate": 58800000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "All-Wales"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829205700,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 20
+    }
+  },
+  {
+    "id": "recuRKhAqwouqnZFt",
+    "fields": {
+      "Name": "Cambridgeshire Constabulary",
+      "Short Name": "Cambs",
+      "Force Type": "Territorial",
+      "Region": "East",
+      "Size Tier": "Small",
+      "Officer Count": 1700,
+      "Staff Count": 1100,
+      "Budget Estimate": 71400000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "7FCS"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828382667,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 57
+    }
+  },
+  {
+    "id": "recuUaAxBpx6PTS6v",
+    "fields": {
+      "Name": "Merseyside Police",
+      "Short Name": "Merseyside",
+      "Force Type": "Territorial",
+      "Region": "North West",
+      "Size Tier": "Medium",
+      "Officer Count": 4120,
+      "Staff Count": 2200,
+      "Budget Estimate": 173040000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12828569054,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-14",
+      "Contact Count": 109
+    }
+  },
+  {
+    "id": "recvrm8gkII3vM9O5",
+    "fields": {
+      "Name": "Nottinghamshire Police",
+      "Short Name": "Notts",
+      "Force Type": "Territorial",
+      "Region": "East Midlands",
+      "Size Tier": "Medium",
+      "Officer Count": 2400,
+      "Staff Count": 1400,
+      "Budget Estimate": 100800000,
+      "HMICFRS Status": "Engage",
+      "HMICFRS Engage": true,
+      "Collaboration": [
+        "East Midlands"
+      ],
+      "Propensity Score": 50,
+      "Segment": "Fixer",
+      "HubSpot Company ID": 12829198573,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 59
+    }
+  },
+  {
+    "id": "recz92vbRwY9UZ3Rx",
+    "fields": {
+      "Name": "Cheshire Constabulary",
+      "Short Name": "Cheshire",
+      "Force Type": "Territorial",
+      "Region": "North West",
+      "Size Tier": "Medium",
+      "Officer Count": 2200,
+      "Staff Count": 1300,
+      "Budget Estimate": 92400000,
+      "HMICFRS Status": "Adequate",
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829262781,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 49
+    }
+  },
+  {
+    "id": "reczSzOZrrNlulTcn",
+    "fields": {
+      "Name": "Hampshire Constabulary",
+      "Short Name": "Hants",
+      "Force Type": "Territorial",
+      "Region": "South East",
+      "Size Tier": "Medium",
+      "Officer Count": 3400,
+      "Staff Count": 2100,
+      "Budget Estimate": 142800000,
+      "HMICFRS Status": "Adequate",
+      "Collaboration": [
+        "TVP/Hants"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12684732380,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-04",
+      "Contact Count": 83
+    }
+  },
+  {
+    "id": "reczlcdE8sftrDebl",
+    "fields": {
+      "Name": "Kent Police",
+      "Short Name": "Kent",
+      "Force Type": "Territorial",
+      "Region": "South East",
+      "Size Tier": "Medium",
+      "Officer Count": 4100,
+      "Staff Count": 2200,
+      "Budget Estimate": 172200000,
+      "HMICFRS Status": "Good",
+      "Collaboration": [
+        "7FCS"
+      ],
+      "Propensity Score": 15,
+      "Segment": "Collaborator",
+      "HubSpot Company ID": 12829198580,
+      "Relationship Score": 80,
+      "Last Contact": "2026-01-12",
+      "Contact Count": 88
+    }
+  }
+]

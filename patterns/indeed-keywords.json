@@ -1,0 +1,107 @@
+{
+  "description": "Indeed search keywords for UK police sector jobs. 30 keywords organized by category and priority.",
+  "source": "MI-Platform-Fresh-Start/patterns/TECHNICAL-PATTERNS.md",
+  "brightDataDatasetId": "gd_l4dx9j9sscpvs7no2",
+  "dateFilter": "last 24 hours",
+  "totalKeywords": 30,
+  "keywords": {
+    "core": {
+      "priority": "high",
+      "description": "Direct police/force identifiers - always relevant",
+      "terms": [
+        "police",
+        "policing",
+        "constabulary",
+        "force",
+        "constable",
+        "detective",
+        "DC",
+        "DS"
+      ]
+    },
+    "investigator": {
+      "priority": "high",
+      "description": "Investigation roles - core Peel service area",
+      "terms": [
+        "investigator",
+        "investigation",
+        "PIP2",
+        "PIP3",
+        "DI",
+        "forensic",
+        "digital forensic"
+      ]
+    },
+    "intelligence": {
+      "priority": "medium",
+      "description": "Intelligence and analysis roles",
+      "terms": [
+        "intel",
+        "intelligence",
+        "intelligence analyst",
+        "crime"
+      ]
+    },
+    "publicProtection": {
+      "priority": "medium",
+      "description": "Safeguarding and custody roles",
+      "terms": [
+        "custody",
+        "safeguarding",
+        "child protection",
+        "PACE"
+      ]
+    },
+    "legalProsecution": {
+      "priority": "medium",
+      "description": "Criminal justice and disclosure roles",
+      "terms": [
+        "disclosure",
+        "prosecution",
+        "CPS",
+        "criminal"
+      ]
+    },
+    "vetting": {
+      "priority": "low",
+      "description": "Vetting and security roles - smaller market",
+      "terms": [
+        "vetting",
+        "security clearance",
+        "probation"
+      ]
+    }
+  },
+  "flatList": [
+    "police",
+    "policing",
+    "constabulary",
+    "force",
+    "constable",
+    "detective",
+    "DC",
+    "DS",
+    "investigator",
+    "investigation",
+    "PIP2",
+    "PIP3",
+    "DI",
+    "forensic",
+    "digital forensic",
+    "intel",
+    "intelligence",
+    "intelligence analyst",
+    "crime",
+    "custody",
+    "safeguarding",
+    "child protection",
+    "PACE",
+    "disclosure",
+    "prosecution",
+    "CPS",
+    "criminal",
+    "vetting",
+    "security clearance",
+    "probation"
+  ]
+}

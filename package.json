@@ -1,0 +1,20 @@
+{
+  "name": "mi-platform",
+  "version": "1.0.0",
+  "description": "Market Intelligence Platform for Peel Solutions",
+  "type": "module",
+  "scripts": {
+    "health": "node scripts/health-check.js",
+    "seed:forces": "node airtable/scripts/seed-forces.js",
+    "seed:test": "node airtable/scripts/seed-test-data.js",
+    "workflow:import": "node n8n/scripts/import-workflow.js",
+    "workflow:export": "node n8n/scripts/export-workflow.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}

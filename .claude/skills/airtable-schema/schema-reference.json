@@ -1,0 +1,125 @@
+{
+  "$schema": "mi-platform-airtable-schema-v1",
+  "description": "Complete Airtable schema for MI Platform",
+  "tables": {
+    "Forces": {
+      "description": "UK police forces reference data (seed once, rarely changes)",
+      "fields": {
+        "force_id": { "type": "autoNumber" },
+        "name": { "type": "singleLineText", "required": true, "example": "Hampshire Constabulary" },
+        "short_name": { "type": "singleLineText", "example": "Hampshire" },
+        "region": { "type": "singleSelect", "options": ["London", "South East", "South West", "East", "East Midlands", "West Midlands", "North West", "North East", "Yorkshire", "Wales", "Scotland", "Northern Ireland", "National"] },
+        "size": { "type": "singleSelect", "options": ["Small", "Medium", "Large"] },
+        "website_url": { "type": "url" },
+        "careers_url": { "type": "url" },
+        "relationship_status": { "type": "singleSelect", "options": ["None", "Prospect", "Approached", "In Discussion", "Client", "Former Client"], "default": "None" },
+        "relationship_notes": { "type": "longText" },
+        "last_contact_date": { "type": "date" },
+        "hubspot_company_id": { "type": "singleLineText" }
+      }
+    },
+    "Signals": {
+      "description": "Raw intelligence from all monitoring sources",
+      "fields": {
+        "signal_id": { "type": "autoNumber" },
+        "source": { "type": "singleSelect", "options": ["indeed", "linkedin", "red_snapper", "investigo", "reed", "adecco", "service_care", "find_a_tender", "contracts_finder", "hmicfrs", "reg28", "google_news", "force_website", "manual", "test"], "required": true },
+        "source_url": { "type": "url" },
+        "title": { "type": "singleLineText", "required": true },
+        "raw_content": { "type": "longText" },
+        "detected_at": { "type": "dateTime", "required": true },
+        "force": { "type": "linkedRecord", "linkedTable": "Forces" },
+        "status": { "type": "singleSelect", "options": ["New", "Classified", "Processed", "Archived", "Manual Review"], "default": "New" },
+        "signal_type": { "type": "singleSelect", "options": ["job_posting", "competitor_activity", "tender", "contract_award", "regulatory", "news"] },
+        "relevance_score": { "type": "number", "min": 0, "max": 100 },
+        "is_competitor_posting": { "type": "checkbox" },
+        "competitor_name": { "type": "singleLineText" },
+        "classification_reasoning": { "type": "longText" },
+        "salary_min": { "type": "currency" },
+        "salary_max": { "type": "currency" },
+        "contract_type": { "type": "singleSelect", "options": ["Permanent", "Fixed Term", "Temporary", "Contract"] },
+        "closing_date": { "type": "date" }
+      }
+    },
+    "Opportunities": {
+      "description": "Actionable leads ready for outreach",
+      "fields": {
+        "opportunity_id": { "type": "autoNumber" },
+        "force": { "type": "linkedRecord", "linkedTable": "Forces", "required": true },
+        "source_signals": { "type": "linkedRecord", "linkedTable": "Signals", "multiple": true },
+        "opportunity_type": { "type": "singleSelect", "options": ["hiring_intent", "competitor_interception", "tender_response", "regulatory_follow_up", "news_trigger"], "required": true },
+        "status": { "type": "singleSelect", "options": ["New", "Researching", "Ready", "Sent", "Replied", "Meeting Booked", "Proposal Sent", "Won", "Lost", "Dormant"], "default": "New" },
+        "priority": { "type": "singleSelect", "options": ["Hot Lead", "High", "Medium", "Low"] },
+        "priority_score": { "type": "number", "min": 0, "max": 100 },
+        "why_now": { "type": "longText" },
+        "contact": { "type": "linkedRecord", "linkedTable": "Contacts" },
+        "outreach": { "type": "linkedRecord", "linkedTable": "Outreach" },
+        "created_at": { "type": "dateTime" },
+        "last_activity": { "type": "dateTime" },
+        "notes": { "type": "longText" }
+      }
+    },
+    "Contacts": {
+      "description": "Decision-maker contact information",
+      "fields": {
+        "contact_id": { "type": "autoNumber" },
+        "name": { "type": "singleLineText", "required": true },
+        "title": { "type": "singleLineText" },
+        "email": { "type": "email" },
+        "phone": { "type": "phoneNumber" },
+        "linkedin_url": { "type": "url" },
+        "force": { "type": "linkedRecord", "linkedTable": "Forces", "required": true },
+        "contact_type": { "type": "singleSelect", "options": ["HR Lead", "Resourcing Manager", "Head of Investigations", "Head of PVP", "Commercial Manager", "Other"] },
+        "research_confidence": { "type": "number", "min": 0, "max": 100 },
+        "research_sources": { "type": "longText" },
+        "last_verified": { "type": "date" },
+        "hubspot_contact_id": { "type": "singleLineText" }
+      }
+    },
+    "Outreach": {
+      "description": "Drafted and sent messages",
+      "fields": {
+        "outreach_id": { "type": "autoNumber" },
+        "opportunity": { "type": "linkedRecord", "linkedTable": "Opportunities", "required": true },
+        "contact": { "type": "linkedRecord", "linkedTable": "Contacts" },
+        "channel": { "type": "singleSelect", "options": ["Email", "LinkedIn", "Phone"], "required": true },
+        "subject": { "type": "singleLineText" },
+        "body": { "type": "longText", "required": true },
+        "status": { "type": "singleSelect", "options": ["Draft", "Ready", "Sent", "Replied", "No Response"], "default": "Draft" },
+        "drafted_at": { "type": "dateTime" },
+        "sent_at": { "type": "dateTime" },
+        "opened_at": { "type": "dateTime" },
+        "replied_at": { "type": "dateTime" }
+      }
+    },
+    "System_Logs": {
+      "description": "Workflow execution logging for monitoring",
+      "fields": {
+        "log_id": { "type": "autoNumber" },
+        "workflow_name": { "type": "singleLineText", "required": true },
+        "execution_id": { "type": "singleLineText" },
+        "event_type": { "type": "singleSelect", "options": ["start", "success", "failure", "warning", "heartbeat"], "required": true },
+        "timestamp": { "type": "dateTime", "required": true },
+        "duration_ms": { "type": "number" },
+        "records_processed": { "type": "number" },
+        "records_created": { "type": "number" },
+        "error_message": { "type": "longText" },
+        "error_node": { "type": "singleLineText" },
+        "metadata": { "type": "longText" }
+      }
+    },
+    "System_Health": {
+      "description": "Aggregated daily metrics for anomaly detection",
+      "fields": {
+        "metric_id": { "type": "autoNumber" },
+        "workflow_name": { "type": "singleLineText", "required": true },
+        "date": { "type": "date", "required": true },
+        "executions": { "type": "number" },
+        "successes": { "type": "number" },
+        "failures": { "type": "number" },
+        "avg_duration_ms": { "type": "number" },
+        "total_records": { "type": "number" },
+        "anomaly_flag": { "type": "checkbox" }
+      }
+    }
+  }
+}

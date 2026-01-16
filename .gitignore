@@ -1,0 +1,32 @@
+# Environment (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Claude Code local overrides
+.claude/settings.local.json
+CLAUDE.local.md
+memory/
+
+# Node
+node_modules/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Paranoid extras
+*secret*
+*.pem
+*.key
+
+# Credentials folder (keep folder, ignore contents)
+credentials/*
+!credentials/README.md
+!credentials/.gitkeep

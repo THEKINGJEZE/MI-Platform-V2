@@ -1,0 +1,73 @@
+{
+  "description": "MI Platform Claude Code settings — anti-decay protections enabled",
+  
+  "permissions": {
+    "allow": [
+      "Bash(node *)",
+      "Bash(npm *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(curl *)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log *)",
+      "Bash(git commit *)",
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "Bash(python3 *)",
+      "Read",
+      "Write",
+      "Edit"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Write(ANCHOR.md)",
+      "Edit(ANCHOR.md)"
+    ]
+  },
+  
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-compact.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before finishing: (1) Is STATUS.md updated with what changed? (2) Is the next action clearly defined? (3) Any drift from ANCHOR.md mission? Address any gaps now."
+          }
+        ]
+      }
+    ]
+  },
+  
+  "defaultModel": "sonnet",
+  
+  "context": {
+    "autoLoad": ["ANCHOR.md", "CLAUDE.md", "STATUS.md"]
+  }
+}

@@ -1,0 +1,375 @@
+{
+  "description": "UK Police Forces seed data for MI Platform",
+  "version": "1.0",
+  "last_updated": "2025-01",
+  "forces": [
+    {
+      "name": "Avon and Somerset Constabulary",
+      "short_name": "Avon and Somerset",
+      "region": "South West",
+      "size": "Large",
+      "website_url": "https://www.avonandsomerset.police.uk",
+      "careers_url": "https://www.avonandsomerset.police.uk/apply/jobs/"
+    },
+    {
+      "name": "Bedfordshire Police",
+      "short_name": "Bedfordshire",
+      "region": "East",
+      "size": "Medium",
+      "website_url": "https://www.bedfordshire.police.uk",
+      "careers_url": "https://www.bedfordshire.police.uk/police-forces/bedfordshire-police/areas/careers/"
+    },
+    {
+      "name": "Cambridgeshire Constabulary",
+      "short_name": "Cambridgeshire",
+      "region": "East",
+      "size": "Medium",
+      "website_url": "https://www.cambs.police.uk",
+      "careers_url": "https://www.cambs.police.uk/apply/Jobs"
+    },
+    {
+      "name": "Cheshire Constabulary",
+      "short_name": "Cheshire",
+      "region": "North West",
+      "size": "Medium",
+      "website_url": "https://www.cheshire.police.uk",
+      "careers_url": "https://www.cheshire.police.uk/police-forces/cheshire-constabulary/areas/cheshire/careers/"
+    },
+    {
+      "name": "City of London Police",
+      "short_name": "City of London",
+      "region": "London",
+      "size": "Small",
+      "website_url": "https://www.cityoflondon.police.uk",
+      "careers_url": "https://www.cityoflondon.police.uk/police-forces/city-of-london-police/areas/careers/"
+    },
+    {
+      "name": "Cleveland Police",
+      "short_name": "Cleveland",
+      "region": "North East",
+      "size": "Medium",
+      "website_url": "https://www.cleveland.police.uk",
+      "careers_url": "https://www.cleveland.police.uk/police-forces/cleveland-police/areas/cleveland/careers/"
+    },
+    {
+      "name": "Cumbria Constabulary",
+      "short_name": "Cumbria",
+      "region": "North West",
+      "size": "Small",
+      "website_url": "https://www.cumbria.police.uk",
+      "careers_url": "https://www.cumbria.police.uk/police-forces/cumbria-constabulary/areas/careers/"
+    },
+    {
+      "name": "Derbyshire Constabulary",
+      "short_name": "Derbyshire",
+      "region": "East Midlands",
+      "size": "Medium",
+      "website_url": "https://www.derbyshire.police.uk",
+      "careers_url": "https://www.derbyshire.police.uk/police-forces/derbyshire-constabulary/areas/derbyshire/careers/"
+    },
+    {
+      "name": "Devon and Cornwall Police",
+      "short_name": "Devon and Cornwall",
+      "region": "South West",
+      "size": "Large",
+      "website_url": "https://www.devon-cornwall.police.uk",
+      "careers_url": "https://www.devon-cornwall.police.uk/police-forces/devon-cornwall-police/areas/devon-and-cornwall/careers/"
+    },
+    {
+      "name": "Dorset Police",
+      "short_name": "Dorset",
+      "region": "South West",
+      "size": "Medium",
+      "website_url": "https://www.dorset.police.uk",
+      "careers_url": "https://www.dorset.police.uk/police-forces/dorset-police/areas/dorset/careers/"
+    },
+    {
+      "name": "Durham Constabulary",
+      "short_name": "Durham",
+      "region": "North East",
+      "size": "Medium",
+      "website_url": "https://www.durham.police.uk",
+      "careers_url": "https://www.durham.police.uk/police-forces/durham-constabulary/areas/durham/careers/"
+    },
+    {
+      "name": "Essex Police",
+      "short_name": "Essex",
+      "region": "East",
+      "size": "Large",
+      "website_url": "https://www.essex.police.uk",
+      "careers_url": "https://www.essex.police.uk/police-forces/essex-police/areas/essex/careers/"
+    },
+    {
+      "name": "Gloucestershire Constabulary",
+      "short_name": "Gloucestershire",
+      "region": "South West",
+      "size": "Medium",
+      "website_url": "https://www.gloucestershire.police.uk",
+      "careers_url": "https://www.gloucestershire.police.uk/police-forces/gloucestershire-constabulary/areas/gloucestershire/careers/"
+    },
+    {
+      "name": "Greater Manchester Police",
+      "short_name": "Greater Manchester",
+      "region": "North West",
+      "size": "Large",
+      "website_url": "https://www.gmp.police.uk",
+      "careers_url": "https://www.gmp.police.uk/police-forces/greater-manchester-police/areas/greater-manchester/careers/"
+    },
+    {
+      "name": "Hampshire Constabulary",
+      "short_name": "Hampshire",
+      "region": "South East",
+      "size": "Large",
+      "website_url": "https://www.hampshire.police.uk",
+      "careers_url": "https://www.hampshire.police.uk/police-forces/hampshire-constabulary/areas/hampshire/careers/"
+    },
+    {
+      "name": "Hertfordshire Constabulary",
+      "short_name": "Hertfordshire",
+      "region": "East",
+      "size": "Medium",
+      "website_url": "https://www.herts.police.uk",
+      "careers_url": "https://www.herts.police.uk/police-forces/hertfordshire-constabulary/areas/hertfordshire/careers/"
+    },
+    {
+      "name": "Humberside Police",
+      "short_name": "Humberside",
+      "region": "Yorkshire",
+      "size": "Medium",
+      "website_url": "https://www.humberside.police.uk",
+      "careers_url": "https://www.humberside.police.uk/police-forces/humberside-police/areas/humberside/careers/"
+    },
+    {
+      "name": "Kent Police",
+      "short_name": "Kent",
+      "region": "South East",
+      "size": "Large",
+      "website_url": "https://www.kent.police.uk",
+      "careers_url": "https://www.kent.police.uk/police-forces/kent-police/areas/kent/careers/"
+    },
+    {
+      "name": "Lancashire Constabulary",
+      "short_name": "Lancashire",
+      "region": "North West",
+      "size": "Large",
+      "website_url": "https://www.lancashire.police.uk",
+      "careers_url": "https://www.lancashire.police.uk/police-forces/lancashire-constabulary/areas/lancashire/careers/"
+    },
+    {
+      "name": "Leicestershire Police",
+      "short_name": "Leicestershire",
+      "region": "East Midlands",
+      "size": "Medium",
+      "website_url": "https://www.leics.police.uk",
+      "careers_url": "https://www.leics.police.uk/police-forces/leicestershire-police/areas/leicestershire/careers/"
+    },
+    {
+      "name": "Lincolnshire Police",
+      "short_name": "Lincolnshire",
+      "region": "East Midlands",
+      "size": "Medium",
+      "website_url": "https://www.lincs.police.uk",
+      "careers_url": "https://www.lincs.police.uk/police-forces/lincolnshire-police/areas/lincolnshire/careers/"
+    },
+    {
+      "name": "Merseyside Police",
+      "short_name": "Merseyside",
+      "region": "North West",
+      "size": "Large",
+      "website_url": "https://www.merseyside.police.uk",
+      "careers_url": "https://www.merseyside.police.uk/police-forces/merseyside-police/areas/merseyside/careers/"
+    },
+    {
+      "name": "Metropolitan Police Service",
+      "short_name": "Met Police",
+      "region": "London",
+      "size": "Large",
+      "website_url": "https://www.met.police.uk",
+      "careers_url": "https://www.met.police.uk/car/careers/"
+    },
+    {
+      "name": "Norfolk Constabulary",
+      "short_name": "Norfolk",
+      "region": "East",
+      "size": "Medium",
+      "website_url": "https://www.norfolk.police.uk",
+      "careers_url": "https://www.norfolk.police.uk/police-forces/norfolk-constabulary/areas/norfolk/careers/"
+    },
+    {
+      "name": "Northamptonshire Police",
+      "short_name": "Northamptonshire",
+      "region": "East Midlands",
+      "size": "Medium",
+      "website_url": "https://www.northants.police.uk",
+      "careers_url": "https://www.northants.police.uk/police-forces/northamptonshire-police/areas/northamptonshire/careers/"
+    },
+    {
+      "name": "Northumbria Police",
+      "short_name": "Northumbria",
+      "region": "North East",
+      "size": "Large",
+      "website_url": "https://www.northumbria.police.uk",
+      "careers_url": "https://www.northumbria.police.uk/police-forces/northumbria-police/areas/northumbria/careers/"
+    },
+    {
+      "name": "North Yorkshire Police",
+      "short_name": "North Yorkshire",
+      "region": "Yorkshire",
+      "size": "Medium",
+      "website_url": "https://www.northyorkshire.police.uk",
+      "careers_url": "https://www.northyorkshire.police.uk/police-forces/north-yorkshire-police/areas/north-yorkshire/careers/"
+    },
+    {
+      "name": "Nottinghamshire Police",
+      "short_name": "Nottinghamshire",
+      "region": "East Midlands",
+      "size": "Medium",
+      "website_url": "https://www.nottinghamshire.police.uk",
+      "careers_url": "https://www.nottinghamshire.police.uk/police-forces/nottinghamshire-police/areas/nottinghamshire/careers/"
+    },
+    {
+      "name": "South Yorkshire Police",
+      "short_name": "South Yorkshire",
+      "region": "Yorkshire",
+      "size": "Large",
+      "website_url": "https://www.southyorkshire.police.uk",
+      "careers_url": "https://www.southyorkshire.police.uk/police-forces/south-yorkshire-police/areas/south-yorkshire/careers/"
+    },
+    {
+      "name": "Staffordshire Police",
+      "short_name": "Staffordshire",
+      "region": "West Midlands",
+      "size": "Medium",
+      "website_url": "https://www.staffordshire.police.uk",
+      "careers_url": "https://www.staffordshire.police.uk/police-forces/staffordshire-police/areas/staffordshire/careers/"
+    },
+    {
+      "name": "Suffolk Constabulary",
+      "short_name": "Suffolk",
+      "region": "East",
+      "size": "Medium",
+      "website_url": "https://www.suffolk.police.uk",
+      "careers_url": "https://www.suffolk.police.uk/police-forces/suffolk-constabulary/areas/suffolk/careers/"
+    },
+    {
+      "name": "Surrey Police",
+      "short_name": "Surrey",
+      "region": "South East",
+      "size": "Medium",
+      "website_url": "https://www.surrey.police.uk",
+      "careers_url": "https://www.surrey.police.uk/police-forces/surrey-police/areas/surrey/careers/"
+    },
+    {
+      "name": "Sussex Police",
+      "short_name": "Sussex",
+      "region": "South East",
+      "size": "Large",
+      "website_url": "https://www.sussex.police.uk",
+      "careers_url": "https://www.sussex.police.uk/police-forces/sussex-police/areas/sussex/careers/"
+    },
+    {
+      "name": "Thames Valley Police",
+      "short_name": "Thames Valley",
+      "region": "South East",
+      "size": "Large",
+      "website_url": "https://www.thamesvalley.police.uk",
+      "careers_url": "https://www.thamesvalley.police.uk/police-forces/thames-valley-police/areas/careers/"
+    },
+    {
+      "name": "Warwickshire Police",
+      "short_name": "Warwickshire",
+      "region": "West Midlands",
+      "size": "Small",
+      "website_url": "https://www.warwickshire.police.uk",
+      "careers_url": "https://www.warwickshire.police.uk/police-forces/warwickshire-police/areas/warwickshire/careers/"
+    },
+    {
+      "name": "West Mercia Police",
+      "short_name": "West Mercia",
+      "region": "West Midlands",
+      "size": "Large",
+      "website_url": "https://www.westmercia.police.uk",
+      "careers_url": "https://www.westmercia.police.uk/police-forces/west-mercia-police/areas/west-mercia/careers/"
+    },
+    {
+      "name": "West Midlands Police",
+      "short_name": "West Midlands",
+      "region": "West Midlands",
+      "size": "Large",
+      "website_url": "https://www.west-midlands.police.uk",
+      "careers_url": "https://www.west-midlands.police.uk/police-forces/west-midlands-police/areas/west-midlands/careers/"
+    },
+    {
+      "name": "West Yorkshire Police",
+      "short_name": "West Yorkshire",
+      "region": "Yorkshire",
+      "size": "Large",
+      "website_url": "https://www.westyorkshire.police.uk",
+      "careers_url": "https://www.westyorkshire.police.uk/police-forces/west-yorkshire-police/areas/west-yorkshire/careers/"
+    },
+    {
+      "name": "Wiltshire Police",
+      "short_name": "Wiltshire",
+      "region": "South West",
+      "size": "Medium",
+      "website_url": "https://www.wiltshire.police.uk",
+      "careers_url": "https://www.wiltshire.police.uk/police-forces/wiltshire-police/areas/wiltshire/careers/"
+    },
+    {
+      "name": "Dyfed-Powys Police",
+      "short_name": "Dyfed-Powys",
+      "region": "Wales",
+      "size": "Small",
+      "website_url": "https://www.dyfed-powys.police.uk",
+      "careers_url": "https://www.dyfed-powys.police.uk/police-forces/dyfed-powys-police/areas/dyfed-powys/careers/"
+    },
+    {
+      "name": "Gwent Police",
+      "short_name": "Gwent",
+      "region": "Wales",
+      "size": "Medium",
+      "website_url": "https://www.gwent.police.uk",
+      "careers_url": "https://www.gwent.police.uk/police-forces/gwent-police/areas/gwent/careers/"
+    },
+    {
+      "name": "North Wales Police",
+      "short_name": "North Wales",
+      "region": "Wales",
+      "size": "Medium",
+      "website_url": "https://www.north-wales.police.uk",
+      "careers_url": "https://www.north-wales.police.uk/police-forces/north-wales-police/areas/north-wales/careers/"
+    },
+    {
+      "name": "South Wales Police",
+      "short_name": "South Wales",
+      "region": "Wales",
+      "size": "Large",
+      "website_url": "https://www.south-wales.police.uk",
+      "careers_url": "https://www.south-wales.police.uk/police-forces/south-wales-police/areas/south-wales/careers/"
+    },
+    {
+      "name": "Police Scotland",
+      "short_name": "Police Scotland",
+      "region": "Scotland",
+      "size": "Large",
+      "website_url": "https://www.scotland.police.uk",
+      "careers_url": "https://www.scotland.police.uk/careers/"
+    },
+    {
+      "name": "Police Service of Northern Ireland",
+      "short_name": "PSNI",
+      "region": "Northern Ireland",
+      "size": "Large",
+      "website_url": "https://www.psni.police.uk",
+      "careers_url": "https://www.joinpsni.co.uk"
+    },
+    {
+      "name": "British Transport Police",
+      "short_name": "BTP",
+      "region": "National",
+      "size": "Medium",
+      "website_url": "https://www.btp.police.uk",
+      "careers_url": "https://www.btp.police.uk/police-forces/british-transport-police/areas/careers/"
+    }
+  ]
+}

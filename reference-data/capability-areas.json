@@ -1,0 +1,296 @@
+[
+  {
+    "id": "rec9l0gkHiPzaIeZ0",
+    "fields": {
+      "Capability ID": "CAP-014",
+      "Capability Name": "HR & Workforce",
+      "Description": "Recruitment, workforce planning, wellbeing, retention, occupational health",
+      "High Fit Roles": "Recruitment Officer, Vetting Officer, Workforce Planning Officer, Occupational Health Advisor",
+      "Outsourcing Potential": "Hybrid",
+      "Outsourcing Notes": "Occupational health widely outsourced. Recruitment advertising outsourced. Vetting surge support validated demand.",
+      "Typical Buyer": "Director of People / HR Director",
+      "Regulatory Oversight": "Home Office workforce stats",
+      "HMICFRS Pillar": "Efficiency",
+      "Signal Keywords Primary": "recruitment crisis, retention crisis, vacancy rate, officer numbers, workforce, sickness absence",
+      "Signal Keywords Secondary": "resignations, retirements, morale, wellbeing, rest day cancellations, mutual aid",
+      "Signal Keywords Regulatory": "Home Office data, HMICFRS efficiency",
+      "Urgency Score": 2,
+      "Base Points Max": 10,
+      "Solution Area": "Improving Performance & Compliance",
+      "Peel Services": "Consultancy, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recAEs4PsiLjRTNtE",
+    "fields": {
+      "Capability ID": "CAP-003",
+      "Capability Name": "Criminal Justice",
+      "Description": "Case file preparation, disclosure management, witness care, court liaison, evidence management",
+      "High Fit Roles": "Disclosure Officer, Case File Builder, Case Progression Officer, Witness Care Officer, Court Liaison Officer, Evidential Review Officer",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "High-profile case collapses have driven demand. DG6 disclosure rules increased burden massively. Redaction errors are data breach risks.",
+      "Typical Buyer": "Head of CJ / CJ Manager",
+      "Regulatory Oversight": "CPS / HMCPSI",
+      "HMICFRS Pillar": "Investigating Crime",
+      "Signal Keywords Primary": "disclosure failure, case file quality, redaction error, DG6, Director's Guidance, charging decision, RUI",
+      "Signal Keywords Secondary": "CPS rejection, NFA, court backlog, victim attrition, trial collapse, evidence lost, redaction software",
+      "Signal Keywords Regulatory": "HMCPSI, joint inspection, Victims' Code, ICO fine",
+      "Urgency Score": 4,
+      "Base Points Max": 30,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recDSfTTD1qlN4yu4",
+    "fields": {
+      "Capability ID": "CAP-013",
+      "Capability Name": "Learning & Development",
+      "Description": "Training delivery, CPD, leadership development, specialist skills training",
+      "High Fit Roles": "Training Officer, L&D Specialist, Assessor, Course Designer, Leadership Coach",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "Training often outsourced. College of Policing sets standards. PEQF (degree entry) created HEI partnerships. Specialist training (Soteria, ICIDP) in demand.",
+      "Typical Buyer": "Head of L&D",
+      "Regulatory Oversight": "College of Policing",
+      "HMICFRS Pillar": "Workforce Development",
+      "Signal Keywords Primary": "training gap, CPD, PEQF, Uplift Programme, detective training, specialist training, ICIDP",
+      "Signal Keywords Secondary": "skills shortage, leadership development, assessment centre, training school",
+      "Signal Keywords Regulatory": "College of Policing, Professional Standards",
+      "Urgency Score": 3,
+      "Base Points Max": 10,
+      "Solution Area": "Building Organisational Capability",
+      "Peel Services": "L&D"
+    }
+  },
+  {
+    "id": "recWtCE5xstebow8C",
+    "fields": {
+      "Capability ID": "CAP-009",
+      "Capability Name": "Public Protection",
+      "Description": "Sex offender management, MAPPA, dangerous offenders, IOM, restraining orders",
+      "High Fit Roles": "Sex Offender Manager, MAPPA Coordinator, IOM Officer, Public Protection Officer",
+      "Outsourcing Potential": "Medium",
+      "Outsourcing Notes": "Statutory MAPPA obligations. Serious Further Offences trigger reviews. Domestic Homicide Reviews create scrutiny.",
+      "Typical Buyer": "Head of PPU",
+      "Regulatory Oversight": "MAPPA / Parole Board",
+      "HMICFRS Pillar": "Protecting Vulnerable People",
+      "Signal Keywords Primary": "MAPPA, sex offender, serious further offence, IOM, dangerous offender, restraining order breach",
+      "Signal Keywords Secondary": "domestic homicide, stalking, public protection unit, offender management",
+      "Signal Keywords Regulatory": "MAPPA SCR, Parole Board, DHR",
+      "Urgency Score": 3,
+      "Base Points Max": 20,
+      "Solution Area": "Improving Performance & Compliance",
+      "Peel Services": "Consultancy, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recZQoLUodKyDoANx",
+    "fields": {
+      "Capability ID": "CAP-012",
+      "Capability Name": "Intelligence",
+      "Description": "Strategic and tactical intelligence, analysis, covert authorities, source handling",
+      "High Fit Roles": "Intelligence Officer, Intelligence Analyst, Covert Authorities Bureau Officer, Source Handler (CHIS Controller)",
+      "Outsourcing Potential": "Hybrid",
+      "Outsourcing Notes": "Analysts can be outsourced. CHIS handling is core warranted. OSINT tools and training outsourced.",
+      "Typical Buyer": "Head of Intelligence",
+      "Regulatory Oversight": "IPCO",
+      "HMICFRS Pillar": "Intelligence",
+      "Signal Keywords Primary": "intelligence gap, analytical backlog, CHIS, source handler, covert, surveillance",
+      "Signal Keywords Secondary": "OSINT, analytical capability, strategic assessment, tactical assessment",
+      "Signal Keywords Regulatory": "IPCO inspection, RIPAA",
+      "Urgency Score": 3,
+      "Base Points Max": 20,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Staffing Solutions"
+    }
+  },
+  {
+    "id": "reccAwpUwvD39sZmA",
+    "fields": {
+      "Capability ID": "CAP-005",
+      "Capability Name": "Safeguarding & MASH",
+      "Description": "Child protection, vulnerable adults, Multi-Agency Safeguarding Hub (MASH), domestic abuse, MARAC",
+      "High Fit Roles": "MASH Officer, MASH Coordinator, Child Protection Investigator, Vulnerable Adult Safeguarding Officer, DA Investigator",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "HMICFRS Vulnerability pillar failures common. MASH backlogs create immense risk. Vacancies filled quickly with agency due to safeguarding risk.",
+      "Typical Buyer": "Head of PPU / Safeguarding Lead",
+      "Regulatory Oversight": "HMICFRS / Safeguarding Boards / JTAIs",
+      "HMICFRS Pillar": "Protecting Vulnerable People",
+      "Signal Keywords Primary": "MASH, safeguarding, child protection, vulnerable child, CSPR, serious case review, child death",
+      "Signal Keywords Secondary": "MASH backlog, referral backlog, voice of the child, multi-agency, RAG rating",
+      "Signal Keywords Regulatory": "HMICFRS, JTAI, CSPR, DHR, Safeguarding Board",
+      "Urgency Score": 5,
+      "Base Points Max": 25,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions, Consultancy"
+    }
+  },
+  {
+    "id": "reckOVIz0hWehu2KU",
+    "fields": {
+      "Capability ID": "CAP-001",
+      "Capability Name": "Major Crime & Homicide",
+      "Description": "Investigation of murder, manslaughter, kidnap, serious violence, cold case reviews",
+      "High Fit Roles": "SIO, HOLMES Indexer, HOLMES Reader, HOLMES Receiver, FLO, Statement Taker, TIE Officer, Major Crime Investigator, Cold Case Review Officer",
+      "Outsourcing Potential": "Hybrid",
+      "Outsourcing Notes": "Interim SIOs (retired officers), Cold Case Review Teams, HOLMES support teams commonly outsourced. Core SIO and suspect interview remain warranted.",
+      "Typical Buyer": "Head of Crime / ACC Crime",
+      "Regulatory Oversight": "HMICFRS",
+      "HMICFRS Pillar": "Investigating Crime",
+      "Signal Keywords Primary": "murder, homicide, suspicious death, MIR, Major Incident Room, HOLMES, forensic tent, post-mortem",
+      "Signal Keywords Secondary": "cold case, house-to-house, CCTV trawl, witness appeal, mutual aid, overtime spend",
+      "Signal Keywords Regulatory": "Regulation 28, IOPC investigation, Article 2, public inquiry, inquest",
+      "Urgency Score": 5,
+      "Base Points Max": 35,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recpKcER5jm7QIvYR",
+    "fields": {
+      "Capability ID": "CAP-007",
+      "Capability Name": "Fraud & Economic Crime",
+      "Description": "Fraud investigation, financial investigation, asset recovery, POCA, money laundering",
+      "High Fit Roles": "Financial Investigator (AFI), Fraud Investigator, Asset Recovery Officer, POCA Officer, Money Laundering Investigator",
+      "Outsourcing Potential": "Critical",
+      "Outsourcing Notes": "NEW 2025 HMICFRS graded pillar. Forces have <2% resources for 40%+ of crime. Action Fraud referrals screened out. Massive capability gap.",
+      "Typical Buyer": "Head of Fraud / Economic Crime Lead",
+      "Regulatory Oversight": "HMICFRS (2025) / Action Fraud",
+      "HMICFRS Pillar": "Managing Fraud (NEW 2025)",
+      "Signal Keywords Primary": "fraud, financial crime, fraud backlog, Action Fraud, POCA, asset recovery, money laundering",
+      "Signal Keywords Secondary": "romance fraud, investment fraud, triage failure, fraud triage, banking evidence, confiscation order",
+      "Signal Keywords Regulatory": "HMICFRS Managing Fraud, NCA, City of London (National Lead)",
+      "Urgency Score": 4,
+      "Base Points Max": 35,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recqRWnnlQJE4pOU5",
+    "fields": {
+      "Capability ID": "CAP-008",
+      "Capability Name": "Serious & Organised Crime",
+      "Description": "OCG disruption, county lines, drug trafficking, human trafficking, modern slavery",
+      "High Fit Roles": "Organised Crime Investigator, County Lines Investigator, Drugs Investigator, Modern Slavery Investigator, Intelligence Officer",
+      "Outsourcing Potential": "Medium",
+      "Outsourcing Notes": "Often ROCU-led (regional). EncroChat data created massive backlog. Intensification Weeks create downstream processing burden.",
+      "Typical Buyer": "ROCU Commander / ACC Crime",
+      "Regulatory Oversight": "NCA / HMICFRS SOC",
+      "HMICFRS Pillar": "Disrupting Serious Organised Crime",
+      "Signal Keywords Primary": "county lines, OCG, organised crime group, EncroChat, drug trafficking, human trafficking, modern slavery, NRM",
+      "Signal Keywords Secondary": "intensification week, dawn raids, Clear Hold Build, POCA, cryptocurrency, cuckooing",
+      "Signal Keywords Regulatory": "NCA, ROCU, Home Office grant",
+      "Urgency Score": 4,
+      "Base Points Max": 25,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions"
+    }
+  },
+  {
+    "id": "recrryhalBVzKQIrA",
+    "fields": {
+      "Capability ID": "CAP-006",
+      "Capability Name": "RASSO",
+      "Description": "Rape and Serious Sexual Offences investigation, victim support, ABE interviews",
+      "High Fit Roles": "RASSO Investigator, SOLO (Sexual Offence Liaison Officer), ABE Interviewer, ISVA",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "Soteria implementation driving demand. Low charge rates under scrutiny. Victim withdrawal rates high. Requires specialist trauma-informed training.",
+      "Typical Buyer": "Head of PPU / RASSO Lead",
+      "Regulatory Oversight": "HMICFRS / Soteria / Victims' Commissioner",
+      "HMICFRS Pillar": "Protecting Vulnerable People",
+      "Signal Keywords Primary": "RASSO, rape investigation, Soteria, sexual offence, rape charge rate, victim withdrawal, ABE",
+      "Signal Keywords Secondary": "Operation Soteria, Soteria Bluestone, ISVA, victim support, specialist unit",
+      "Signal Keywords Regulatory": "HMICFRS, Victims' Commissioner, Soteria NOM",
+      "Urgency Score": 4,
+      "Base Points Max": 30,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions, L&D"
+    }
+  },
+  {
+    "id": "recsoZkwtW0iWiukl",
+    "fields": {
+      "Capability ID": "CAP-002",
+      "Capability Name": "Digital Forensics & Cyber",
+      "Description": "Extraction, analysis and examination of digital devices (mobile, computer, cloud). Cyber crime investigation.",
+      "High Fit Roles": "Digital Forensic Investigator (DFI), Digital Media Investigator (DMI), Kiosk Operator, Mobile Phone Examiner, Cyber Crime Investigator, High Tech Crime Officer",
+      "Outsourcing Potential": "Critical",
+      "Outsourcing Notes": "18-month backlogs nationwide. ISO 17025 accreditation pressure. Forces outsourcing entire workflows. Massive skills gap - police pay can't compete.",
+      "Typical Buyer": "Head of Forensics / DFU Manager",
+      "Regulatory Oversight": "Forensic Science Regulator (FSR)",
+      "HMICFRS Pillar": "Investigating Crime",
+      "Signal Keywords Primary": "DFU, Digital Forensic Unit, device backlog, ISO 17025, mobile phone extraction, kiosk, cloud extraction, awaiting examination",
+      "Signal Keywords Secondary": "queue times, examination backlog, cyber attack, ransomware, IIOC grading, server capacity",
+      "Signal Keywords Regulatory": "FSR, UKAS, ICO fine, HMICFRS cyber inspection",
+      "Urgency Score": 5,
+      "Base Points Max": 35,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Peel Teams, Staffing Solutions"
+    }
+  },
+  {
+    "id": "rectnJE5eHDXCrVYe",
+    "fields": {
+      "Capability ID": "CAP-010",
+      "Capability Name": "Custody",
+      "Description": "Detention of arrested persons, custody healthcare, welfare, fitness to detain/interview",
+      "High Fit Roles": "Detention Officer, Custody Nurse, Healthcare Professional (HCP), Appropriate Adult, Forensic Medical Examiner (FME)",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "NEW 2025 HMICFRS graded pillar. Deaths in custody trigger IOPC + Coroner. Healthcare almost entirely outsourced. Ligature points persistent finding.",
+      "Typical Buyer": "Head of Custody",
+      "Regulatory Oversight": "HMICFRS / HMIP / Coroners",
+      "HMICFRS Pillar": "Custody (NEW 2025)",
+      "Signal Keywords Primary": "death in custody, custody suite, ligature point, custody healthcare, HCP, detention officer, cell safety",
+      "Signal Keywords Secondary": "use of force, strip search, PACE clock, Appropriate Adult, mental health crisis, S136",
+      "Signal Keywords Regulatory": "HMICFRS custody inspection, IOPC, Regulation 28, ICV report",
+      "Urgency Score": 5,
+      "Base Points Max": 10,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Staffing Solutions"
+    }
+  },
+  {
+    "id": "recwxIH9L34MIOZeD",
+    "fields": {
+      "Capability ID": "CAP-011",
+      "Capability Name": "Control Room & Contact",
+      "Description": "999/101 call handling, dispatch, command and control, incident management",
+      "High Fit Roles": "Force Control Room Operator, Call Handler, Dispatcher, Incident Manager, CCTV Operator",
+      "Outsourcing Potential": "Hybrid",
+      "Outsourcing Notes": "Call abandonment rates highly politicised. Technology + surge staffing. Right Care Right Person changing demand profile.",
+      "Typical Buyer": "Head of Contact / FCR Manager",
+      "Regulatory Oversight": "HMICFRS / PCC",
+      "HMICFRS Pillar": "Responding to the Public",
+      "Signal Keywords Primary": "999 wait times, 101 delays, call abandonment, control room, FCR, Force Control Room, dispatch",
+      "Signal Keywords Secondary": "queue times, digital desk, mental health triage, hanging on telephone, summer demand",
+      "Signal Keywords Regulatory": "HMICFRS PEEL, PCC performance, IOPC (delayed response), Regulation 28",
+      "Urgency Score": 4,
+      "Base Points Max": 10,
+      "Solution Area": "Enhancing Operational Capacity",
+      "Peel Services": "Staffing Solutions"
+    }
+  },
+  {
+    "id": "recxNC6aSU3sBx90n",
+    "fields": {
+      "Capability ID": "CAP-004",
+      "Capability Name": "Professional Standards",
+      "Description": "Misconduct investigations, vetting, counter-corruption, complaints handling",
+      "High Fit Roles": "PSD Investigator, Counter-Corruption Investigator, Vetting Officer, Complaints Handler, Misconduct Investigator",
+      "Outsourcing Potential": "High",
+      "Outsourcing Notes": "Post-Casey/Angiolini transformation. Forces implementing Continuous Integrity Screening. Vetting backlogs. IOPC referrals paralyse internal teams.",
+      "Typical Buyer": "Head of PSD / DCC",
+      "Regulatory Oversight": "IOPC / Angiolini / Casey",
+      "HMICFRS Pillar": "Legitimacy",
+      "Signal Keywords Primary": "misconduct, gross misconduct, IOPC investigation, IOPC referral, vetting failure, counter-corruption, dismissal",
+      "Signal Keywords Secondary": "officer convicted, vetting backlog, social media screening, re-vetting, integrity",
+      "Signal Keywords Regulatory": "IOPC independent investigation, IOPC directed investigation, Casey Review, Angiolini",
+      "Urgency Score": 4,
+      "Base Points Max": 30,
+      "Solution Area": "Improving Performance & Compliance",
+      "Peel Services": "Consultancy, Staffing Solutions"
+    }
+  }
+]
