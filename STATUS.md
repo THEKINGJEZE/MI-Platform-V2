@@ -33,6 +33,11 @@
   - `prompts/job-classification.md`
   - `prompts/email-triage.md`
 - [x] Created `docs/GUARDRAILS.md` (11 architectural rules from lessons learned)
+- [x] Created `docs/CLAUDE-CODE-CAPABILITIES.md` (comprehensive capabilities reference — 680 lines)
+  - Documented 3 agents, 5 commands, 1 skill, 5 MCPs (53+ tools)
+  - Decision matrices for quick lookup ("I need X → use Y")
+  - Common patterns for research/build/debug/wrap-up
+  - Limitations, gotchas, and extension guide
 - [x] Updated CLAUDE.md with guardrails section
 - [x] Updated docs/DEPENDENCY-MAP.md with new files
 - [x] Dashboard V1 review completed (`docs/archive/dashboard-v1-review.md`)
