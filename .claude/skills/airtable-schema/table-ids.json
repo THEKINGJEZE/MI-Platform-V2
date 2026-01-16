@@ -1,0 +1,44 @@
+{
+  "base_id": "appEEWaGtGUwOyOhm",
+  "tables": {
+    "Forces": {
+      "id": "tblbAjBEdpv42Smpw",
+      "name": "Forces"
+    },
+    "Contacts": {
+      "id": "tbl0u9vy71jmyaDx1",
+      "name": "Contacts"
+    },
+    "Signals": {
+      "id": "tblez9trodMzKKqXq",
+      "name": "Signals"
+    },
+    "Opportunities": {
+      "id": "tblJgZuI3LM2Az5id",
+      "name": "Opportunities"
+    }
+  },
+  "key_fields": {
+    "Forces.name": "fldGTnHEGlRwKIJ9d",
+    "Forces.region": "fldOOYLnKmLK7hZU2",
+    "Forces.country": "fldj5XpIfjdcqwErJ",
+    "Forces.size": "fldQqxfL30A3LCLad",
+    "Forces.hubspot_company_id": "fldz91DqaZJSIpMJR",
+    "Contacts.force": "fldIJAPG1VTNnKJ78",
+    "Signals.title": "fldQklpHxaVrCIxyH",
+    "Signals.type": "fldx9EREM1HJg02HM",
+    "Signals.source": "fldWf6e6icXw9al06",
+    "Signals.force": "fldVwMpl7oir3Imb9",
+    "Signals.status": "fldUnpm8cM6cOLHYg",
+    "Signals.external_id": "fld8GCyoVENwehPvL",
+    "Opportunities.name": "fldgTEzvhn82gv1qL",
+    "Opportunities.force": "fldD8bV1En6FWxAto",
+    "Opportunities.signals": "fld67K7Z6j6wxZHfP",
+    "Opportunities.status": "fldjzdcqrTB44wz3X",
+    "Opportunities.contact": "fld8ZuFVXVnNE0tHI"
+  },
+  "notes": {
+    "rollup_fields": "signal_count and signal_types rollup fields must be added manually in Airtable UI - API does not support rollup field creation",
+    "default_table": "Table 2 (tblfPgxDCh8eSEC25) should be deleted manually"
+  }
+}

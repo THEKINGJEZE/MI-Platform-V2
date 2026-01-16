@@ -1,42 +1,68 @@
 # MI Platform — Session Status
 
-**Updated**: 16 January 2025
+**Updated**: 16 January 2025 18:00
 **Phase**: 1 — Core Jobs Pipeline
-**Session Goal**: Build Phase 1 workflows
+**Session Goal**: Complete SPEC-002 Jobs Ingestion
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Test WF1: MI: Jobs Ingestion workflow**
-> ```
-> 1. Open workflow in n8n UI: https://n8n.srv1190997.hstgr.cloud/workflow/RqFcVMcQ7I8t4dIM
-> 2. Run manual test
-> 3. Verify signals created in Airtable Signals table
-> ```
+> **Build WF3: MI: Jobs Classifier**
+> - Triggered when new signals arrive with status="new"
+> - Uses Claude API to classify relevance (0-100 score)
+> - Updates signal status: relevant/irrelevant
+> - Links relevant signals to Forces table
 
 **Blockers**: None
 
 ---
 
 ## ✅ Done This Session
-- [x] Created WF1: MI: Jobs Ingestion workflow (ID: `RqFcVMcQ7I8t4dIM`)
-  - 18 nodes, polling Bright Data every 4 hours
-  - Force matching with 47 patterns inlined
-  - Creates signals in Airtable with status="new"
+- [x] Refactored to webhook-based architecture (polling had timeout issues)
+  - **WF1: MI: Jobs Trigger** (`RqFcVMcQ7I8t4dIM`) — triggers scrape, returns immediately
+  - **WF2: MI: Jobs Receiver** (`nGBkihJb6279HOHD`) — receives webhook, processes jobs
+- [x] Webhook config: `https://n8n.srv1190997.hstgr.cloud/webhook/mi-jobs-receiver`
+- [x] Force matching with 48 patterns inlined
+- [x] Creates signals in Airtable with status="new"
 - [x] Created SPEC-001 Airtable schema (4 tables)
 - [x] Seeded 48 UK police forces
 - [x] Created `.claude/skills/airtable-schema/table-ids.json` artifact
-- [x] Added Spec Drafting Hard Rules to CHAT-INSTRUCTIONS.md — enforces prep-spec gate before spec drafting
+- [x] **Tested webhook architecture end-to-end** ✅
+  - Fixed Airtable base ID (was wrong base)
+  - Fixed field names to match SPEC-001 schema
+  - Test records created successfully in Signals table
+- [x] **Force linking working** ✅
+  - Added Airtable: Fetch Forces node to get force record IDs
+  - Added Merge node to combine jobs with forces lookup
+  - Fixed Merge connections (input 0=jobs, input 1=forces)
+  - Signals now link to Forces table via `force` field
+- [x] **Force pattern alignment with Airtable** ✅
+  - Fixed "Avon and Somerset Constabulary" → "Avon and Somerset Police"
+  - Fixed "Devon and Cornwall Police" → "Devon & Cornwall Police"
+  - Added national forces (NCA, MoD Police, CNC)
+  - Updated patterns/force-matching.js to match workflow
+- [x] **Fixed webhook payload parsing**
+  - Added support for nested body.body structure from MCP test calls
+  - Added support for triple-nested body.body.body structure
+- [x] **Deduplication implemented and tested** ✅
+  - Created external_id field in Airtable Signals table (fld8GCyoVENwehPvL)
+  - Added Airtable: Check Existing node to search for duplicates
+  - Added Code: Filter New Jobs node to remove duplicates
+  - Tested with duplicate URL — correctly filtered (0 records created)
+  - Per SPEC-002 Node 6 requirement
+- [x] **Enhanced execution logging** ✅
+  - Updated Set: Log Summary node with complete metrics per SPEC-002 Node 8
+  - Now logs: jobs_fetched, jobs_filtered, jobs_created, jobs_skipped, duration_ms
+  - Provides full visibility into pipeline performance
 
 ## 🔄 In Progress
-- [ ] Test WF1 with manual trigger ← **START HERE**
-- [ ] Build WF2: MI: Jobs Classifier workflow
+- [ ] Build WF3: MI: Jobs Classifier workflow ← **START HERE**
 
 ## ⏳ Up Next (This Week)
-1. Test WF1: MI: Jobs Ingestion workflow
-2. Build WF2: MI: Jobs Classifier workflow
-3. Build WF3: MI: Opportunity Creator workflow
+1. Build WF3: MI: Jobs Classifier workflow
+2. Build WF4: MI: Opportunity Creator workflow
+3. Full end-to-end test with real Bright Data scrape
 
 ---
 
@@ -50,10 +76,15 @@ None
 ## 💡 Decisions Made This Session
 | What | Logged? |
 |------|---------|
-| WF1: Polling approach (not webhooks) for Bright Data integration | No — per SPEC-002 |
-| WF1: Simplified dedup for MVP (external_id generated but not checked) | No — iteration 1 |
-| WF1: Patterns inlined in Code nodes (n8n can't require external files) | No — technical |
-| Rollup fields (signal_count, signal_types) must be added manually in Airtable UI | No — API limitation |
+| Webhook-based architecture (not polling) | Yes — polling timed out after 20 attempts |
+| Two-workflow design (Trigger + Receiver) | Yes — proven pattern from archived workflows |
+| Bright Data delivers to webhook callback | Yes — `deliver.type: 'webhook'` |
+| Patterns inlined in Code nodes | No — n8n can't require external files |
+| Fixed base ID: appEEWaGtGUwOyOhm | No — was pointing to wrong base |
+| Field names match SPEC-001 (`url` not `source_url`) | No — schema alignment |
+| Deduplication via Airtable search + filter | No — SPEC-002 requirement, straightforward implementation |
+| Enhanced logging with 8 metrics | No — SPEC-002 Node 8 requirement |
+| Schedule: Daily 06:00 (not every 4 hours) | No — user preference for less frequent runs |
 
 ---
 
@@ -62,7 +93,7 @@ None
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[███████░░░] 70% — Core Jobs Pipeline
+[█████████░] 80% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
@@ -73,20 +104,20 @@ Completed:
   ✅ Guardrails documented (11 architectural rules)
   ✅ Reusable patterns created (force-matching, keywords, filters)
   ✅ AI prompts created (job classification, email triage)
-  ✅ Phase 1 spec created (specs/phase-1-core-pipeline.md)
   ✅ n8n deployment scripts created
   ✅ Force-matching skill created
   ✅ Prep-spec command created
   ✅ Airtable schema created (4 tables: Forces, Contacts, Signals, Opportunities)
   ✅ 48 forces seeded
-  ✅ WF1: Jobs Ingestion workflow created (RqFcVMcQ7I8t4dIM)
+  ✅ WF1: Jobs Trigger workflow (RqFcVMcQ7I8t4dIM)
+  ✅ WF2: Jobs Receiver workflow (nGBkihJb6279HOHD)
+  ✅ SPEC-002: Jobs Ingestion complete (webhook, dedupe, logging)
 
 Remaining:
-  □ Test WF1 end-to-end
-  □ Jobs classifier workflow (WF2)
-  □ Opportunity creator workflow (WF3)
-  □ Opportunity enricher workflow (WF4)
-  □ End-to-end test
+  □ Jobs classifier workflow (WF3)
+  □ Opportunity creator workflow (WF4)
+  □ Opportunity enricher workflow (WF5)
+  □ End-to-end test with real data
 ```
 
 ---
