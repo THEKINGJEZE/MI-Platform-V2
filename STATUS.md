@@ -8,16 +8,15 @@
 
 ## 🎯 Immediate Next Action
 
-> **Copy credentials from Fresh-Start, then create Airtable base:**
+> **Verify Airtable schema and begin Phase 1 workflows:**
 > ```
-> 1. Copy credentials/ folder contents from MI-Platform-Fresh-Start
-> 2. Run node scripts/health-check.js to verify connections
-> 3. Create Airtable base with full schema
-> 4. Seed 48 UK police forces (reference-data/uk-police-forces.json)
-> 5. Seed 7 competitors (reference-data/competitors.json)
+> 1. Use Airtable MCP to verify base schema matches requirements
+> 2. Check if Competitors table exists (7 records needed)
+> 3. Create Phase 1 spec (specs/phase-1-core-pipeline.md)
+> 4. Build first n8n workflow (Indeed ingestion)
 > ```
 
-**Blockers**: None — git infrastructure ready, credentials folder awaiting setup.
+**Blockers**: None — Airtable base exists (48 forces ✓), credentials working, n8n connected (72 workflows).
 
 ---
 
@@ -43,11 +42,17 @@
   - Updated `.gitignore` to protect credentials
   - Updated CLAUDE.md with git commands and session protocol
   - Initialized git, committed 46 files, pushed to GitHub (commit: 9e2b631)
+- [x] Credentials setup complete:
+  - Copied from MI-Platform/dashboard-react/.env
+  - Airtable ✅ Connected (base: appEEWaGtGUwOyOhm, 48 forces already seeded)
+  - n8n ✅ Connected (72 workflows available)
+  - HubSpot ⚠️ Needs permission update (non-blocking for Phase 1)
+  - Claude API ⚠️ Key needed (non-blocking for Phase 1)
 
 ## 🔄 In Progress
-- [ ] Create Airtable base for MI Platform V2 ← **START HERE**
-- [ ] Seed 48 UK police forces
-- [ ] Seed 7 competitors
+- [ ] Verify Airtable schema matches V2 requirements ← **START HERE**
+- [ ] Check Competitors table (seed if missing)
+- [ ] Create Phase 1 spec document
 
 ## ⏳ Up Next (This Week)
 1. Create Airtable base with schema
@@ -74,22 +79,24 @@ None — MCPs are working, governance docs in place
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[████░░░░░░] 30% — Core Jobs Pipeline
+[█████░░░░░] 40% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
   ✅ Claude Code + MCPs configured
   ✅ Governance documentation
   ✅ Git repository initialized and pushed to GitHub
+  ✅ Credentials copied and Airtable/n8n connected
   ✅ Reference data merged (48 forces, 7 competitors, 14 capabilities)
   ✅ Guardrails documented (11 architectural rules)
   ✅ Reusable patterns created (force-matching, keywords, filters)
   ✅ AI prompts created (job classification, email triage)
+  ✅ Airtable base exists with 48 forces seeded
 
 Remaining:
-  □ Credentials setup
-  □ Airtable base + schema
-  □ Data seeded
+  □ Verify Airtable schema completeness
+  □ Seed competitors (if missing)
+  □ Create Phase 1 spec
   □ Indeed ingestion workflow
   □ Signal classification
   □ Opportunity creation + enrichment
