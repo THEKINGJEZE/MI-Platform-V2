@@ -8,14 +8,16 @@
 
 ## 🎯 Immediate Next Action
 
-> **Create Airtable base and seed data:**
+> **Copy credentials from Fresh-Start, then create Airtable base:**
 > ```
-> 1. Create Airtable base with full schema
-> 2. Seed 48 UK police forces (reference-data/uk-police-forces.json)
-> 3. Seed 7 competitors (reference-data/competitors.json)
+> 1. Copy credentials/ folder contents from MI-Platform-Fresh-Start
+> 2. Run node scripts/health-check.js to verify connections
+> 3. Create Airtable base with full schema
+> 4. Seed 48 UK police forces (reference-data/uk-police-forces.json)
+> 5. Seed 7 competitors (reference-data/competitors.json)
 > ```
 
-**Blockers**: None — ready to proceed. Dashboard V1 review complete (`docs/archive/dashboard-v1-review.md`).
+**Blockers**: None — git infrastructure ready, credentials folder awaiting setup.
 
 ---
 
@@ -35,6 +37,12 @@
 - [x] Updated CLAUDE.md with guardrails section
 - [x] Updated docs/DEPENDENCY-MAP.md with new files
 - [x] Dashboard V1 review completed (`docs/archive/dashboard-v1-review.md`)
+- [x] Git repository setup complete:
+  - Created `credentials/` folder structure with README.md
+  - Created `docs/GIT-WORKFLOW.md` (commit conventions)
+  - Updated `.gitignore` to protect credentials
+  - Updated CLAUDE.md with git commands and session protocol
+  - Initialized git, committed 46 files, pushed to GitHub (commit: 9e2b631)
 
 ## 🔄 In Progress
 - [ ] Create Airtable base for MI Platform V2 ← **START HERE**
@@ -66,18 +74,20 @@ None — MCPs are working, governance docs in place
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[███░░░░░░░] 25% — Core Jobs Pipeline
+[████░░░░░░] 30% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
   ✅ Claude Code + MCPs configured
   ✅ Governance documentation
+  ✅ Git repository initialized and pushed to GitHub
   ✅ Reference data merged (48 forces, 7 competitors, 14 capabilities)
   ✅ Guardrails documented (11 architectural rules)
   ✅ Reusable patterns created (force-matching, keywords, filters)
   ✅ AI prompts created (job classification, email triage)
 
 Remaining:
+  □ Credentials setup
   □ Airtable base + schema
   □ Data seeded
   □ Indeed ingestion workflow
