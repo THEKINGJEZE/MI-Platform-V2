@@ -2,52 +2,58 @@
 
 **Updated**: 16 January 2025
 **Phase**: 1 — Core Jobs Pipeline
-**Session Goal**: Complete Claude Code self-audit enhancements, prepare for Phase 1 build
+**Session Goal**: Build Phase 1 workflows
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Create Phase 1 tables in cleared MI Platform base:**
+> **Test WF1: MI: Jobs Ingestion workflow**
 > ```
-> 1. Create tables per Phase 1 spec (Forces, Jobs_Raw_Archive, Signals, etc.)
-> 2. Seed 48 forces from reference-data/uk-police-forces.json
-> 3. Update schema-reference.json with real table/field IDs
-> 4. Build WF1: MI: Jobs Ingestion workflow
+> 1. Open workflow in n8n UI: https://n8n.srv1190997.hstgr.cloud/workflow/RqFcVMcQ7I8t4dIM
+> 2. Run manual test
+> 3. Verify signals created in Airtable Signals table
 > ```
 
-**Blockers**: None — MI Platform base (`appEEWaGtGUwOyOhm`) cleared and ready
+**Blockers**: None
 
 ---
 
 ## ✅ Done This Session
-- [x] Fixed custom command invocation (commands now work without `/project:` prefix):
-  - Removed invalid `name:` frontmatter from 4 command files
-  - Added missing frontmatter to `hygiene-check.md` and `consistency-check.md`
-  - Fixed usage examples in `prep-spec.md` and `deploy-workflow.md`
-  - Updated `CLAUDE.md` quick commands table with correct syntax
+- [x] Created WF1: MI: Jobs Ingestion workflow (ID: `RqFcVMcQ7I8t4dIM`)
+  - 18 nodes, polling Bright Data every 4 hours
+  - Force matching with 47 patterns inlined
+  - Creates signals in Airtable with status="new"
+- [x] Created SPEC-001 Airtable schema (4 tables)
+- [x] Seeded 48 UK police forces
+- [x] Created `.claude/skills/airtable-schema/table-ids.json` artifact
+- [x] Added Spec Drafting Hard Rules to CHAT-INSTRUCTIONS.md — enforces prep-spec gate before spec drafting
 
 ## 🔄 In Progress
-- [ ] Create Phase 1 tables in MI Platform base ← **START HERE**
-- [ ] Update schema-reference.json with real table/field IDs
+- [ ] Test WF1 with manual trigger ← **START HERE**
+- [ ] Build WF2: MI: Jobs Classifier workflow
 
 ## ⏳ Up Next (This Week)
-1. Create Phase 1 tables in cleared base
-2. Seed forces from reference-data/uk-police-forces.json
-3. Update Airtable schema skill with real IDs
-4. Build WF1: MI: Jobs Ingestion workflow
+1. Test WF1: MI: Jobs Ingestion workflow
+2. Build WF2: MI: Jobs Classifier workflow
+3. Build WF3: MI: Opportunity Creator workflow
 
 ---
 
 ## ⚠️ Blockers
-None — MI Platform base cleared and ready
+None
+
+**Manual tasks needed in Airtable UI:**
+- Delete "Table 2" (tblfPgxDCh8eSEC25) — default table
+- Add rollup fields to Opportunities: `signal_count` (COUNT), `signal_types` (ARRAYJOIN)
 
 ## 💡 Decisions Made This Session
 | What | Logged? |
 |------|---------|
-| Phase 1 spec defines 4 workflows with clear sequence | Pending |
-| Force-matching skill enforces G-005 guardrail | Pending |
-| n8n scripts use ESM modules (matches package.json) | Pending |
+| WF1: Polling approach (not webhooks) for Bright Data integration | No — per SPEC-002 |
+| WF1: Simplified dedup for MVP (external_id generated but not checked) | No — iteration 1 |
+| WF1: Patterns inlined in Code nodes (n8n can't require external files) | No — technical |
+| Rollup fields (signal_count, signal_types) must be added manually in Airtable UI | No — API limitation |
 
 ---
 
@@ -56,7 +62,7 @@ None — MI Platform base cleared and ready
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[████░░░░░░] 45% — Core Jobs Pipeline
+[███████░░░] 70% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
@@ -71,11 +77,12 @@ Completed:
   ✅ n8n deployment scripts created
   ✅ Force-matching skill created
   ✅ Prep-spec command created
+  ✅ Airtable schema created (4 tables: Forces, Contacts, Signals, Opportunities)
+  ✅ 48 forces seeded
+  ✅ WF1: Jobs Ingestion workflow created (RqFcVMcQ7I8t4dIM)
 
 Remaining:
-  □ Create Phase 1 tables in Airtable
-  □ Seed 48 forces
-  □ Indeed ingestion workflow (WF1)
+  □ Test WF1 end-to-end
   □ Jobs classifier workflow (WF2)
   □ Opportunity creator workflow (WF3)
   □ Opportunity enricher workflow (WF4)

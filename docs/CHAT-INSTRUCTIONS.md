@@ -108,7 +108,7 @@ Before drafting a spec, Claude Chat needs context about what exists in the proje
 **The process**:
 
 1. **Discuss in Chat** — Agree on what needs building, approach, priorities
-2. **Generate context** — James runs in Claude Code: `/project:prep-spec [topic]`
+2. **Generate context** — James runs in Claude Code: `/prep-spec [topic]`
 3. **Review brief** — Claude Code outputs `specs/NEXT-CONTEXT.md`
 4. **Draft spec in Chat** — James shares the context brief, Chat writes the spec
 5. **Validate in Code** — Claude Code confirms references exist, saves to `specs/`
@@ -119,11 +119,58 @@ Before drafting a spec, Claude Chat needs context about what exists in the proje
 
 | Step | Claude Chat's Job |
 |------|-------------------|
-| After step 1 | Say: "Run `/project:prep-spec [topic]` in Claude Code, then share the output here" |
+| After step 1 | Say: "Run `/prep-spec [topic]` in Claude Code, then share the output here" |
 | After step 3 | Review the context brief, then draft the full spec |
 | After step 4 | Provide spec as a handoff block for Claude Code to validate and save |
 
 **If James asks for a spec without context**: Don't draft blind. Ask if they've run `prep-spec` first, or if they can share what exists in the relevant directories.
+
+### Spec Drafting Hard Rules
+
+**These are non-negotiable. Do not draft a spec without completing this checklist.**
+
+Before writing ANY spec content, Claude Chat MUST have:
+
+| # | Requirement | How to Verify |
+|---|-------------|---------------|
+| 1 | **NEXT-CONTEXT.md from prep-spec** | James has shared the output, OR pasted its contents |
+| 2 | **Acceptance criteria visible** | Copied from ROADMAP.md (not invented) |
+| 3 | **Applicable guardrails identified** | Listed by ID (G-XXX) from GUARDRAILS.md |
+| 4 | **Source of truth confirmed** | Strategy doc section, NOT derived files like schema-reference.json |
+
+**If any requirement is missing → STOP and ask for it.**
+
+**Hard Gates:**
+
+1. **No context = No spec.** If James asks "write me a spec for X" without sharing prep-spec output, respond:
+   > "I need context before drafting. Run `/prep-spec [topic]` in Claude Code and share the output here."
+
+2. **Source documents only.** Never use generated/derived files (schema-reference.json, workflow JSON exports) as the source of truth. Always reference:
+   - `peel-solutions-mi-platform-strategy.md` for architecture
+   - `ROADMAP.md` for acceptance criteria
+   - `GUARDRAILS.md` for rules
+
+3. **Inline guardrail references required.** Every workflow step that touches a guardrail must reference it inline:
+   ```markdown
+   ### Workflow: ingest-indeed-jobs
+
+   **Step 3**: Store raw results to Jobs_Raw_Archive **(G-001: raw before filtering)**
+   **Step 4**: Apply force matching patterns **(G-005: JS before AI)**
+   ```
+
+4. **Testing Plan is mandatory.** Every spec must include 5 specific test cases that verify the acceptance criteria. Not "test that it works" — actual scenarios with expected outcomes.
+
+**Template Verification:**
+
+Before drafting, mentally confirm the spec will have these sections (from specs/README.md):
+- [ ] Overview
+- [ ] Architecture (data flow diagram)
+- [ ] Tables (Airtable schema)
+- [ ] Workflows (with guardrail references inline)
+- [ ] Testing Plan (5 specific tests minimum)
+- [ ] Acceptance Criteria (copied from ROADMAP.md)
+- [ ] Build Sequence
+- [ ] Dependencies
 
 ### Context Refresh
 
