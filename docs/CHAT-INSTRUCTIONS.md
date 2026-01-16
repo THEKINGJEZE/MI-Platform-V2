@@ -101,6 +101,18 @@ When handing a task to Claude Code, provide:
 **STATUS update**: What to add to STATUS.md
 ```
 
+### Spec Creation Protocol
+
+Before asking Claude Chat to draft a spec:
+
+1. **Discuss in Chat** — Agree on what needs building, approach, priorities
+2. **Generate context** — In Claude Code: `/project:prep-spec [topic]`
+3. **Review brief** — Claude Code outputs `specs/NEXT-CONTEXT.md`
+4. **Draft spec in Chat** — Share or reference the context brief
+5. **Validate in Code** — Claude Code confirms references, saves to `specs/`
+
+**Why this order**: Chat is blind to project files. Code scans what exists so Chat can write specs that reference real patterns, prompts, and guardrails — not imagined ones.
+
 ### Context Refresh
 
 If starting a new chat session about this project:

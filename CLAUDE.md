@@ -90,5 +90,6 @@ Drift detected? → Stop. Summarize. Realign to ANCHOR.md.
 | `/project:deploy-workflow` | Import workflow to n8n |
 | `/project:test-pipeline` | End-to-end test |
 | `/project:hygiene-check` | Check document sizes, trigger cleanup |
+| `/project:prep-spec [topic]` | Generate context brief for spec creation |
 | `git status` | Check uncommitted changes |
 | `git add . && git commit -m "[scope] msg" && git push` | Commit and push |

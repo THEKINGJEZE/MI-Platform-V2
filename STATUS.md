@@ -21,21 +21,11 @@
 ---
 
 ## ✅ Done This Session
-- [x] Claude Code self-audit completed
-- [x] Created n8n workflow scripts:
-  - `n8n/scripts/import-workflow.js` — Deploy workflow from JSON
-  - `n8n/scripts/export-workflow.js` — Export workflow to JSON
-  - `n8n/workflows/.gitkeep` — Workflow storage directory
-- [x] Created Phase 1 spec document:
-  - `specs/phase-1-core-pipeline.md` — 4 workflows, architecture, testing plan
-  - `specs/README.md` — Spec directory documentation
-- [x] Created force-matching skill:
-  - `.claude/skills/force-matching/SKILL.md` — Guardrail G-005 enforcement
-  - Updated `workflow-builder` agent to reference force-matching skill
-- [x] Added git commit protocol:
-  - Updated `.claude/settings.json` Stop hook to prompt for commits
-  - Added Git Commit Protocol section to `CLAUDE.md`
-  - Ensures consistent commit hygiene at session end
+- [x] Created prep-spec command:
+  - `.claude/commands/prep-spec.md` — Generate context briefs for Claude Chat
+  - Updated `docs/CHAT-INSTRUCTIONS.md` with Spec Creation Protocol
+  - Updated `CLAUDE.md` quick commands table
+  - Test output: `specs/NEXT-CONTEXT.md` (81 lines, under 100 limit)
 
 ## 🔄 In Progress
 - [ ] Create Phase 1 tables in MI Platform base ← **START HERE**
@@ -80,6 +70,7 @@ Completed:
   ✅ Phase 1 spec created (specs/phase-1-core-pipeline.md)
   ✅ n8n deployment scripts created
   ✅ Force-matching skill created
+  ✅ Prep-spec command created
 
 Remaining:
   □ Create Phase 1 tables in Airtable
