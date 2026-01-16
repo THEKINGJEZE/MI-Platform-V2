@@ -1,3 +1,7 @@
+---
+description: Check document sizes and trigger cleanup if needed
+---
+
 # Document Hygiene Check
 
 Run this command when documents feel bloated or during weekly maintenance.

@@ -21,11 +21,11 @@
 ---
 
 ## ✅ Done This Session
-- [x] Created prep-spec command:
-  - `.claude/commands/prep-spec.md` — Generate context briefs for Claude Chat
-  - Updated `docs/CHAT-INSTRUCTIONS.md` with Spec Creation Protocol
-  - Updated `CLAUDE.md` quick commands table
-  - Test output: `specs/NEXT-CONTEXT.md` (81 lines, under 100 limit)
+- [x] Fixed custom command invocation (commands now work without `/project:` prefix):
+  - Removed invalid `name:` frontmatter from 4 command files
+  - Added missing frontmatter to `hygiene-check.md` and `consistency-check.md`
+  - Fixed usage examples in `prep-spec.md` and `deploy-workflow.md`
+  - Updated `CLAUDE.md` quick commands table with correct syntax
 
 ## 🔄 In Progress
 - [ ] Create Phase 1 tables in MI Platform base ← **START HERE**

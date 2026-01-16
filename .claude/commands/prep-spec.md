@@ -1,6 +1,6 @@
 ---
-name: prep-spec
 description: Generate context brief for Claude Chat before spec creation
+argument-hint: <topic>
 ---
 
 # Prepare Spec Context Brief
@@ -8,10 +8,10 @@ description: Generate context brief for Claude Chat before spec creation
 ## Usage
 
 ```
-/project:prep-spec <topic>
+/prep-spec <topic>
 ```
 
-Example: `/project:prep-spec phase-1b-competitors`
+Example: `/prep-spec phase-1b-competitors`
 
 ## Purpose
 

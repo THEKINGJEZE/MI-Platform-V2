@@ -85,11 +85,11 @@ Drift detected? → Stop. Summarize. Realign to ANCHOR.md.
 ## Quick Commands
 | Command | Purpose |
 |---------|---------|
-| `/project:health-check` | Verify all API connections |
-| `/project:check-alignment` | Am I on track? |
-| `/project:deploy-workflow` | Import workflow to n8n |
-| `/project:test-pipeline` | End-to-end test |
-| `/project:hygiene-check` | Check document sizes, trigger cleanup |
-| `/project:prep-spec [topic]` | Generate context brief for spec creation |
+| `/health-check` | Verify all API connections |
+| `/check-alignment` | Am I on track? |
+| `/deploy-workflow <name>` | Import workflow to n8n |
+| `/hygiene-check` | Check document sizes, trigger cleanup |
+| `/consistency-check` | Verify document references are valid |
+| `/prep-spec <topic>` | Generate context brief for spec creation |
 | `git status` | Check uncommitted changes |
 | `git add . && git commit -m "[scope] msg" && git push` | Commit and push |

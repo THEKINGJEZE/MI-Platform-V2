@@ -1,5 +1,4 @@
 ---
-name: health-check
 description: Verify all system connections (Airtable, n8n, HubSpot, Claude API)
 ---
 

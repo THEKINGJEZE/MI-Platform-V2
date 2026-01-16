@@ -103,15 +103,27 @@ When handing a task to Claude Code, provide:
 
 ### Spec Creation Protocol
 
-Before asking Claude Chat to draft a spec:
+Before drafting a spec, Claude Chat needs context about what exists in the project.
+
+**The process**:
 
 1. **Discuss in Chat** — Agree on what needs building, approach, priorities
-2. **Generate context** — In Claude Code: `/project:prep-spec [topic]`
+2. **Generate context** — James runs in Claude Code: `/project:prep-spec [topic]`
 3. **Review brief** — Claude Code outputs `specs/NEXT-CONTEXT.md`
-4. **Draft spec in Chat** — Share or reference the context brief
-5. **Validate in Code** — Claude Code confirms references, saves to `specs/`
+4. **Draft spec in Chat** — James shares the context brief, Chat writes the spec
+5. **Validate in Code** — Claude Code confirms references exist, saves to `specs/`
 
 **Why this order**: Chat is blind to project files. Code scans what exists so Chat can write specs that reference real patterns, prompts, and guardrails — not imagined ones.
+
+**What Claude Chat does at each step**:
+
+| Step | Claude Chat's Job |
+|------|-------------------|
+| After step 1 | Say: "Run `/project:prep-spec [topic]` in Claude Code, then share the output here" |
+| After step 3 | Review the context brief, then draft the full spec |
+| After step 4 | Provide spec as a handoff block for Claude Code to validate and save |
+
+**If James asks for a spec without context**: Don't draft blind. Ask if they've run `prep-spec` first, or if they can share what exists in the relevant directories.
 
 ### Context Refresh
 
@@ -148,7 +160,7 @@ If starting a new chat session about this project:
 | If James asks... | Claude Chat should... |
 |------------------|----------------------|
 | "How should we..." | Give strategic recommendation |
-| "Build/create/deploy..." | Create spec, suggest handoff to Claude Code |
+| "Build/create/deploy..." | Discuss approach → guide through Spec Creation Protocol → draft spec after receiving context |
 | "Review this document..." | Analyse against ANCHOR.md mission |
 | "What's next?" | Reference STATUS.md and current phase |
 | "I'm stuck on..." | Think through options, recommend one |

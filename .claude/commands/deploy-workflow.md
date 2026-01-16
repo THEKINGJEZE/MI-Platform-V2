@@ -1,6 +1,6 @@
 ---
-name: deploy-workflow
 description: Import or update an n8n workflow from project JSON files
+argument-hint: <workflow-name>
 ---
 
 # Deploy Workflow to n8n
@@ -8,10 +8,10 @@ description: Import or update an n8n workflow from project JSON files
 ## Usage
 
 ```
-/project:deploy-workflow <workflow-name>
+/deploy-workflow <workflow-name>
 ```
 
-Example: `/project:deploy-workflow ingest-indeed-jobs`
+Example: `/deploy-workflow ingest-indeed-jobs`
 
 ## What It Does
 

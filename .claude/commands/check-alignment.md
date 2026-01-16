@@ -1,5 +1,4 @@
 ---
-name: check-alignment
 description: Quick drift detection — compare current work to ANCHOR.md mission
 ---
 

@@ -1,3 +1,7 @@
+---
+description: Verify document references and cross-document facts are aligned
+---
+
 # Consistency Check
 
 Verify document references and cross-document facts are aligned.
