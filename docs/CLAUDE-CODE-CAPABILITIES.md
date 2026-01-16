@@ -451,7 +451,7 @@ Task(subagent_type="workflow-builder", ...)
 - When designing queries
 - Before schema changes
 
-**Full Schema**: `schema-reference.json` (complete field definitions)
+**Full Schema**: `.claude/skills/airtable-schema/schema-reference.json` (complete field definitions)
 
 ---
 

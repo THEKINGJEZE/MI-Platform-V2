@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Before finishing: (1) Is STATUS.md updated with what changed? (2) Is the next action clearly defined? (3) Any drift from ANCHOR.md mission? Address any gaps now."
+            "prompt": "Before finishing: (1) Is STATUS.md updated? (2) Is next action defined? (3) Any drift from ANCHOR.md? (4) Run git status and ask if user wants to commit changes to GitHub."
           }
         ]
       }

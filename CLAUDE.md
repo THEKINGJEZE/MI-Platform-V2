@@ -59,6 +59,15 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 2. **Work**: Use @references, not paste. /compact every 3-4 turns.
 3. **End**: Update STATUS.md. Define next action. git commit && git push.
 
+## Git Commit Protocol
+After completing any task that modifies files:
+1. Run `git status` to show what changed
+2. Ask: "Ready to commit these changes to GitHub?"
+3. If yes: `git add . && git commit -m "[scope] description" && git push`
+4. Use conventional scope prefixes: `[docs]`, `[config]`, `[scripts]`, `[specs]`, `[fix]`
+
+**Always ask** — never auto-commit without confirmation.
+
 ## Context Hygiene
 - `/compact` after 3-4 complex exchanges
 - `/clear` between unrelated tasks  

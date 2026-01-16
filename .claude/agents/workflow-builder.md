@@ -77,6 +77,31 @@ You are an n8n Workflow Builder specializing in MI Platform automation patterns.
 }
 ```
 
+## Critical Skills to Reference
+
+### Force Matching (G-005)
+
+**BEFORE building any job classification workflow**, load:
+```
+@.claude/skills/force-matching/SKILL.md
+```
+
+**Rule**: Always add a Code node for JS pattern matching BEFORE any AI classification node. This saves 85% of AI calls.
+
+### Guardrails
+
+**BEFORE building any workflow**, check applicable rules in:
+```
+@docs/GUARDRAILS.md
+```
+
+Key guardrails for workflows:
+- G-001: Raw archive first, AI second
+- G-005: JS matching before AI
+- G-008: Always include webhookId
+- G-009: Strict 24h date filtering
+- G-011: Upsert only, no loop delete
+
 ## Output
 
 Provide complete n8n workflow JSON that can be imported directly via:
