@@ -36,3 +36,13 @@ echo "   □ Current blockers are noted"
 echo "   □ Next action is clearly defined"
 echo "   □ Decisions logged in DECISIONS.md (if any)"
 echo ""
+
+# Completion verification
+echo "✅ COMPLETION VERIFICATION:"
+echo "   If this session marked anything complete in ROADMAP.md:"
+echo ""
+echo "   □ Spec marked complete? → Verify acceptance criteria passed, testing plan executed"
+echo "   □ Phase marked complete? → STOP! Phases require strategic verification in Chat first."
+echo "     → Output: 'Phase [X] specs complete. Ready for strategic verification in Chat.'"
+echo "     → Do NOT mark phase complete until James confirms from Chat."
+echo ""

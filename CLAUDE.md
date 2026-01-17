@@ -81,6 +81,26 @@ Every few tool uses, silently verify:
 
 Drift detected? → Stop. Summarize. Realign to ANCHOR.md.
 
+## Completion Rules
+
+Completion follows a two-tier system to ensure strategic alignment.
+
+### Spec-Level Completion (Code handles autonomously)
+When a spec is fully implemented:
+1. Verify all acceptance criteria from ROADMAP.md are met
+2. Run the testing plan from the spec
+3. If all pass → mark the spec ✅ in ROADMAP.md
+
+### Phase-Level Completion (Requires Chat verification)
+Phases must NOT be marked complete by Code alone.
+
+When all specs in a phase are complete:
+1. Output: "Phase [X] specs complete. Ready for strategic verification in Chat."
+2. James verifies in Chat that the phase delivers what the strategy intended
+3. Only after James confirms → mark the phase complete in ROADMAP.md
+
+**Why**: Code can verify "did we build what the spec said?" but only Chat can verify "does this phase actually serve the Monday morning experience per the strategy?"
+
 ## Quick Commands
 | Command | Purpose |
 |---------|---------|

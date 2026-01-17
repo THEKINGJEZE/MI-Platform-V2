@@ -22,6 +22,10 @@
 ---
 
 ## ✅ Done This Session
+- [x] **Two-tier completion rules added** ✅
+  - Specs can be marked complete autonomously (verify acceptance criteria + tests)
+  - Phases require Chat strategic verification before completion
+  - Pre-compact hook now checks for completion verification
 - [x] **Context brief for SPEC-005 generated** ✅
   - Ran `/prep-spec opportunity-enrichment`
   - Output: `specs/NEXT-CONTEXT.md` — ready for Claude Chat
