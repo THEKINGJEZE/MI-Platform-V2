@@ -42,7 +42,6 @@ List files with one-line purpose descriptions:
 - `capability-areas.json` — 14 capability areas for classification
 
 **Skills** (`.claude/skills/`):
-- `airtable-schema/` — Airtable table/field quick reference
 - `force-matching/` — Force identification skill (enforces G-005)
 
 **Rules** (`.claude/rules/`):

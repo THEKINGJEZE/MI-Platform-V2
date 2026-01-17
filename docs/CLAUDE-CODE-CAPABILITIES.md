@@ -35,7 +35,7 @@
 |----------|-------|----------|
 | **Specialized Agents** | 3 | alignment-checker, workflow-builder, signal-triage |
 | **Slash Commands** | 5 | /check-alignment, /health-check, /consistency-check, /deploy-workflow, /hygiene-check |
-| **Skills** | 1 | airtable-schema (pattern for more) |
+| **Skills** | 1 | force-matching |
 | **MCP Integrations** | 5 | Airtable (12 tools), n8n (16 tools), HubSpot (6 tools), Playwright (17 tools), Context7 (2 tools) |
 | **Built-in Tools** | 10+ | Bash, Read, Write, Edit, Grep, Glob, WebSearch, TodoWrite, Task, AskUserQuestion |
 
@@ -46,8 +46,6 @@
 **"Is my work aligned with the mission?"** → Use `/project:check-alignment` command ([Section 4](#4-slash-commands))
 
 **"How do I interact with Airtable?"** → Use Airtable MCP tools ([Section 6](#6-mcp-integrations))
-
-**"What's the Airtable schema?"** → Load `airtable-schema` skill ([Section 5](#5-skills-system))
 
 **"Can I send emails?"** → No, write to command queue (G-002) ([Section 10](#10-limitations--gotchas))
 
@@ -413,45 +411,11 @@ Task(subagent_type="workflow-builder", ...)
 
 ### Current State
 
-**Skills Exist**: 1 (`airtable-schema`)
+**Skills Exist**: 1 (`force-matching`)
 
 **Skills Are**: Reusable knowledge bundles with quick reference + supporting data files
 
 **Location**: `.claude/skills/<skill-name>/`
-
----
-
-### airtable-schema Skill
-
-**Purpose**: Quick reference for Airtable table structures and relationships
-
-**How to Load**:
-```
-@.claude/skills/airtable-schema/SKILL.md
-```
-
-**What It Provides**:
-- Table name → purpose mapping
-- Key fields per table
-- Relationship diagram
-- Common operations with examples
-
-**Tables Documented**:
-- Forces (UK police forces)
-- Signals (raw intelligence)
-- Opportunities (actionable leads)
-- Contacts (decision-makers)
-- Outreach (draft messages)
-- System_Logs (workflow monitoring)
-- System_Health (daily metrics)
-
-**When to Use**:
-- Before creating Airtable records (know required fields)
-- When mapping n8n workflow fields
-- When designing queries
-- Before schema changes
-
-**Full Schema**: `.claude/skills/airtable-schema/schema-reference.json` (complete field definitions)
 
 ---
 
@@ -604,8 +568,6 @@ mcp__airtable__delete_records({
 #### Reference
 
 **Patterns**: `.claude/rules/airtable.md`
-**Schema**: `.claude/skills/airtable-schema/`
-**Table IDs**: See airtable-schema skill
 
 ---
 
@@ -1485,7 +1447,6 @@ description: What this command does
 |-------|----------|
 | Airtable API patterns | [.claude/rules/airtable.md](../.claude/rules/airtable.md) |
 | n8n workflow patterns | [.claude/rules/n8n.md](../.claude/rules/n8n.md) |
-| Airtable schema reference | [.claude/skills/airtable-schema/](../.claude/skills/airtable-schema/) |
 
 ### Process & Workflows
 

@@ -1,0 +1,326 @@
+{
+  "name": "MI: Jobs Classifier",
+  "id": "w4Mw2wX9wBeimYP2",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 15}]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 500],
+      "parameters": {}
+    },
+    {
+      "id": "set-start-time",
+      "name": "Set: Start Time",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "start-time", "name": "start_time", "value": "={{ Date.now() }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-signals",
+      "name": "Airtable: Fetch New Signals",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [540, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblez9trodMzKKqXq", "mode": "id"},
+        "filterByFormula": "={status}=\"new\"",
+        "sort": {"property": [{"field": "detected_at", "direction": "asc"}]},
+        "limit": 20,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "if-has-signals",
+      "name": "IF: Has Signals",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [760, 400],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "has-items", "leftValue": "={{ $input.all().length }}", "rightValue": 0, "operator": {"type": "number", "operation": "gt"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-forces",
+      "name": "Airtable: Fetch Forces",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [980, 300],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblbAjBEdpv42Smpw", "mode": "id"},
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "merge-signals-forces",
+      "name": "Merge: Signals + Forces",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [1200, 400],
+      "parameters": {
+        "mode": "append",
+        "mergeByFields": {"values": []},
+        "options": {},
+        "combinationMode": "multiplex"
+      }
+    },
+    {
+      "id": "code-force-pattern-match",
+      "name": "Code: Force Pattern Match",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 400],
+      "parameters": {
+        "jsCode": "// G-005: Fuzzy JS Matching Before AI\n// Patterns from patterns/force-matching.js - run JS before AI calls\n\nconst FORCE_PATTERNS = {\n  'metropolitan police': 'Metropolitan Police Service',\n  'met police': 'Metropolitan Police Service',\n  'greater manchester police': 'Greater Manchester Police',\n  'west midlands police': 'West Midlands Police',\n  'west yorkshire police': 'West Yorkshire Police',\n  'city of london police': 'City of London Police',\n  'kent police': 'Kent Police',\n  'essex police': 'Essex Police',\n  'surrey police': 'Surrey Police',\n  'sussex police': 'Sussex Police',\n  'thames valley police': 'Thames Valley Police',\n  'hampshire constabulary': 'Hampshire Constabulary',\n  'hertfordshire constabulary': 'Hertfordshire Constabulary',\n  'bedfordshire police': 'Bedfordshire Police',\n  'avon and somerset': 'Avon and Somerset Police',\n  'devon and cornwall': 'Devon & Cornwall Police',\n  'dorset police': 'Dorset Police',\n  'gloucestershire constabulary': 'Gloucestershire Constabulary',\n  'wiltshire police': 'Wiltshire Police',\n  'merseyside police': 'Merseyside Police',\n  'lancashire constabulary': 'Lancashire Constabulary',\n  'cheshire constabulary': 'Cheshire Constabulary',\n  'cumbria constabulary': 'Cumbria Constabulary',\n  'south yorkshire police': 'South Yorkshire Police',\n  'north yorkshire police': 'North Yorkshire Police',\n  'humberside police': 'Humberside Police',\n  'northumbria police': 'Northumbria Police',\n  'cleveland police': 'Cleveland Police',\n  'durham constabulary': 'Durham Constabulary',\n  'nottinghamshire police': 'Nottinghamshire Police',\n  'leicestershire police': 'Leicestershire Police',\n  'lincolnshire police': 'Lincolnshire Police',\n  'northamptonshire police': 'Northamptonshire Police',\n  'derbyshire constabulary': 'Derbyshire Constabulary',\n  'warwickshire police': 'Warwickshire Police',\n  'west mercia police': 'West Mercia Police',\n  'staffordshire police': 'Staffordshire Police',\n  'norfolk constabulary': 'Norfolk Constabulary',\n  'suffolk constabulary': 'Suffolk Constabulary',\n  'cambridgeshire constabulary': 'Cambridgeshire Constabulary',\n  'dyfed-powys police': 'Dyfed-Powys Police',\n  'gwent police': 'Gwent Police',\n  'north wales police': 'North Wales Police',\n  'south wales police': 'South Wales Police',\n  'police scotland': 'Police Scotland',\n  'british transport police': 'British Transport Police',\n  'counter terrorism policing': 'Counter Terrorism Policing',\n  'national crime agency': 'National Crime Agency',\n  'ministry of defence police': 'Ministry of Defence Police',\n  'civil nuclear constabulary': 'Civil Nuclear Constabulary'\n};\n\nfunction lookupForce(text) {\n  if (!text) return null;\n  const textLower = text.toLowerCase();\n  for (const [pattern, forceName] of Object.entries(FORCE_PATTERNS)) {\n    if (textLower.includes(pattern)) {\n      return forceName;\n    }\n  }\n  return null;\n}\n\n// Build force name to record ID lookup from forces data\nconst forces = [];\nconst seenForceIds = new Set();\nfor (const item of $input.all()) {\n  const forceName = item.json.name || item.json.Name;\n  if (forceName && item.json.id && !seenForceIds.has(item.json.id)) {\n    if (!item.json.raw_data && !item.json.title) {\n      forces.push({ name: forceName, recordId: item.json.id });\n      seenForceIds.add(item.json.id);\n    }\n  }\n}\n\nconst forceLookup = {};\nfor (const force of forces) {\n  forceLookup[force.name] = force.recordId;\n}\n\n// Get unique signals\nconst signalsMap = new Map();\nfor (const item of $input.all()) {\n  if (item.json.title && item.json.raw_data && !signalsMap.has(item.json.id)) {\n    signalsMap.set(item.json.id, item.json);\n  }\n}\n\nconst results = [];\nfor (const signal of signalsMap.values()) {\n  let rawData = {};\n  try {\n    rawData = JSON.parse(signal.raw_data);\n  } catch (e) {\n    rawData = {};\n  }\n  \n  const company = rawData.company_name || '';\n  const location = rawData.location || '';\n  const title = signal.title || rawData.job_title || '';\n  const description = rawData.description_text || rawData.description || '';\n  \n  const matchedForceName = lookupForce(company) || lookupForce(location) || lookupForce(title);\n  const matchedForceId = matchedForceName ? forceLookup[matchedForceName] : null;\n  \n  results.push({\n    json: {\n      signal_id: signal.id,\n      signal_title: title,\n      company_name: company,\n      location: location,\n      description_text: description.substring(0, 2000),\n      existing_force: signal.force || null,\n      pattern_matched_force: matchedForceName,\n      pattern_matched_force_id: matchedForceId,\n      pattern_confidence: matchedForceId ? 90 : 0,\n      force_lookup: forceLookup\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+    {
+      "id": "loop-each-signal",
+      "name": "Loop: Process Each",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1640, 400],
+      "parameters": {"batchSize": 1, "options": {}}
+    },
+    {
+      "id": "openai-classify",
+      "name": "OpenAI: Classify Signal",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [1860, 400],
+      "parameters": {
+        "resource": "text",
+        "operation": "response",
+        "modelId": {"__rl": true, "value": "gpt-4o-mini", "mode": "id"},
+        "responses": {
+          "values": [
+            {"type": "text", "role": "system", "content": "You are a Jobs Screening Agent for UK Police sector recruitment intelligence. You MUST include the signal_id in your response exactly as provided."},
+            {"type": "text", "role": "user", "content": "={{ `SIGNAL_ID: ${$json.signal_id}\n\nAnalyze this job posting and determine if it is relevant to the UK police/law enforcement sector.\n\n## JOB DETAILS\nTitle: ${$json.signal_title || 'Unknown'}\nEmployer: ${$json.company_name || 'Unknown'}\nLocation: ${$json.location || 'Unknown'}\nDescription: ${$json.description_text || 'No description'}\n\n## CRITICAL: LAW ENFORCEMENT SCOPE\nThis filter targets the UK law enforcement and criminal justice sector.\n\n## TASK 1 - POLICE/LAW ENFORCEMENT RELEVANCE\nALWAYS ACCEPT if ANY of these are true:\n- Employer IS a UK police force\n- Employer IS a police-related body (College of Policing, NCA, IOPC)\n- Job title contains \"police\"\n- Employer IS a known police recruitment agency (Red Snapper, Matrix SCM, etc.)\n\n## LAW ENFORCEMENT FUNCTIONS (Accept)\n- Serious Crime Investigation\n- Criminal Justice\n- Intelligence\n- Forensics\n- Public Protection\n- Security Vetting\n\n## KEYWORD INDICATORS (Strong Accept)\n- PACE, CPIA, PIP, ABE, MAPPA, MARAC\n- Disclosure, Case File, Criminal Justice Unit\n- Digital Forensics, HOLMES, Major Incident Room\n- Safeguarding, Child Protection, Vulnerable Adult\n\n## REJECT ONLY if ALL of these are true:\n- Employer is private sector (banks, tech, retail) with NO law enforcement connection\n- Role is generic (IT Support, HR Admin, Finance) with NO law enforcement context\n- Employer is NHS/healthcare (UNLESS role is \"Police Custody\" healthcare)\n- Location is outside UK\n\n## OUTPUT FORMAT\nRespond in JSON format ONLY with these exact keys:\n{\n  \"signal_id\": \"<COPY THE SIGNAL_ID FROM ABOVE EXACTLY>\",\n  \"relevant\": true or false,\n  \"confidence\": 0-100,\n  \"reasoning\": \"Brief explanation\",\n  \"force\": \"UK police force name if identified, or null\",\n  \"force_confidence\": 0-100,\n  \"rejection_reason\": \"If rejected, why. Otherwise null\",\n  \"role_type\": \"Investigation, Intelligence, Custody, Admin, Other\"\n}` }}"}
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "maxTokens": 500,
+          "temperature": 0.1,
+          "textFormat": {"textOptions": [{"type": "json_object"}]}
+        }
+      },
+      "credentials": {"openAiApi": {"id": "KPeEyy20q5aUrUtM", "name": "OpenAi account"}}
+    },
+    {
+      "id": "wait-openai",
+      "name": "Wait: 200ms",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2080, 400],
+      "parameters": {"unit": "seconds", "amount": 1},
+      "webhookId": "wait-openai-classifier"
+    },
+    {
+      "id": "code-derive-status",
+      "name": "Code: Derive Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2300, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Derive status from AI response and pattern matching\n// Per SPEC-003: score >= 70 = relevant, < 70 = irrelevant\n// Force: use pattern match if confidence >= 80, else use AI force if confidence >= 80\n\nconst aiResponseRaw = $input.item.json;\n\n// Parse the AI response - handle nested Langchain OpenAI output structure\nlet aiResponse = {};\ntry {\n  let responseText = '';\n  \n  if (aiResponseRaw.output && Array.isArray(aiResponseRaw.output)) {\n    const firstOutput = aiResponseRaw.output[0];\n    if (firstOutput && firstOutput.content && Array.isArray(firstOutput.content)) {\n      responseText = firstOutput.content[0]?.text || '';\n    }\n  } else if (typeof aiResponseRaw.content === 'string') {\n    responseText = aiResponseRaw.content;\n  } else if (typeof aiResponseRaw.message === 'string') {\n    responseText = aiResponseRaw.message;\n  } else if (typeof aiResponseRaw.text === 'string') {\n    responseText = aiResponseRaw.text;\n  } else {\n    responseText = JSON.stringify(aiResponseRaw);\n  }\n  \n  const jsonMatch = responseText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    aiResponse = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  aiResponse = {\n    relevant: false,\n    confidence: 0,\n    reasoning: 'Failed to parse AI response: ' + e.message,\n    force: null,\n    force_confidence: 0,\n    rejection_reason: 'AI parsing error',\n    role_type: 'Unknown'\n  };\n}\n\n// CRITICAL: Get signal_id from AI response (echo-back pattern)\nconst signalId = aiResponse.signal_id;\n\nif (!signalId) {\n  let fallbackSignalId = null;\n  try {\n    const loopItem = $('Loop: Process Each').item;\n    if (loopItem?.json?.signal_id) {\n      fallbackSignalId = loopItem.json.signal_id;\n    }\n  } catch (e1) {}\n  \n  if (!fallbackSignalId) {\n    try {\n      const patternItem = $('Code: Force Pattern Match').item;\n      if (patternItem?.json?.signal_id) {\n        fallbackSignalId = patternItem.json.signal_id;\n      }\n    } catch (e2) {}\n  }\n  \n  if (fallbackSignalId) {\n    aiResponse.signal_id = fallbackSignalId;\n  } else {\n    throw new Error(`Could not determine signal_id. AI response did not include it.`);\n  }\n}\n\n// Get original signal data for pattern matching info\nlet signal = {};\ntry {\n  const loopItem = $('Loop: Process Each').item;\n  if (loopItem?.json) signal = loopItem.json;\n} catch (e) {\n  try {\n    const patternItem = $('Code: Force Pattern Match').item;\n    if (patternItem?.json) signal = patternItem.json;\n  } catch (e2) {\n    signal = {};\n  }\n}\n\nconst confidence = typeof aiResponse.confidence === 'number' ? aiResponse.confidence : 0;\nconst status = confidence >= 70 ? 'relevant' : 'irrelevant';\n\nlet forceIdToLink = null;\nlet forceSource = null;\n\nlet forceLookup = {};\ntry {\n  if (typeof signal.force_lookup === 'string') {\n    forceLookup = JSON.parse(signal.force_lookup);\n  } else if (signal.force_lookup && typeof signal.force_lookup === 'object') {\n    forceLookup = signal.force_lookup;\n  }\n} catch (e) {\n  forceLookup = {};\n}\n\nconst patternConfidence = signal.pattern_confidence || 0;\nif (patternConfidence >= 80 && signal.pattern_matched_force_id) {\n  forceIdToLink = signal.pattern_matched_force_id;\n  forceSource = 'pattern';\n} else if (aiResponse.force_confidence >= 80 && aiResponse.force) {\n  const aiForceId = forceLookup[aiResponse.force];\n  if (aiForceId) {\n    forceIdToLink = aiForceId;\n    forceSource = 'ai';\n  }\n} else if (signal.existing_force && Array.isArray(signal.existing_force) && signal.existing_force.length > 0) {\n  forceIdToLink = signal.existing_force[0];\n  forceSource = 'existing';\n}\n\nreturn {\n  json: {\n    signal_id: aiResponse.signal_id,\n    signal_title: signal.signal_title || aiResponse.signal_title || 'unknown',\n    relevance_score: confidence,\n    relevance_reason: aiResponse.reasoning || 'No reasoning provided',\n    status: status,\n    force_id: forceIdToLink,\n    force_source: forceSource,\n    ai_force: aiResponse.force,\n    ai_force_confidence: aiResponse.force_confidence,\n    pattern_force: signal.pattern_matched_force,\n    pattern_force_id: signal.pattern_matched_force_id,\n    role_type: aiResponse.role_type || 'Unknown',\n    rejection_reason: aiResponse.rejection_reason\n  }\n};"
+      }
+    },
+    {
+      "id": "airtable-update-signal",
+      "name": "Airtable: Update Signal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2520, 400],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblez9trodMzKKqXq/{{ $json.signal_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"relevance_score\": {{ $json.relevance_score }},\n    \"relevance_reason\": {{ JSON.stringify($json.relevance_reason) }},\n    \"status\": {{ JSON.stringify($json.status) }},\n    \"force\": {{ $json.force_id ? JSON.stringify([$json.force_id]) : '[]' }}\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Using HTTP Request instead of Airtable node due to n8n bug where Resource Locator fields don't evaluate expressions correctly inside splitInBatches loops"
+    },
+    {
+      "id": "wait-airtable",
+      "name": "Wait: 200ms (Airtable)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2740, 400],
+      "parameters": {"unit": "seconds", "amount": 1},
+      "webhookId": "wait-airtable-classifier"
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate: Collect Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2960, 400],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "processed_signals",
+        "options": {}
+      }
+    },
+    {
+      "id": "set-log-summary",
+      "name": "Set: Log Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3180, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "workflow-name", "name": "workflow_name", "value": "MI: Jobs Classifier", "type": "string"},
+            {"id": "signals-processed", "name": "signals_processed", "value": "={{ $json.processed_signals ? $json.processed_signals.length : 0 }}", "type": "number"},
+            {"id": "signals-relevant", "name": "signals_relevant", "value": "={{ $json.processed_signals ? $json.processed_signals.filter(s => s.status === 'relevant').length : 0 }}", "type": "number"},
+            {"id": "signals-irrelevant", "name": "signals_irrelevant", "value": "={{ $json.processed_signals ? $json.processed_signals.filter(s => s.status === 'irrelevant').length : 0 }}", "type": "number"},
+            {"id": "forces-linked", "name": "forces_linked", "value": "={{ $json.processed_signals ? $json.processed_signals.filter(s => s.force_id).length : 0 }}", "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "set-no-signals",
+      "name": "Set: No Signals",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [980, 500],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "No signals with status='new' to process", "type": "string"},
+            {"id": "signals-processed", "name": "signals_processed", "value": 0, "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-check-more",
+      "name": "Airtable: Check More Signals",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [3400, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "mode": "id", "value": "appEEWaGtGUwOyOhm"},
+        "table": {"__rl": true, "mode": "id", "value": "tblez9trodMzKKqXq"},
+        "filterByFormula": "{status}=\"new\"",
+        "limit": 1,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "if-more-to-process",
+      "name": "IF: More to Process",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [3620, 400],
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {"id": "more-check", "leftValue": "={{ $input.all().length }}", "rightValue": "0", "operator": {"type": "number", "operation": "gt"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Every 15 Minutes": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Manual Trigger": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Set: Start Time": {"main": [[{"node": "Airtable: Fetch New Signals", "type": "main", "index": 0}]]},
+    "Airtable: Fetch New Signals": {"main": [[{"node": "IF: Has Signals", "type": "main", "index": 0}]]},
+    "IF: Has Signals": {"main": [[{"node": "Airtable: Fetch Forces", "type": "main", "index": 0}, {"node": "Merge: Signals + Forces", "type": "main", "index": 0}], [{"node": "Set: No Signals", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Forces": {"main": [[{"node": "Merge: Signals + Forces", "type": "main", "index": 1}]]},
+    "Merge: Signals + Forces": {"main": [[{"node": "Code: Force Pattern Match", "type": "main", "index": 0}]]},
+    "Code: Force Pattern Match": {"main": [[{"node": "Loop: Process Each", "type": "main", "index": 0}]]},
+    "Loop: Process Each": {"main": [[{"node": "Aggregate: Collect Results", "type": "main", "index": 0}], [{"node": "OpenAI: Classify Signal", "type": "main", "index": 0}]]},
+    "OpenAI: Classify Signal": {"main": [[{"node": "Wait: 200ms", "type": "main", "index": 0}]]},
+    "Wait: 200ms": {"main": [[{"node": "Code: Derive Status", "type": "main", "index": 0}]]},
+    "Code: Derive Status": {"main": [[{"node": "Airtable: Update Signal", "type": "main", "index": 0}]]},
+    "Airtable: Update Signal": {"main": [[{"node": "Wait: 200ms (Airtable)", "type": "main", "index": 0}]]},
+    "Wait: 200ms (Airtable)": {"main": [[{"node": "Loop: Process Each", "type": "main", "index": 0}]]},
+    "Aggregate: Collect Results": {"main": [[{"node": "Set: Log Summary", "type": "main", "index": 0}]]},
+    "Set: Log Summary": {"main": [[{"node": "Airtable: Check More Signals", "type": "main", "index": 0}]]},
+    "Airtable: Check More Signals": {"main": [[{"node": "IF: More to Process", "type": "main", "index": 0}]]},
+    "IF: More to Process": {"main": [[{"node": "Airtable: Fetch New Signals", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "meta": {
+    "spec": "SPEC-003",
+    "description": "Classifies signals with status=new using OpenAI gpt-4o-mini. Force pattern matching runs BEFORE AI (G-005). Updates signals with relevance_score, relevance_reason, status (relevant/irrelevant), and force link.",
+    "notes": "HTTP Request node used for Airtable updates instead of native node due to n8n bug with Resource Locator fields in loops"
+  }
+}

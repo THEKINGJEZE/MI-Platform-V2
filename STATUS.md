@@ -2,25 +2,30 @@
 
 **Updated**: 17 January 2025
 **Phase**: 1 — Core Jobs Pipeline
-**Session Goal**: Build WF4: Opportunity Creator
+**Session Goal**: Build WF5: Opportunity Enricher
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Build WF4: MI: Opportunity Creator**
-> - Triggered when signals marked as `status=relevant`
-> - Groups signals by force into opportunities
-> - Creates opportunity records in Airtable
+> **Draft SPEC-005 in Claude Chat**
+> - Context brief generated: `specs/NEXT-CONTEXT.md` ✅
+> - Share brief with Claude Chat to draft SPEC-005: Opportunity Enricher
+> - Then return to Claude Code to implement WF5
 
 **Blockers**: None
 
-**Manual task for James**:
+**Manual tasks for James**:
 - Activate WF3 schedule in n8n UI (toggle the Active switch)
+- Activate WF4 schedule in n8n UI (toggle the Active switch)
 
 ---
 
 ## ✅ Done This Session
+- [x] **Context brief for SPEC-005 generated** ✅
+  - Ran `/prep-spec opportunity-enrichment`
+  - Output: `specs/NEXT-CONTEXT.md` — ready for Claude Chat
+  - Includes: acceptance criteria, existing assets, guardrails, key questions
 - [x] **`/implement` slash command created** ✅
   - Stage-gated spec implementation with external progress tracking
   - Six stages: Parse → Audit → Plan → Build → Verify → Document
@@ -42,15 +47,24 @@
   - Solution: Use HTTP Request node for Airtable updates instead of native node
   - AI echo-back pattern: Pass signal_id to AI, have it return in response
 - [x] All previous SPEC-001 and SPEC-002 work (see git history)
+- [x] **SPEC-004: Opportunity Creator COMPLETE** ✅
+  - **WF4: MI: Opportunity Creator** (`7LYyzpLC5GzoJROn`)
+  - Schedule: Every 15 minutes (aligned with WF3)
+  - Fetches signals with status=relevant and no opportunity linked
+  - Groups signals by force, skips signals without force
+  - Upsert pattern: finds existing open opportunity or creates new
+  - G-011 compliant: no delete loops
+  - **Tested & verified against SPEC-004** — all acceptance criteria met
+  - 23 nodes including SPEC-005 enrichment trigger placeholder
+  - Exported to `n8n/workflows/opportunity-creator.json`
 
 ## 🔄 In Progress
-- [ ] Build WF4: MI: Opportunity Creator ← **START HERE**
+- [ ] Build WF5: MI: Opportunity Enricher
 
 ## ⏳ Up Next (This Week)
-1. Activate WF3 schedule (manual in n8n UI)
-2. Build WF4: MI: Opportunity Creator workflow
-3. Build WF5: MI: Opportunity Enricher workflow
-4. Full end-to-end test with real Bright Data scrape
+1. Activate WF3 + WF4 schedules (manual in n8n UI)
+2. Build WF5: MI: Opportunity Enricher workflow
+3. Full end-to-end test with real Bright Data scrape
 
 ---
 
@@ -85,7 +99,7 @@ None
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[██████████] 92% — Core Jobs Pipeline
+[██████████] 96% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
@@ -106,10 +120,10 @@ Completed:
   ✅ WF2: Jobs Receiver workflow (nGBkihJb6279HOHD)
   ✅ SPEC-002: Jobs Ingestion complete (webhook, dedupe, logging)
   ✅ WF3: Jobs Classifier workflow (w4Mw2wX9wBeimYP2) — TESTED & WORKING
+  ✅ WF4: Opportunity Creator workflow (7LYyzpLC5GzoJROn) — TESTED & WORKING
 
 Remaining:
-  □ Activate WF3 schedule (manual in n8n UI)
-  □ Opportunity creator workflow (WF4)
+  □ Activate WF3 + WF4 schedules (manual in n8n UI)
   □ Opportunity enricher workflow (WF5)
   □ End-to-end test with real data
 ```

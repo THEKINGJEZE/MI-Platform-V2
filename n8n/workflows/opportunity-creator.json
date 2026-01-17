@@ -1,0 +1,388 @@
+{
+  "name": "MI: Opportunity Creator",
+  "id": "7LYyzpLC5GzoJROn",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 15}]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 500],
+      "parameters": {}
+    },
+    {
+      "id": "set-start-time",
+      "name": "Set: Start Time",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "start-time", "name": "start_time", "value": "={{ Date.now() }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-relevant-signals",
+      "name": "Airtable: Fetch Relevant Signals",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [540, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblez9trodMzKKqXq", "mode": "id"},
+        "filterByFormula": "=AND({status}=\"relevant\", LEN(ARRAYJOIN(Opportunities))=0)",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "if-has-signals",
+      "name": "IF: Has Signals",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [760, 400],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "has-items", "leftValue": "={{ $input.all().length }}", "rightValue": 0, "operator": {"type": "number", "operation": "gt"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "code-filter-and-group",
+      "name": "Code: Filter & Group by Force",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 300],
+      "parameters": {
+        "jsCode": "// Filter signals that have a force linked, then group by force\n// Skip signals without force (log them for tracking)\n\nconst signals = $input.all();\n\nconst withForce = [];\nconst withoutForce = [];\n\nfor (const signal of signals) {\n  const forceArray = signal.json.force;\n  \n  // Check if force is linked (array with at least one record ID)\n  if (forceArray && Array.isArray(forceArray) && forceArray.length > 0) {\n    withForce.push({\n      signal_id: signal.json.id,\n      signal_title: signal.json.title,\n      force_id: forceArray[0], // First linked force\n      relevance_score: signal.json.relevance_score,\n      detected_at: signal.json.detected_at\n    });\n  } else {\n    withoutForce.push({\n      signal_id: signal.json.id,\n      signal_title: signal.json.title,\n      reason: 'No force linked'\n    });\n  }\n}\n\n// Group signals by force_id\nconst forceGroups = {};\nfor (const signal of withForce) {\n  if (!forceGroups[signal.force_id]) {\n    forceGroups[signal.force_id] = {\n      force_id: signal.force_id,\n      signals: []\n    };\n  }\n  forceGroups[signal.force_id].signals.push(signal);\n}\n\n// Convert to array of items for processing\nconst groupItems = Object.values(forceGroups).map(group => ({\n  json: {\n    force_id: group.force_id,\n    signal_ids: group.signals.map(s => s.signal_id),\n    signal_titles: group.signals.map(s => s.signal_title),\n    signal_count: group.signals.length\n  }\n}));\n\n// Log summary\nconsole.log(`Signals with force: ${withForce.length}`);\nconsole.log(`Signals without force (skipped): ${withoutForce.length}`);\nconsole.log(`Force groups: ${groupItems.length}`);\n\n// If no valid groups, return empty result marker\nif (groupItems.length === 0) {\n  return [{\n    json: {\n      _empty: true,\n      skipped_count: withoutForce.length,\n      skipped_signals: withoutForce,\n      message: 'No signals with force to process'\n    }\n  }];\n}\n\n// Add summary as first item for tracking\nreturn [{\n  json: {\n    _summary: true,\n    total_signals: signals.length,\n    with_force: withForce.length,\n    without_force: withoutForce.length,\n    force_groups: groupItems.length,\n    skipped_signals: withoutForce\n  }\n}, ...groupItems];"
+      }
+    },
+    {
+      "id": "if-has-groups",
+      "name": "IF: Has Valid Groups",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1200, 300],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "not-empty", "leftValue": "={{ $json._empty }}", "rightValue": true, "operator": {"type": "boolean", "operation": "notEquals"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "code-extract-groups",
+      "name": "Code: Extract Force Groups",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 200],
+      "parameters": {
+        "jsCode": "// Extract just the force groups (skip the summary item)\nconst items = $input.all();\n\n// Filter out summary and empty markers\nconst forceGroups = items.filter(item => \n  !item.json._summary && !item.json._empty && item.json.force_id\n);\n\nif (forceGroups.length === 0) {\n  return [{ json: { _empty: true, message: 'No force groups to process' } }];\n}\n\nreturn forceGroups;"
+      }
+    },
+    {
+      "id": "loop-each-force",
+      "name": "Loop: Process Each Force",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1640, 200],
+      "parameters": {"batchSize": 1, "options": {}}
+    },
+    {
+      "id": "http-find-existing-opp",
+      "name": "HTTP: Find Existing Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1860, 200],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filterByFormula",
+              "value": "=AND(FIND(\"{{ $json.force_id }}\", ARRAYJOIN(RECORD_ID(force))) > 0, NOT(OR({status}=\"won\", {status}=\"lost\", {status}=\"dormant\")))"
+            },
+            {"name": "maxRecords", "value": "1"}
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Search for existing open opportunity for this force. Excludes won/lost/dormant."
+    },
+    {
+      "id": "wait-after-search",
+      "name": "Wait: 200ms",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2080, 200],
+      "parameters": {"unit": "seconds", "amount": 1},
+      "webhookId": "wait-opp-search"
+    },
+    {
+      "id": "code-decide-create-update",
+      "name": "Code: Decide Create or Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2300, 200],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Decide whether to create new opportunity or update existing\n// Carry forward force_id and signal_ids from the loop\n\nconst airtableResponse = $input.item.json;\nconst loopItem = $('Loop: Process Each Force').item.json;\n\nconst hasExisting = airtableResponse.records && airtableResponse.records.length > 0;\nconst existingOpp = hasExisting ? airtableResponse.records[0] : null;\n\nreturn {\n  json: {\n    action: hasExisting ? 'update' : 'create',\n    existing_opp_id: existingOpp ? existingOpp.id : null,\n    existing_signals: existingOpp && existingOpp.fields.signals ? existingOpp.fields.signals : [],\n    force_id: loopItem.force_id,\n    signal_ids: loopItem.signal_ids,\n    signal_titles: loopItem.signal_titles,\n    signal_count: loopItem.signal_count\n  }\n};"
+      }
+    },
+    {
+      "id": "if-create-or-update",
+      "name": "IF: Create or Update",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2520, 200],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "is-create", "leftValue": "={{ $json.action }}", "rightValue": "create", "operator": {"type": "string", "operation": "equals"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "http-create-opportunity",
+      "name": "HTTP: Create Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2740, 100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"name\": \"Hiring Activity - {{ $json.signal_count }} signal(s)\",\n    \"force\": [\"{{ $json.force_id }}\"],\n    \"signals\": {{ JSON.stringify($json.signal_ids) }},\n    \"status\": \"researching\"\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Create new opportunity with signals linked"
+    },
+    {
+      "id": "http-update-opportunity",
+      "name": "HTTP: Update Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2740, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $json.existing_opp_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"signals\": {{ JSON.stringify([...$json.existing_signals, ...$json.signal_ids]) }}\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Add new signals to existing opportunity"
+    },
+    {
+      "id": "merge-after-create-update",
+      "name": "Merge: After Create/Update",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [2960, 200],
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      }
+    },
+    {
+      "id": "code-extract-opp-id",
+      "name": "Code: Extract Opportunity ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3180, 200],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Extract the opportunity ID from create or update response\n// Also capture whether it was a create or update action\n\nconst response = $input.item.json;\n\n// Response structure varies: create returns {id, fields}, update returns {id, fields}\nlet oppId = null;\nlet action = 'unknown';\n\nif (response.id) {\n  oppId = response.id;\n  action = response.fields && response.fields.name && response.fields.name.includes('Hiring Activity') ? 'created' : 'updated';\n} else if (response.records && response.records[0]) {\n  oppId = response.records[0].id;\n  action = 'created';\n}\n\nreturn {\n  json: {\n    opportunity_id: oppId,\n    action: action,\n    response: response\n  }\n};"
+      }
+    },
+    {
+      "id": "wait-after-update",
+      "name": "Wait: 200ms (Rate Limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3400, 200],
+      "parameters": {"unit": "seconds", "amount": 1},
+      "webhookId": "wait-opp-update"
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate: Collect Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [3620, 200],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "processed_opportunities",
+        "options": {}
+      }
+    },
+    {
+      "id": "set-log-summary",
+      "name": "Set: Log Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3840, 200],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "workflow-name", "name": "workflow_name", "value": "MI: Opportunity Creator", "type": "string"},
+            {"id": "opps-processed", "name": "opportunities_processed", "value": "={{ $json.processed_opportunities ? $json.processed_opportunities.length : 0 }}", "type": "number"},
+            {"id": "opps-created", "name": "opportunities_created", "value": "={{ $json.processed_opportunities ? $json.processed_opportunities.filter(o => o.action === 'created').length : 0 }}", "type": "number"},
+            {"id": "opps-updated", "name": "opportunities_updated", "value": "={{ $json.processed_opportunities ? $json.processed_opportunities.filter(o => o.action === 'updated').length : 0 }}", "type": "number"},
+            {"id": "signals-processed", "name": "signals_processed", "value": "={{ $('Airtable: Fetch Relevant Signals').all().length }}", "type": "number"},
+            {"id": "signals-skipped", "name": "signals_skipped_no_force", "value": "={{ $('Airtable: Fetch Relevant Signals').all().filter(s => !s.json.force || s.json.force.length === 0).length }}", "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"},
+            {"id": "duration-ms", "name": "duration_ms", "value": "={{ Date.now() - $('Set: Start Time').item.json.start_time }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "code-enrichment-placeholder",
+      "name": "Code: Enrichment Trigger (Placeholder)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4060, 200],
+      "parameters": {
+        "jsCode": "// SPEC-005 Placeholder: Trigger Opportunity Enricher\n// When SPEC-005 is built, this will call the enrichment webhook\n// for opportunities with status=researching\n\nconst stats = $input.item.json;\n\n// Log that enrichment would be triggered\nconst opportunitiesForEnrichment = stats.opportunities_created || 0;\n\nconsole.log(`Enrichment trigger placeholder: ${opportunitiesForEnrichment} new opportunities ready for enrichment`);\n\n// Return stats unchanged - enrichment webhook call will be added in SPEC-005\nreturn {\n  json: {\n    ...stats,\n    enrichment_placeholder: true,\n    opportunities_for_enrichment: opportunitiesForEnrichment,\n    message: 'Enrichment trigger ready for SPEC-005 implementation'\n  }\n};"
+      },
+      "notes": "SPEC-005: Will trigger WF5: MI: Opportunity Enricher via webhook"
+    },
+    {
+      "id": "set-no-signals",
+      "name": "Set: No Signals",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [980, 500],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "No relevant signals without opportunities to process", "type": "string"},
+            {"id": "opportunities-processed", "name": "opportunities_processed", "value": 0, "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "set-no-groups",
+      "name": "Set: No Valid Groups",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1420, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "All relevant signals lack force assignment - skipped", "type": "string"},
+            {"id": "skipped-count", "name": "skipped_count", "value": "={{ $json.skipped_count || $json.without_force || 0 }}", "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Every 15 Minutes": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Manual Trigger": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Set: Start Time": {"main": [[{"node": "Airtable: Fetch Relevant Signals", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Relevant Signals": {"main": [[{"node": "IF: Has Signals", "type": "main", "index": 0}]]},
+    "IF: Has Signals": {"main": [[{"node": "Code: Filter & Group by Force", "type": "main", "index": 0}], [{"node": "Set: No Signals", "type": "main", "index": 0}]]},
+    "Code: Filter & Group by Force": {"main": [[{"node": "IF: Has Valid Groups", "type": "main", "index": 0}]]},
+    "IF: Has Valid Groups": {"main": [[{"node": "Code: Extract Force Groups", "type": "main", "index": 0}], [{"node": "Set: No Valid Groups", "type": "main", "index": 0}]]},
+    "Code: Extract Force Groups": {"main": [[{"node": "Loop: Process Each Force", "type": "main", "index": 0}]]},
+    "Loop: Process Each Force": {"main": [[{"node": "Aggregate: Collect Results", "type": "main", "index": 0}], [{"node": "HTTP: Find Existing Opportunity", "type": "main", "index": 0}]]},
+    "HTTP: Find Existing Opportunity": {"main": [[{"node": "Wait: 200ms", "type": "main", "index": 0}]]},
+    "Wait: 200ms": {"main": [[{"node": "Code: Decide Create or Update", "type": "main", "index": 0}]]},
+    "Code: Decide Create or Update": {"main": [[{"node": "IF: Create or Update", "type": "main", "index": 0}]]},
+    "IF: Create or Update": {"main": [[{"node": "HTTP: Create Opportunity", "type": "main", "index": 0}], [{"node": "HTTP: Update Opportunity", "type": "main", "index": 0}]]},
+    "HTTP: Create Opportunity": {"main": [[{"node": "Merge: After Create/Update", "type": "main", "index": 0}]]},
+    "HTTP: Update Opportunity": {"main": [[{"node": "Merge: After Create/Update", "type": "main", "index": 1}]]},
+    "Merge: After Create/Update": {"main": [[{"node": "Code: Extract Opportunity ID", "type": "main", "index": 0}]]},
+    "Code: Extract Opportunity ID": {"main": [[{"node": "Wait: 200ms (Rate Limit)", "type": "main", "index": 0}]]},
+    "Wait: 200ms (Rate Limit)": {"main": [[{"node": "Loop: Process Each Force", "type": "main", "index": 0}]]},
+    "Aggregate: Collect Results": {"main": [[{"node": "Set: Log Summary", "type": "main", "index": 0}]]},
+    "Set: Log Summary": {"main": [[{"node": "Code: Enrichment Trigger (Placeholder)", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "meta": {
+    "spec": "SPEC-004",
+    "description": "Groups relevant signals by force into opportunity records. Creates new opportunities or adds signals to existing open opportunities. G-011 compliant: upsert pattern, no delete loops.",
+    "notes": "HTTP Request nodes used for Airtable operations in loops due to n8n bug with Resource Locator fields"
+  }
+}

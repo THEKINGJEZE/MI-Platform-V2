@@ -1,69 +1,91 @@
 /**
  * UK Police Force Matching Patterns
  *
- * 47 fuzzy matching patterns for UK police force identification.
+ * Fuzzy matching patterns for UK police force identification.
  * Maps common variations and abbreviations to canonical force names.
+ *
+ * IMPORTANT: Force names MUST match exactly with Airtable Forces table.
+ * Updated: 16 Jan 2026 to align with Airtable schema.
  *
  * Usage: Run JavaScript lookup BEFORE falling back to AI classification.
  * This is 200x faster and free vs AI calls.
  *
- * Source: Extracted from MI-Platform-Fresh-Start indeed-receiver-bright-data.json
- * Related: reference-data/uk-police-forces.json contains 48 official forces
- *
- * @see DEC-304 in docs/GUARDRAILS.md
+ * @see G-005 in docs/GUARDRAILS.md
  */
 
 const FORCE_PATTERNS = {
+  // Large forces
   'metropolitan police': 'Metropolitan Police Service',
   'met police': 'Metropolitan Police Service',
-  'city of london police': 'City of London Police',
   'greater manchester police': 'Greater Manchester Police',
   'west midlands police': 'West Midlands Police',
   'west yorkshire police': 'West Yorkshire Police',
-  'merseyside police': 'Merseyside Police',
-  'south yorkshire police': 'South Yorkshire Police',
-  'thames valley police': 'Thames Valley Police',
-  'hampshire constabulary': 'Hampshire Constabulary',
-  'hampshire & isle of wight constabulary': 'Hampshire & Isle Of Wight Constabulary',
-  'hampshire and isle of wight': 'Hampshire & Isle Of Wight Constabulary',
+
+  // London
+  'city of london police': 'City of London Police',
+
+  // South East
   'kent police': 'Kent Police',
   'essex police': 'Essex Police',
   'surrey police': 'Surrey Police',
   'sussex police': 'Sussex Police',
-  'avon and somerset': 'Avon and Somerset Constabulary',
-  'devon and cornwall': 'Devon and Cornwall Police',
+  'thames valley police': 'Thames Valley Police',
+  'hampshire constabulary': 'Hampshire Constabulary',
+  'hertfordshire constabulary': 'Hertfordshire Constabulary',
+  'bedfordshire police': 'Bedfordshire Police',
+
+  // South West
+  'avon and somerset': 'Avon and Somerset Police',
+  'devon and cornwall': 'Devon & Cornwall Police',
   'dorset police': 'Dorset Police',
+  'gloucestershire constabulary': 'Gloucestershire Constabulary',
+  'wiltshire police': 'Wiltshire Police',
+
+  // North West
+  'merseyside police': 'Merseyside Police',
   'lancashire constabulary': 'Lancashire Constabulary',
-  'nottinghamshire police': 'Nottinghamshire Police',
+  'cheshire constabulary': 'Cheshire Constabulary',
+  'cumbria constabulary': 'Cumbria Constabulary',
+
+  // Yorkshire & Humberside
+  'south yorkshire police': 'South Yorkshire Police',
+  'north yorkshire police': 'North Yorkshire Police',
+  'humberside police': 'Humberside Police',
+
+  // North East
   'northumbria police': 'Northumbria Police',
   'cleveland police': 'Cleveland Police',
   'durham constabulary': 'Durham Constabulary',
-  'north yorkshire police': 'North Yorkshire Police',
-  'humberside police': 'Humberside Police',
-  'lincolnshire police': 'Lincolnshire Police',
-  'norfolk constabulary': 'Norfolk Constabulary',
-  'suffolk constabulary': 'Suffolk Constabulary',
-  'cambridgeshire constabulary': 'Cambridgeshire Constabulary',
-  'bedfordshire police': 'Bedfordshire Police',
-  'hertfordshire constabulary': 'Hertfordshire Constabulary',
+
+  // East Midlands
+  'nottinghamshire police': 'Nottinghamshire Police',
   'leicestershire police': 'Leicestershire Police',
+  'lincolnshire police': 'Lincolnshire Police',
   'northamptonshire police': 'Northamptonshire Police',
+  'derbyshire constabulary': 'Derbyshire Constabulary',
+
+  // West Midlands
   'warwickshire police': 'Warwickshire Police',
   'west mercia police': 'West Mercia Police',
   'staffordshire police': 'Staffordshire Police',
-  'derbyshire constabulary': 'Derbyshire Constabulary',
-  'cheshire constabulary': 'Cheshire Constabulary',
-  'cumbria constabulary': 'Cumbria Constabulary',
-  'gloucestershire constabulary': 'Gloucestershire Constabulary',
-  'wiltshire police': 'Wiltshire Police',
+
+  // East
+  'norfolk constabulary': 'Norfolk Constabulary',
+  'suffolk constabulary': 'Suffolk Constabulary',
+  'cambridgeshire constabulary': 'Cambridgeshire Constabulary',
+
+  // Wales
   'dyfed-powys police': 'Dyfed-Powys Police',
   'gwent police': 'Gwent Police',
   'north wales police': 'North Wales Police',
   'south wales police': 'South Wales Police',
-  'police scotland': 'Police Scotland',
-  'psni': 'Police Service of Northern Ireland',
+
+  // National/Specialist
   'british transport police': 'British Transport Police',
-  'counter terrorism policing': 'Counter Terrorism Policing'
+  'counter terrorism policing': 'Counter Terrorism Policing',
+  'national crime agency': 'National Crime Agency',
+  'ministry of defence police': 'Ministry of Defence Police',
+  'civil nuclear constabulary': 'Civil Nuclear Constabulary'
 };
 
 /**
