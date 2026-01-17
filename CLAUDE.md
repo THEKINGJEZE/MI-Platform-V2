@@ -41,7 +41,6 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 |-------|-----------|
 | Roadmap | @ROADMAP.md |
 | Current spec | @specs/consistency-checker.md (build this first) |
-| Schema | @.claude/skills/airtable-schema/SKILL.md |
 | Airtable patterns | @.claude/rules/airtable.md |
 | n8n patterns | @.claude/rules/n8n.md |
 | Full architecture | @docs/architecture.md |
@@ -85,6 +84,7 @@ Drift detected? → Stop. Summarize. Realign to ANCHOR.md.
 ## Quick Commands
 | Command | Purpose |
 |---------|---------|
+| `/implement <spec-number>` | Stage-gated spec implementation with progress tracking |
 | `/health-check` | Verify all API connections |
 | `/check-alignment` | Am I on track? |
 | `/deploy-workflow <name>` | Import workflow to n8n |
