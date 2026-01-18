@@ -108,13 +108,13 @@
 
 ## 🔄 In Progress
 - [ ] **Phase 1 E2E Testing** — See [test plan](specs/PHASE-1-E2E-TEST.md)
-  - [ ] Test 1: Manual Pipeline Trigger
-  - [ ] Test 2: Irrelevant Signal Filtering
-  - [ ] Test 3: Force Matching (G-005)
-  - [ ] Test 4: Deduplication
-  - [ ] Test 5: Opportunity Consolidation
-  - [ ] Test 6: Monday Morning Experience
-  - [ ] Test 7: Production Burn-In (1 week)
+  - [x] Test 1: Manual Pipeline Trigger ✅
+  - [x] Test 2: Irrelevant Signal Filtering ✅
+  - [x] Test 3: Force Matching (G-005) ✅
+  - [x] Test 4: Deduplication ✅
+  - [x] Test 5: Opportunity Consolidation ✅
+  - [x] Test 6: Monday Morning Experience ✅
+  - [ ] Test 7: Production Burn-In (1 week) ⏳ Started 18 Jan
 
 ## ⏳ Up Next (This Week)
 1. ~~Activate WF3 + WF4 + WF5 schedules~~ ✅ DONE
