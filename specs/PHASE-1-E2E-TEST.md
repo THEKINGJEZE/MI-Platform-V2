@@ -207,13 +207,49 @@ Phase 1 E2E testing is complete when:
 
 | Test | Date | Result | Notes |
 |------|------|--------|-------|
-| Test 1: Manual Trigger | | | |
-| Test 2: Irrelevant Filter | | | |
-| Test 3: Force Matching | | | |
-| Test 4: Deduplication | | | |
-| Test 5: Consolidation | | | |
-| Test 6: Monday Experience | | | |
-| Test 7: Burn-In | | | |
+| Test 1: Manual Trigger | 18 Jan 2025 | ✅ PASS | Full pipeline WF1→WF5 executing, 29 ready opportunities |
+| Test 2: Irrelevant Filter | 18 Jan 2025 | ⚠️ ISSUE | 0 irrelevant signals found — classification may be too lenient |
+| Test 3: Force Matching | 18 Jan 2025 | ✅ PASS | G-005 compliant: pattern match before AI, 65% (79/122) signals have force |
+| Test 4: Deduplication | 18 Jan 2025 | ❌ FAIL | 26 duplicate URLs found — deduplication not working |
+| Test 5: Consolidation | 18 Jan 2025 | ❌ FAIL | 4 forces have multiple opportunities (Herts x3, BTP x2, Beds x3, Cambs x3) |
+| Test 6: Monday Experience | 18 Jan 2025 | ⚠️ REVIEW | 29 ready opportunities (exceeds 3-5 target), all have contacts/drafts |
+| Test 7: Burn-In | | | Pending - 1 week monitoring |
+
+---
+
+## Issues Found
+
+### Critical Issues (Must Fix)
+
+#### Issue 1: Deduplication Not Working
+- **Location**: WF2 (Jobs Receiver)
+- **Evidence**: 26 duplicate Indeed URLs in Signals table
+- **Impact**: Inflated signal counts, duplicate processing
+- **Fix**: Review deduplication logic in WF2 Code node
+
+#### Issue 2: Opportunity Consolidation Not Working
+- **Location**: WF4 (Opportunity Creator)
+- **Evidence**: Multiple opportunities for same force:
+  - Hertfordshire Constabulary: 3 opportunities
+  - British Transport Police: 2 opportunities
+  - Bedfordshire Police: 3 opportunities
+  - Cambridgeshire Constabulary: 3 opportunities
+- **Impact**: Fragmented leads, harder Monday review
+- **Fix**: Review upsert logic in WF4 — should find existing open opportunity for force
+
+### Minor Issues (Monitor)
+
+#### Issue 3: No Irrelevant Signals
+- **Location**: WF3 (Jobs Classifier)
+- **Evidence**: 0 signals with status='irrelevant', 120 relevant, 2 new
+- **Impact**: Either classification is too lenient or all scraped jobs are genuinely police-related
+- **Action**: Review relevance_score distribution, may need stricter threshold
+
+#### Issue 4: Too Many Ready Opportunities
+- **Location**: Overall system
+- **Evidence**: 29 ready opportunities vs target 3-5
+- **Impact**: May overwhelm Monday review
+- **Action**: After fixing consolidation, numbers should reduce significantly
 
 ---
 

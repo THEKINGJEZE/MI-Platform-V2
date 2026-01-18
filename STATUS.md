@@ -28,6 +28,17 @@
 ---
 
 ## ✅ Done This Session
+- [x] **Bug Fix: WF2 Deduplication + WF4 Consolidation** ✅
+  - **Bug 1 (WF2)**: Added `returnAll: true` to Airtable search node — was only fetching first 100 records
+  - **Bug 2 (WF4)**: Fixed invalid formula `RECORD_ID(force)` → `{force}` in consolidation search
+  - Also added `status="sent"` to exclusion list in WF4
+  - Both workflows deployed and active
+  - JSON files updated: `jobs-receiver.json`, `opportunity-creator.json`
+- [x] **Data Cleanup: Duplicates Removed** ✅
+  - Deleted 35 duplicate signals (kept oldest for each URL)
+  - Consolidated 4 forces with multiple opportunities into 1 each
+  - Deleted 7 duplicate opportunities
+  - **Final counts**: 87 signals (0 duplicates), 23 opportunities (1 per force)
 - [x] **Phase 1 Specs Signed Off (ROADMAP.md)** ✅
   - SPEC-001 to SPEC-005 verified against strategy document
   - All aligned; model deviations (gpt-4o-mini) documented as intentional
@@ -136,6 +147,8 @@ None
 | WF3 schedule: Every 15 minutes | No — frequent enough to catch new signals quickly |
 | HTTP Request for Airtable updates in loops | No — n8n bug: Resource Locator fields don't eval expressions in loops |
 | AI echo-back pattern for signal_id tracking | No — workaround for n8n pairedItem chain breaking through Langchain nodes |
+| WF2 deduplication: add returnAll: true | No — bug fix, Airtable search only fetched first 100 records |
+| WF4 consolidation formula fix | No — bug fix, RECORD_ID(force) is invalid syntax |
 
 ---
 
@@ -168,6 +181,9 @@ Completed:
   ✅ WF4: Opportunity Creator workflow (7LYyzpLC5GzoJROn) — ACTIVE (15min schedule)
   ✅ WF5: Opportunity Enricher workflow (Lb5iOr1m93kUXBC0) — ACTIVE (15min schedule)
   ✅ Airtable rollup fields: signal_count, signal_types
+  ✅ Bug fix: WF2 deduplication (returnAll: true)
+  ✅ Bug fix: WF4 consolidation formula (ARRAYJOIN({force}))
+  ✅ Data cleanup: 35 duplicate signals removed, 7 duplicate opportunities consolidated
 
 Remaining:
   □ End-to-end test with real Bright Data scrape

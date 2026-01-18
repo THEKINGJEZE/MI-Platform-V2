@@ -118,6 +118,7 @@
         "table": "tblez9trodMzKKqXq",
         "options": {},
         "filterByFormula": "",
+        "returnAll": true,
         "base": { "__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id" }
       },
       "credentials": {

@@ -135,7 +135,7 @@
           "parameters": [
             {
               "name": "filterByFormula",
-              "value": "=AND(FIND(\"{{ $json.force_id }}\", ARRAYJOIN(RECORD_ID(force))) > 0, NOT(OR({status}=\"won\", {status}=\"lost\", {status}=\"dormant\")))"
+              "value": "=AND(FIND(\"{{ $json.force_id }}\", ARRAYJOIN({force})) > 0, NOT(OR({status}=\"sent\", {status}=\"won\", {status}=\"lost\", {status}=\"dormant\")))"
             },
             {"name": "maxRecords", "value": "1"}
           ]
