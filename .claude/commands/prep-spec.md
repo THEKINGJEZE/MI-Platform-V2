@@ -5,6 +5,26 @@ argument-hint: <topic>
 
 # Prepare Spec Context Brief
 
+## Topic Registry
+
+Valid topics and their context pointers. Use these to scope the context brief.
+
+| Topic | ROADMAP Section | Primary Guardrails | Key Files |
+|-------|-----------------|-------------------|----------|
+| `airtable-schema` | Phase 1 → "Airtable base created" | G-011 | `reference-data/uk-police-forces.json`, `airtable/forces-seed.json` |
+| `jobs-ingestion` | Phase 1 → "Indeed ingestion workflow" | G-001, G-003, G-009 | `patterns/indeed-keywords.json`, `reference-data/uk-police-forces.json` |
+| `signal-classification` | Phase 1 → "Signal classification" | G-005, G-001 | `patterns/force-matching.js`, `prompts/job-classification.md` |
+| `opportunity-creator` | Phase 1 → "Opportunities created" | G-011, G-001 | `prompts/job-classification.md` |
+| `opportunity-enricher` | Phase 1 → "Basic enrichment working" | G-011 | `prompts/opportunity-enrichment.md` |
+| `monday-review` | Phase 1 → Full phase | G-001, G-011 | All Phase 1 specs, `Opportunities` table |
+| `competitor-monitoring` | Phase 1b → Full phase | G-001, G-003, G-005 | `reference-data/competitors.json`, `patterns/force-matching.js` |
+| `email-integration` | Phase 2a → Full phase | G-002, G-006 | `prompts/email-triage.md` |
+| `tenders` | Phase 2b → Full phase | G-001 | (no existing assets yet) |
+| `regulatory` | Phase 4 → Full phase | G-001, G-010 | `patterns/job-portal-filters.js` |
+| `news` | Phase 5 → Full phase | G-001, G-010 | `patterns/job-portal-filters.js` |
+
+**If topic not listed**: Search ROADMAP.md for partial matches, or ask James for clarification.
+
 ## Usage
 
 ```
@@ -18,6 +38,19 @@ Example: `/prep-spec phase-1b-competitors`
 Generates a context brief file (`specs/NEXT-CONTEXT.md`) containing project assets that Claude Chat needs to reference when writing specifications. This ensures specs reference real patterns, prompts, and guardrails — not imagined ones.
 
 ## Process
+
+### Step 0: Resolve topic to context pointers
+
+Look up `$ARGUMENTS` in the Topic Registry table above.
+
+**If found**:
+- Use the ROADMAP Section to locate acceptance criteria
+- Use Primary Guardrails to filter which guardrails to include
+- Use Key Files as starting points for asset inventory
+
+**If not found**:
+- Search ROADMAP.md for partial matches on the topic
+- If still unclear, output: "Topic '[topic]' not in registry. Available topics: [list]. Or clarify what you need."
 
 ### Step 1: Extract acceptance criteria from ROADMAP.md
 

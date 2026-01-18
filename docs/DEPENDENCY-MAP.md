@@ -39,6 +39,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 |-------|-----|
 | STATUS.md | Current phase reference might need updating |
 | specs/phase-X.md | Spec should match roadmap acceptance criteria |
+| .claude/commands/prep-spec.md | Topic Registry may need new phase entry |
 
 ### When You Change CLAUDE.md
 | Check | Why |
@@ -186,3 +187,4 @@ All documents that contain project information:
 | reference-data/*.json | Reference data | None (source of truth) |
 | patterns/*.js | Reusable patterns | None |
 | prompts/*.md | AI prompts | None |
+| .claude/commands/prep-spec.md | Spec context generation | ← ROADMAP (Topic Registry) |

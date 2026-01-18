@@ -1,91 +1,81 @@
-# Context Brief: Opportunity Enrichment (SPEC-005)
+# Context Brief: Monday Review Experience
 
-Generated: 17 January 2025
+Generated: 18 January 2025
 For: Claude Chat spec drafting
 
 ---
 
 ## Current State
 
-**Phase**: 1 — Core Jobs Pipeline
-**Goal**: Build WF5: Opportunity Enricher
+**Phase**: 1 — Core Jobs Pipeline (99% COMPLETE)
+**Goal**: Phase 1 End-to-End Testing — Tests 1-6 passing, burn-in started
 **Blockers**: None
 
 ---
 
 ## Acceptance Criteria (from ROADMAP.md)
 
-Phase 1 criteria relevant to enrichment:
+Phase 1 must deliver the Monday review experience. Full criteria:
+- [ ] Airtable base created with schema (Signals, Opportunities, Forces, Contacts)
+- [ ] 46 UK police forces seeded in Forces table
+- [ ] Indeed ingestion workflow running (scheduled, every 4 hours)
+- [ ] Signal classification working (Claude API, >90% accuracy)
+- [ ] Opportunities created from relevant signals
 - [ ] Basic enrichment working (contact lookup, message draft)
-- [ ] Can review opportunity and mark as sent
+- [ ] **Can review opportunity and mark as sent**
 - [ ] End-to-end test: fake job → classified → opportunity → reviewed
 
----
-
-## Workflow Context
-
-**Upstream**: WF4 (Opportunity Creator) outputs opportunities with `status=researching`
-- Creates/updates opportunity records linking signals to forces
-- Node 9 is placeholder for SPEC-005 trigger
-- New opportunities need: contact lookup, message drafting
-
-**Expected trigger**: Called by WF4 for newly created opportunities OR scheduled pickup of `status=researching` opportunities
-
-**Output goal**: Opportunities with `status=ready` containing:
-- Contact (from Contacts table, linked to force)
-- Draft message (personalised outreach)
-- Priority score
-- "Why now" narrative
+**Done Means Done** (from ROADMAP):
+1. All acceptance criteria checked off
+2. End-to-end test passing
+3. Running in production for 1 week without major issues
+4. **James has used it for at least one Monday review**
 
 ---
 
 ## Existing Assets
 
+### Workflows (n8n — all active)
+- `jobs-trigger.json` — WF1: Triggers Bright Data scrape daily at 06:00
+- `jobs-receiver.json` — WF2: Webhook receiver, deduplication, logging
+- `jobs-classifier.json` — WF3: AI classification + force matching (15min schedule)
+- `opportunity-creator.json` — WF4: Creates opportunities from relevant signals (15min)
+- `opportunity-enricher.json` — WF5: Contact lookup, draft outreach, priority scoring (15min)
+
 ### Patterns (reuse these, don't recreate)
-- `patterns/force-matching.js` — UK police force name matching (47 patterns, used in classification)
-- `patterns/indeed-keywords.json` — Indeed search keywords configuration
-- `patterns/job-portal-filters.js` — Filter job portal false positives (G-010)
+- `patterns/force-matching.js` — UK police force name fuzzy matching (G-005 compliant)
+- `patterns/job-portal-filters.js` — Filter job portal URLs from news (G-010)
 
 ### Prompts (can extend or reference)
-- `prompts/job-classification.md` — Claude prompt for classifying job signals (model: gpt-4o-mini)
-- `prompts/email-triage.md` — Claude prompt for email classification
+- `prompts/job-classification.md` — Claude prompt for signal relevance scoring
+- `prompts/email-triage.md` — Email classification prompt (Phase 2a)
+- `prompts/opportunity-enrichment.md` — Outreach draft + priority scoring
 
 ### Reference Data (source of truth)
 - `reference-data/uk-police-forces.json` — 48 UK police forces with metadata
 - `reference-data/competitors.json` — 7 competitor definitions
 - `reference-data/capability-areas.json` — 14 capability areas for classification
 
+### Specs (completed, for reference)
+- `specs/SPEC-001-airtable-schema.md` — Database schema design
+- `specs/SPEC-002-jobs-ingestion.md` — Bright Data + webhook ingestion
+- `specs/SPEC-003-signal-classification.md` — AI classification workflow
+- `specs/SPEC-004-opportunity-creator.md` — Signal → Opportunity conversion
+- `specs/SPEC-005-opportunity-enricher.md` — Contact + draft enrichment
+
 ### Skills & Rules
-- `.claude/skills/force-matching/SKILL.md` — Force identification skill (G-005)
-- `.claude/skills/airtable-schema/table-ids.json` — Current Airtable table/field IDs
-- `.claude/rules/airtable.md` — Airtable API patterns, rate limits (5 req/s, batch 10)
+- `.claude/skills/force-matching/` — Force identification skill (enforces G-005)
+- `.claude/rules/airtable.md` — Airtable API patterns and rate limits
 - `.claude/rules/n8n.md` — n8n workflow structure requirements
-
----
-
-## Airtable Schema (from table-ids.json)
-
-**Base ID**: `appEEWaGtGUwOyOhm`
-
-| Table | ID | Key Fields |
-|-------|-----|------------|
-| Forces | `tblbAjBEdpv42Smpw` | name, region, country, size, hubspot_company_id |
-| Contacts | `tbl0u9vy71jmyaDx1` | force (linked) |
-| Signals | `tblez9trodMzKKqXq` | title, type, source, force, status, opportunity |
-| Opportunities | `tblJgZuI3LM2Az5id` | name, force, signals, status, contact |
-
-**Opportunity status values**: researching → ready → sent → replied → meeting → proposal → won/lost/dormant
 
 ---
 
 ## Applicable Guardrails
 
-| ID | Rule | Relevance |
-|----|------|-----------|
-| G-002 | Command Queue for Email Actions | DO NOT send emails directly — write to queue |
-| G-005 | Fuzzy JS Matching Before AI | Already done in WF3, not needed here |
-| G-007 | No CLI Agents (Use n8n) | Build as n8n workflow, not scripts |
-| G-011 | Upsert Only (No Loop Delete) | Use upsert when updating opportunities |
+| ID | Rule | Relevance to Monday Review |
+|----|------|---------------------------|
+| G-001 | Dumb Scrapers + Smart Agents | Review sees clean opportunities, not raw data |
+| G-011 | Upsert Only (No Loop Delete) | Status updates must not risk data loss |
 
 ---
 
@@ -93,44 +83,28 @@ Phase 1 criteria relevant to enrichment:
 
 | Decision | Date | Impact |
 |----------|------|--------|
-| A2: Airtable as Primary Database | Jan 2025 | Contacts stored in Airtable, not HubSpot |
-| A3: Self-Hosted n8n | Jan 2025 | No execution limits for enrichment |
-| HTTP Request for Airtable updates in loops | Jan 2025 | n8n bug workaround — use HTTP not native node |
-| WF3 uses OpenAI gpt-4o-mini | Jan 2025 | Cost-effective model for AI tasks |
+| A2: Airtable as Primary Database | Jan 2025 | Review UI likely built on Airtable views |
+| A4: Two-Layer Claude Architecture | 16 Jan | Review logic in Chat, implementation in Code |
+| A7: Single Source of Truth | 16 Jan | Opportunity table is canonical for leads |
 
 ---
 
 ## Key Questions for Spec
 
-1. **Contact lookup strategy**:
-   - Does Contacts table have data? Or seed from HubSpot?
-   - What fields are needed? (name, email, role, phone?)
-   - Fallback if no contact exists for force?
-
-2. **Message drafting**:
-   - What personalisation variables? (force name, signal titles, role type)
-   - Template-based or AI-generated each time?
-   - Where is the draft stored? (Opportunities table field? Separate table?)
-
-3. **Priority scoring**:
-   - What factors? (signal count, recency, competitor involvement)
-   - Numeric score or categorical (hot/warm/cold)?
-
-4. **"Why now" narrative**:
-   - AI-generated summary of why this opportunity is timely?
-   - Based on signal titles/descriptions?
-
-5. **HubSpot integration**:
-   - Does enrichment sync to HubSpot?
-   - Or is that a separate workflow?
+1. **What is the review interface?** — Airtable interface? Custom dashboard? n8n form?
+2. **What actions does James take?** — Approve → Send? Edit draft? Skip? Archive?
+3. **What does "mark as sent" mean?** — Update Airtable status? Log to HubSpot? Both?
+4. **What metrics matter for Monday?** — # ready leads, time to review, quality score?
+5. **How does HubSpot sync fit?** — Sync after approval? Sync on send? Background sync?
 
 ---
 
 ## Notes for Claude Chat
 
 - Reference assets by path (e.g., `patterns/force-matching.js`)
-- New prompts go in `prompts/` (e.g., `prompts/opportunity-enrichment.md`)
-- Spec output should go in `specs/SPEC-005-opportunity-enricher.md`
+- New prompts go in `prompts/`
+- New patterns go in `patterns/`
+- Spec output should go in `specs/SPEC-006-monday-review.md`
 - Keep spec under 200 lines
-- WF4 has placeholder at Node 9 ready for SPEC-005 integration
-- Consider both triggered (from WF4) and scheduled (catch stragglers) execution
+- **Critical success metric**: ≤15 min Monday review time (from ANCHOR.md)
+- **User context**: James has ADHD — minimize decisions, maximize clarity

@@ -23,7 +23,7 @@
 
 **Blockers**: None
 
-**Next step**: Execute Test 1 — trigger WF1 manually and trace through full pipeline.
+**Next step**: Share `specs/NEXT-CONTEXT.md` with Claude Chat to draft SPEC-006: Monday Review Interface.
 
 ---
 
@@ -74,6 +74,10 @@
   - Ran `/prep-spec opportunity-enrichment`
   - Output: `specs/NEXT-CONTEXT.md` — ready for Claude Chat
   - Includes: acceptance criteria, existing assets, guardrails, key questions
+- [x] **Context brief for Monday Review generated** ✅
+  - Ran `/prep-spec monday-review`
+  - Output: `specs/NEXT-CONTEXT.md` — updated for SPEC-006 drafting
+  - Key questions: interface choice, user actions, HubSpot sync
 - [x] **`/implement` slash command created** ✅
   - Stage-gated spec implementation with external progress tracking
   - Six stages: Parse → Audit → Plan → Build → Verify → Document
