@@ -1,0 +1,461 @@
+{
+  "name": "MI: Opportunity Enricher",
+  "id": "Lb5iOr1m93kUXBC0",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [112, 304]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [112, 512]
+    },
+    {
+      "parameters": {
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "filterByFormula", "value": "{status} = \"researching\""},
+            {"name": "maxRecords", "value": "20"},
+            {"name": "sort[0][field]", "value": "created_at"},
+            {"name": "sort[0][direction]", "value": "asc"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-opportunities",
+      "name": "Airtable: Fetch Researching Opps",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 400],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "has-records",
+              "leftValue": "={{ $json.records.length }}",
+              "rightValue": 0,
+              "operator": {"type": "number", "operation": "gt"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-opps",
+      "name": "IF: Has Opportunities",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [544, 400]
+    },
+    {
+      "parameters": {"options": {}},
+      "id": "set-no-opps",
+      "name": "Set: No Opportunities",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [768, 560]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convert Airtable records array into individual n8n items\nconst response = $input.first().json;\nconst records = response.records || [];\nif (records.length === 0) return [];\nreturn records.map(record => ({ json: record }));"
+      },
+      "id": "06e33f0c-0b2f-44c3-8da8-e323bfa4c463",
+      "name": "Code: Split Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [656, 400]
+    },
+    {
+      "parameters": {"options": {}},
+      "id": "split-batches",
+      "name": "Loop: Each Opportunity",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [768, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if opportunity already has a verified contact\nconst opp = $input.first().json;\nconst fields = opp.fields || opp;\nconst hasContact = fields.contact && fields.contact.length > 0;\nconst isVerified = fields.contact_confidence === 'verified';\nreturn [{ json: { ...opp, skip_contact_lookup: hasContact && isVerified, existing_contact_id: hasContact ? fields.contact[0] : null } }];"
+      },
+      "id": "check-verified",
+      "name": "Code: Check Verified Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [992, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract IDs from opportunity record\nconst item = $input.first().json;\nconst fields = item.fields || item;\nconst forceLinks = fields.force || [];\nconst signalLinks = fields.signals || [];\nreturn [{ json: { opportunity_id: item.id, force_id: forceLinks.length > 0 ? forceLinks[0] : null, signal_ids: signalLinks, skip_contact_lookup: item.skip_contact_lookup || false, existing_contact_id: item.existing_contact_id || null, opp_fields: fields } }];"
+      },
+      "id": "extract-ids",
+      "name": "Code: Extract IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblbAjBEdpv42Smpw/{{ $json.force_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "options": {}
+      },
+      "id": "fetch-force",
+      "name": "HTTP: Fetch Force Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1424, 400],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge force data with opportunity context\nconst prevContext = $('Code: Extract IDs').first().json;\nconst forceResponse = $input.first().json;\nconst force = forceResponse.fields || forceResponse;\nreturn [{ json: { opportunity_id: prevContext.opportunity_id, force_id: prevContext.force_id, signal_ids: prevContext.signal_ids || [], skip_contact_lookup: prevContext.skip_contact_lookup || false, existing_contact_id: prevContext.existing_contact_id || null, opp_fields: prevContext.opp_fields || {}, force_name: force.name || 'Unknown Force', force_region: force.region || '', force_size: force.size || '', hubspot_company_id: force.hubspot_company_id || null } }];"
+      },
+      "id": "merge-force",
+      "name": "Code: Merge Force Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "skip-lookup",
+              "leftValue": "={{ $json.skip_contact_lookup }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-skip-lookup",
+      "name": "IF: Skip Contact Lookup",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1872, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1/{{ $json.existing_contact_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "options": {}
+      },
+      "id": "fetch-existing-contact",
+      "name": "HTTP: Fetch Existing Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2080, 256],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge existing contact data into context\nconst ctx = $('Code: Merge Force Data').first().json;\nconst contactResponse = $input.first().json;\nconst contact = contactResponse.fields || contactResponse;\nreturn [{ json: { opportunity_id: ctx.opportunity_id, force_id: ctx.force_id, force_name: ctx.force_name, force_region: ctx.force_region, force_size: ctx.force_size, hubspot_company_id: ctx.hubspot_company_id, opp_fields: ctx.opp_fields, contact_id: contactResponse.id, contact_name: contact.name || '', contact_email: contact.email || '', contact_role: contact.role || '', contact_relationship_status: contact.relationship_status || 'unknown', contact_last_interaction: contact.last_interaction || null, contact_interaction_count: contact.interaction_count || 0, contact_source: 'existing', contact_confidence: 'verified', skip_hubspot: true } }];"
+      },
+      "id": "merge-existing-contact",
+      "name": "Code: Merge Existing Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2304, 256]
+    },
+    {
+      "parameters": {
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "filterByFormula", "value": "=FIND(\"{{ $json.force_id }}\", ARRAYJOIN({force}))"},
+            {"name": "maxRecords", "value": "5"},
+            {"name": "sort[0][field]", "value": "last_interaction"},
+            {"name": "sort[0][direction]", "value": "desc"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-airtable-contacts",
+      "name": "HTTP: Lookup Airtable Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2080, 560],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if Airtable returned any contacts\nconst ctx = $('Code: Merge Force Data').first().json;\nconst response = $input.first().json;\nconst records = response.records || [];\nif (records.length > 0) {\n  const contact = records[0];\n  const fields = contact.fields || contact;\n  return [{ json: { opportunity_id: ctx.opportunity_id, force_id: ctx.force_id, force_name: ctx.force_name, force_region: ctx.force_region, force_size: ctx.force_size, hubspot_company_id: ctx.hubspot_company_id, opp_fields: ctx.opp_fields, contact_id: contact.id, contact_name: fields.name || '', contact_email: fields.email || '', contact_role: fields.role || '', contact_relationship_status: fields.relationship_status || 'unknown', contact_last_interaction: fields.last_interaction || null, contact_interaction_count: fields.interaction_count || 0, contact_source: 'airtable', contact_confidence: fields.verified ? 'verified' : 'likely', skip_hubspot: true } }];\n}\nreturn [{ json: { opportunity_id: ctx.opportunity_id, force_id: ctx.force_id, force_name: ctx.force_name, force_region: ctx.force_region, force_size: ctx.force_size, hubspot_company_id: ctx.hubspot_company_id, opp_fields: ctx.opp_fields, contact_id: null, contact_source: null, contact_confidence: null, skip_hubspot: false } }];"
+      },
+      "id": "check-airtable-contact",
+      "name": "Code: Check Airtable Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2304, 560]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"},
+          "conditions": [
+            {
+              "id": "need-hubspot",
+              "leftValue": "={{ $json.contact_id === null && $json.hubspot_company_id !== null && $json.hubspot_company_id !== '' }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-need-hubspot",
+      "name": "IF: Need HubSpot Lookup",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2528, 560]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [{\n    \"filters\": [{\n      \"propertyName\": \"associatedcompanyid\",\n      \"operator\": \"EQ\",\n      \"value\": \"{{ $json.hubspot_company_id }}\"\n    }]\n  }],\n  \"sorts\": [{\"propertyName\": \"lastmodifieddate\", \"direction\": \"DESCENDING\"}],\n  \"properties\": [\"firstname\", \"lastname\", \"email\", \"jobtitle\", \"phone\"],\n  \"limit\": 10\n}",
+        "options": {}
+      },
+      "id": "hubspot-search",
+      "name": "HTTP: Search HubSpot Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2752, 464],
+      "credentials": {
+        "httpHeaderAuth": {"id": "6u9JM1Nkeo6jn3e6", "name": "HubSpot API"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Select best HubSpot contact based on role priority\nconst ctx = $('Code: Check Airtable Contact').first().json;\nconst response = $input.first().json;\nconst results = response.results || [];\nif (results.length === 0) { return [{ json: { ...ctx, contact_source: 'none', hubspot_contact: null } }]; }\nconst priorityRoles = ['hr', 'resourcing', 'pvp', 'people', 'crime', 'head', 'director', 'manager'];\nlet bestContact = results[0];\nlet bestScore = 0;\nfor (const contact of results) {\n  const title = (contact.properties.jobtitle || '').toLowerCase();\n  let score = 0;\n  for (let i = 0; i < priorityRoles.length; i++) {\n    if (title.includes(priorityRoles[i])) { score = priorityRoles.length - i; break; }\n  }\n  if (contact.properties.email) score += 10;\n  if (score > bestScore) { bestScore = score; bestContact = contact; }\n}\nconst props = bestContact.properties;\nreturn [{ json: { ...ctx, contact_source: 'hubspot', hubspot_contact: { hubspot_id: bestContact.id, name: ((props.firstname || '') + ' ' + (props.lastname || '')).trim(), firstname: props.firstname || '', lastname: props.lastname || '', email: props.email || '', jobtitle: props.jobtitle || '', phone: props.phone || '' } } }];"
+      },
+      "id": "select-hubspot-contact",
+      "name": "Code: Select Best HubSpot Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2960, 464]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "from-hubspot",
+              "leftValue": "={{ $json.contact_source }}",
+              "rightValue": "hubspot",
+              "operator": {"type": "string", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-create-from-hubspot",
+      "name": "IF: Create From HubSpot",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [3184, 464]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"records\": [{\n    \"fields\": {\n      \"name\": \"{{ $json.hubspot_contact.name }}\",\n      \"first_name\": \"{{ $json.hubspot_contact.firstname }}\",\n      \"email\": \"{{ $json.hubspot_contact.email }}\",\n      \"role\": \"{{ $json.hubspot_contact.jobtitle }}\",\n      \"phone\": \"{{ $json.hubspot_contact.phone }}\",\n      \"force\": [\"{{ $json.force_id }}\"],\n      \"hubspot_id\": \"{{ $json.hubspot_contact.hubspot_id }}\",\n      \"source\": \"hubspot_sync\",\n      \"verified\": {{ $json.hubspot_contact.email ? true : false }},\n      \"relationship_status\": \"cold\"\n    }\n  }]\n}",
+        "options": {}
+      },
+      "id": "create-contact-airtable",
+      "name": "HTTP: Create Contact in Airtable",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3408, 352],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge newly created Airtable contact into context\nconst ctx = $('Code: Select Best HubSpot Contact').first().json;\nconst response = $input.first().json;\nconst created = response.records?.[0] || response;\nconst fields = created.fields || created;\nreturn [{ json: { opportunity_id: ctx.opportunity_id, force_id: ctx.force_id, force_name: ctx.force_name, force_region: ctx.force_region, force_size: ctx.force_size, hubspot_company_id: ctx.hubspot_company_id, opp_fields: ctx.opp_fields, contact_id: created.id, contact_name: fields.name || (ctx.hubspot_contact ? ctx.hubspot_contact.name : ''), contact_email: fields.email || (ctx.hubspot_contact ? ctx.hubspot_contact.email : ''), contact_role: fields.role || (ctx.hubspot_contact ? ctx.hubspot_contact.jobtitle : ''), contact_relationship_status: 'cold', contact_last_interaction: null, contact_interaction_count: 0, contact_source: 'hubspot', contact_confidence: fields.email ? 'verified' : 'likely' } }];"
+      },
+      "id": "merge-created-contact",
+      "name": "Code: Merge Created Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3632, 352]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Determine outreach channel based on contact email availability\nconst item = $input.first().json;\nconst hasEmail = item.contact_email && item.contact_email.includes('@');\nconst outreachChannel = hasEmail ? 'email' : 'linkedin';\nreturn [{ json: { ...item, outreach_channel: outreachChannel } }];"
+      },
+      "id": "determine-channel",
+      "name": "Code: Determine Outreach Channel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4064, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Determine outreach angle based on signals and context\nconst item = $input.first().json;\nlet angle = 'proactive';\nlet isCompetitorIntercept = false;\nconst oppFields = item.opp_fields || {};\nconst signalType = oppFields.primary_signal_type || '';\nif (signalType.includes('competitor')) { angle = 'competitor_intercept'; isCompetitorIntercept = true; }\nelse if (signalType.includes('tender')) { angle = 'tender'; }\nelse if (signalType.includes('regulatory') || signalType.includes('hmicfrs')) { angle = 'regulatory'; }\nelse if (signalType.includes('job') || signalType.includes('hiring')) { angle = 'direct_hiring'; }\nreturn [{ json: { ...item, outreach_angle: angle, is_competitor_intercept: isCompetitorIntercept } }];"
+      },
+      "id": "determine-angle",
+      "name": "Code: Determine Outreach Angle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4288, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build AI context for OpenAI enrichment call\nconst item = $input.first().json;\nconst systemPrompt = 'You are an Opportunity Enrichment Agent for Peel Solutions, a UK police sector staffing company. Your task: Analyse opportunity context and generate ready-to-send outreach. ABOUT PEEL SOLUTIONS: We provide managed investigator teams to police forces. Our model: outcome-based delivery, not just agency temps. We handle recruitment, management, and quality assurance. Differentiator: We take responsibility for results, not just filling seats. YOUR APPROACH: 1. Analyse the signals to understand what is happening at this force 2. Consider the relationship history with this contact 3. Determine the best outreach angle based on context 4. Write a compelling, personalised message appropriate for the channel 5. Score the opportunity based on urgency and fit 6. Explain why now in 2-3 sentences';\nconst userPrompt = 'Enrich this opportunity for outreach. FORCE: ' + (item.force_name || 'Unknown') + ' (' + (item.force_region || '') + ', ' + (item.force_size || '') + ') CONTACT: ' + (item.contact_name || 'Unknown') + ', ' + (item.contact_role || 'Unknown role') + ' RELATIONSHIP: ' + (item.contact_relationship_status || 'unknown') + ', last interaction: ' + (item.contact_last_interaction || 'never') + ', ' + (item.contact_interaction_count || 0) + ' previous interactions CHANNEL: ' + item.outreach_channel + ' OUTREACH ANGLE: ' + item.outreach_angle + ' COMPETITOR INTERCEPT: ' + item.is_competitor_intercept + ' Return JSON only with these fields: outreach_draft (under 100 words, personalised, signed James), subject_line, priority_score (0-100), priority_tier (hot/high/medium/low), why_now (2-3 sentences), reasoning (brief scoring explanation)';\nreturn [{ json: { ...item, ai_system_prompt: systemPrompt, ai_user_prompt: userPrompt } }];"
+      },
+      "id": "build-ai-context",
+      "name": "Code: Build AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4512, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": {{ JSON.stringify($json.ai_system_prompt) }}},\n    {\"role\": \"user\", \"content\": {{ JSON.stringify($json.ai_user_prompt) }}}\n  ],\n  \"response_format\": {\"type\": \"json_object\"},\n  \"temperature\": 0.7,\n  \"max_tokens\": 1000\n}",
+        "options": {}
+      },
+      "id": "call-openai",
+      "name": "HTTP: Call OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4720, 400],
+      "credentials": {
+        "openAiApi": {"id": "KPeEyy20q5aUrUtM", "name": "OpenAi account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse OpenAI JSON response\nconst ctx = $('Code: Build AI Context').first().json;\nconst response = $input.first().json;\nlet enrichment = {};\ntry { const content = response.choices?.[0]?.message?.content || '{}'; enrichment = JSON.parse(content); }\ncatch (e) { enrichment = { outreach_draft: 'AI enrichment failed - manual review needed', subject_line: 'Peel Solutions - Capacity Support', priority_score: 50, priority_tier: 'medium', why_now: 'Unable to generate - please review manually', reasoning: 'Parse error' }; }\nlet score = parseInt(enrichment.priority_score) || 50;\nscore = Math.max(0, Math.min(100, score));\nlet tier = enrichment.priority_tier || '';\nif (!tier || !['hot', 'high', 'medium', 'low'].includes(tier)) { if (score >= 90) tier = 'hot'; else if (score >= 70) tier = 'high'; else if (score >= 50) tier = 'medium'; else tier = 'low'; }\nreturn [{ json: { opportunity_id: ctx.opportunity_id, contact_id: ctx.contact_id, contact_confidence: ctx.contact_confidence || 'guess', outreach_channel: ctx.outreach_channel, outreach_angle: ctx.outreach_angle, outreach_draft: enrichment.outreach_draft || '', subject_line: enrichment.subject_line || '', priority_score: score, priority_tier: tier, why_now: enrichment.why_now || '', reasoning: enrichment.reasoning || '' } }];"
+      },
+      "id": "parse-ai-response",
+      "name": "Code: Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4944, 400]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $json.opportunity_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"contact\": {{ $json.contact_id ? '[\"' + $json.contact_id + '\"]' : '[]' }},\n    \"contact_confidence\": \"{{ $json.contact_confidence || '' }}\",\n    \"outreach_channel\": \"{{ $json.outreach_channel }}\",\n    \"outreach_angle\": \"{{ $json.outreach_angle }}\",\n    \"outreach_draft\": {{ JSON.stringify($json.outreach_draft || '') }},\n    \"priority_score\": {{ $json.priority_score || 50 }},\n    \"priority_tier\": \"{{ $json.priority_tier || 'medium' }}\",\n    \"why_now\": {{ JSON.stringify($json.why_now || '') }},\n    \"status\": \"{{ $json.contact_id ? 'ready' : 'researching' }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-opportunity",
+      "name": "HTTP: Update Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5168, 400],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log completion and prepare for next iteration\nconst item = $input.first().json;\nconsole.log('Enriched opportunity ' + item.opportunity_id);\nreturn [{ json: { enriched: true, opportunity_id: item.opportunity_id, priority_tier: item.priority_tier, has_contact: !!item.contact_id } }];"
+      },
+      "id": "log-completion",
+      "name": "Code: Log Completion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [5392, 400]
+    }
+  ],
+  "connections": {
+    "Schedule: Every 15 Minutes": {"main": [[{"node": "Airtable: Fetch Researching Opps", "type": "main", "index": 0}]]},
+    "Manual Trigger": {"main": [[{"node": "Airtable: Fetch Researching Opps", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Researching Opps": {"main": [[{"node": "IF: Has Opportunities", "type": "main", "index": 0}]]},
+    "IF: Has Opportunities": {"main": [[{"node": "Code: Split Records", "type": "main", "index": 0}], [{"node": "Set: No Opportunities", "type": "main", "index": 0}]]},
+    "Code: Split Records": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]},
+    "Loop: Each Opportunity": {"main": [[], [{"node": "Code: Check Verified Contact", "type": "main", "index": 0}]]},
+    "Code: Check Verified Contact": {"main": [[{"node": "Code: Extract IDs", "type": "main", "index": 0}]]},
+    "Code: Extract IDs": {"main": [[{"node": "HTTP: Fetch Force Details", "type": "main", "index": 0}]]},
+    "HTTP: Fetch Force Details": {"main": [[{"node": "Code: Merge Force Data", "type": "main", "index": 0}]]},
+    "Code: Merge Force Data": {"main": [[{"node": "IF: Skip Contact Lookup", "type": "main", "index": 0}]]},
+    "IF: Skip Contact Lookup": {"main": [[{"node": "HTTP: Fetch Existing Contact", "type": "main", "index": 0}], [{"node": "HTTP: Lookup Airtable Contacts", "type": "main", "index": 0}]]},
+    "HTTP: Fetch Existing Contact": {"main": [[{"node": "Code: Merge Existing Contact", "type": "main", "index": 0}]]},
+    "Code: Merge Existing Contact": {"main": [[{"node": "Code: Determine Outreach Channel", "type": "main", "index": 0}]]},
+    "HTTP: Lookup Airtable Contacts": {"main": [[{"node": "Code: Check Airtable Contact", "type": "main", "index": 0}]]},
+    "Code: Check Airtable Contact": {"main": [[{"node": "IF: Need HubSpot Lookup", "type": "main", "index": 0}]]},
+    "IF: Need HubSpot Lookup": {"main": [[{"node": "HTTP: Search HubSpot Contacts", "type": "main", "index": 0}], [{"node": "Code: Determine Outreach Channel", "type": "main", "index": 0}]]},
+    "HTTP: Search HubSpot Contacts": {"main": [[{"node": "Code: Select Best HubSpot Contact", "type": "main", "index": 0}]]},
+    "Code: Select Best HubSpot Contact": {"main": [[{"node": "IF: Create From HubSpot", "type": "main", "index": 0}]]},
+    "IF: Create From HubSpot": {"main": [[{"node": "HTTP: Create Contact in Airtable", "type": "main", "index": 0}], [{"node": "Code: Determine Outreach Channel", "type": "main", "index": 0}]]},
+    "HTTP: Create Contact in Airtable": {"main": [[{"node": "Code: Merge Created Contact", "type": "main", "index": 0}]]},
+    "Code: Merge Created Contact": {"main": [[{"node": "Code: Determine Outreach Channel", "type": "main", "index": 0}]]},
+    "Code: Determine Outreach Channel": {"main": [[{"node": "Code: Determine Outreach Angle", "type": "main", "index": 0}]]},
+    "Code: Determine Outreach Angle": {"main": [[{"node": "Code: Build AI Context", "type": "main", "index": 0}]]},
+    "Code: Build AI Context": {"main": [[{"node": "HTTP: Call OpenAI", "type": "main", "index": 0}]]},
+    "HTTP: Call OpenAI": {"main": [[{"node": "Code: Parse AI Response", "type": "main", "index": 0}]]},
+    "Code: Parse AI Response": {"main": [[{"node": "HTTP: Update Opportunity", "type": "main", "index": 0}]]},
+    "HTTP: Update Opportunity": {"main": [[{"node": "Code: Log Completion", "type": "main", "index": 0}]]},
+    "Code: Log Completion": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

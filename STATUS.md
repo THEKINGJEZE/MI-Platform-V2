@@ -1,27 +1,38 @@
 # MI Platform — Session Status
 
-**Updated**: 17 January 2025
-**Phase**: 1 — Core Jobs Pipeline
-**Session Goal**: Build WF5: Opportunity Enricher
+**Updated**: 18 January 2025
+**Phase**: 1 — Core Jobs Pipeline (98% COMPLETE)
+**Session Goal**: ~~Build WF5: Opportunity Enricher~~ ✅ DONE
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Draft SPEC-005 in Claude Chat**
-> - Context brief generated: `specs/NEXT-CONTEXT.md` ✅
-> - Share brief with Claude Chat to draft SPEC-005: Opportunity Enricher
-> - Then return to Claude Code to implement WF5
+> **Phase 1 nearly complete! Final steps:**
+> 1. Activate WF3 + WF4 + WF5 schedules (toggle Active in n8n UI)
+> 2. Run end-to-end test with real Bright Data scrape
+> 3. Verify Monday review experience
 
 **Blockers**: None
 
 **Manual tasks for James**:
 - Activate WF3 schedule in n8n UI (toggle the Active switch)
 - Activate WF4 schedule in n8n UI (toggle the Active switch)
+- Activate WF5 schedule in n8n UI (toggle the Active switch)
 
 ---
 
 ## ✅ Done This Session
+- [x] **SPEC-005: Opportunity Enricher COMPLETE** ✅
+  - **WF5: MI: Opportunity Enricher** (`Lb5iOr1m93kUXBC0`)
+  - Schedule: Every 15 minutes
+  - Fetches opportunities with status=researching
+  - Looks up contacts: Airtable first, HubSpot fallback
+  - Creates contacts in Airtable from HubSpot
+  - AI enrichment via OpenAI gpt-4o-mini
+  - Updates: contact, outreach_draft, priority_score, why_now, status=ready
+  - **10 debug fixes applied** during verification (documented in IMPL-005.md)
+  - Exported to `n8n/workflows/opportunity-enricher.json`
 - [x] **Two-tier completion rules added** ✅
   - Specs can be marked complete autonomously (verify acceptance criteria + tests)
   - Phases require Chat strategic verification before completion
@@ -63,12 +74,12 @@
   - Exported to `n8n/workflows/opportunity-creator.json`
 
 ## 🔄 In Progress
-- [ ] Build WF5: MI: Opportunity Enricher
+*Nothing currently in progress*
 
 ## ⏳ Up Next (This Week)
-1. Activate WF3 + WF4 schedules (manual in n8n UI)
-2. Build WF5: MI: Opportunity Enricher workflow
-3. Full end-to-end test with real Bright Data scrape
+1. Activate WF3 + WF4 + WF5 schedules (manual in n8n UI)
+2. Full end-to-end test with real Bright Data scrape
+3. Phase 1 completion verification
 
 ---
 
@@ -103,7 +114,7 @@ None
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[██████████] 96% — Core Jobs Pipeline
+[██████████] 98% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
@@ -125,10 +136,10 @@ Completed:
   ✅ SPEC-002: Jobs Ingestion complete (webhook, dedupe, logging)
   ✅ WF3: Jobs Classifier workflow (w4Mw2wX9wBeimYP2) — TESTED & WORKING
   ✅ WF4: Opportunity Creator workflow (7LYyzpLC5GzoJROn) — TESTED & WORKING
+  ✅ WF5: Opportunity Enricher workflow (Lb5iOr1m93kUXBC0) — TESTED & WORKING
 
 Remaining:
-  □ Activate WF3 + WF4 schedules (manual in n8n UI)
-  □ Opportunity enricher workflow (WF5)
+  □ Activate WF3 + WF4 + WF5 schedules (manual in n8n UI)
   □ End-to-end test with real data
 ```
 
@@ -160,4 +171,4 @@ Indeed jobs (daily) → WF1 triggers → WF2 ingests → WF3 classifies
 
 ---
 
-*Last aligned with ANCHOR.md: 17 January 2025*
+*Last aligned with ANCHOR.md: 18 January 2025*

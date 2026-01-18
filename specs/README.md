@@ -30,7 +30,12 @@ Examples:
 
 | Spec | Phase | Status |
 |------|-------|--------|
-| [phase-1-core-pipeline.md](phase-1-core-pipeline.md) | 1 | Building |
+| [SPEC-001-airtable-schema.md](SPEC-001-airtable-schema.md) | 1 | ✅ Complete |
+| [SPEC-002-jobs-ingestion.md](SPEC-002-jobs-ingestion.md) | 1 | ✅ Complete |
+| [SPEC-003-signal-classification.md](SPEC-003-signal-classification.md) | 1 | ✅ Complete |
+| [SPEC-004-opportunity-creator.md](SPEC-004-opportunity-creator.md) | 1 | ✅ Complete |
+| [SPEC-005-opportunity-enricher.md](SPEC-005-opportunity-enricher.md) | 1 | Ready |
+| [phase-1-core-pipeline.md](phase-1-core-pipeline.md) | 1 | Overview |
 
 ## Archived Specs
 
