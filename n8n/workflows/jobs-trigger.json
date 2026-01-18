@@ -1,0 +1,103 @@
+{
+  "name": "MI: Jobs Trigger",
+  "id": "RqFcVMcQ7I8t4dIM",
+  "active": true,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Daily 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 160],
+      "parameters": {}
+    },
+    {
+      "id": "trigger-bright-data",
+      "name": "HTTP: Trigger Bright Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 80],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brightdata.com/datasets/v3/scrape",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "dataset_id", "value": "gd_l4dx9j9sscpvs7no2" },
+            { "name": "type", "value": "discover_new" },
+            { "name": "discover_by", "value": "keyword" },
+            { "name": "include_errors", "value": "true" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ deliver: { type: 'webhook', endpoint: 'https://n8n.srv1190997.hstgr.cloud/webhook/mi-jobs-receiver' }, input: [{ country: 'GB', domain: 'uk.indeed.com', keyword_search: 'police', location: 'United Kingdom', date_posted: 'Last 24 hours' }, { country: 'GB', domain: 'uk.indeed.com', keyword_search: 'constabulary', location: 'United Kingdom', date_posted: 'Last 24 hours' }, { country: 'GB', domain: 'uk.indeed.com', keyword_search: 'investigator police', location: 'United Kingdom', date_posted: 'Last 24 hours' }] }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "eOqTH1Au4zhbB2z9",
+          "name": "Bright Data API"
+        }
+      }
+    },
+    {
+      "id": "log-trigger",
+      "name": "Set: Log Trigger",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 80],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "workflow", "name": "workflow", "value": "MI: Jobs Trigger", "type": "string" },
+            { "id": "status", "name": "status", "value": "triggered", "type": "string" },
+            { "id": "snapshot_id", "name": "snapshot_id", "value": "={{ $json.snapshot_id }}", "type": "string" },
+            { "id": "triggered_at", "name": "triggered_at", "value": "={{ new Date().toISOString() }}", "type": "string" },
+            { "id": "note", "name": "note", "value": "Results will be delivered via webhook to MI: Jobs Receiver", "type": "string" }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Daily 06:00": {
+      "main": [[{ "node": "HTTP: Trigger Bright Data", "type": "main", "index": 0 }]]
+    },
+    "Manual Trigger": {
+      "main": [[{ "node": "HTTP: Trigger Bright Data", "type": "main", "index": 0 }]]
+    },
+    "HTTP: Trigger Bright Data": {
+      "main": [[{ "node": "Set: Log Trigger", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  }
+}

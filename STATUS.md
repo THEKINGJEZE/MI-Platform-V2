@@ -1,28 +1,50 @@
 # MI Platform — Session Status
 
 **Updated**: 18 January 2025
-**Phase**: 1 — Core Jobs Pipeline (98% COMPLETE)
-**Session Goal**: ~~Build WF5: Opportunity Enricher~~ ✅ DONE
+**Phase**: 1 — Core Jobs Pipeline (99% COMPLETE)
+**Session Goal**: Phase 1 End-to-End Testing
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Phase 1 nearly complete! Final steps:**
-> 1. Activate WF3 + WF4 + WF5 schedules (toggle Active in n8n UI)
-> 2. Run end-to-end test with real Bright Data scrape
-> 3. Verify Monday review experience
+> **E2E Test Plan created. Execute tests to verify pipeline.**
+>
+> See [PHASE-1-E2E-TEST.md](specs/PHASE-1-E2E-TEST.md) for full test plan.
+>
+> **7 Tests to Complete**:
+> 1. Manual Pipeline Trigger (full flow WF1→WF5)
+> 2. Irrelevant Signal Filtering
+> 3. Force Matching (G-005 compliance)
+> 4. Deduplication
+> 5. Opportunity Consolidation
+> 6. Monday Morning Experience
+> 7. Production Burn-In (1 week)
 
 **Blockers**: None
 
-**Manual tasks for James**:
-- Activate WF3 schedule in n8n UI (toggle the Active switch)
-- Activate WF4 schedule in n8n UI (toggle the Active switch)
-- Activate WF5 schedule in n8n UI (toggle the Active switch)
+**Next step**: Execute Test 1 — trigger WF1 manually and trace through full pipeline.
 
 ---
 
 ## ✅ Done This Session
+- [x] **Phase 1 Specs Signed Off (ROADMAP.md)** ✅
+  - SPEC-001 to SPEC-005 verified against strategy document
+  - All aligned; model deviations (gpt-4o-mini) documented as intentional
+  - ROADMAP.md updated with sign-off record
+- [x] **WF3 + WF4 + WF5 schedules activated** ✅ (manual in n8n UI)
+- [x] **Airtable rollup fields created** ✅ (via Playwright automation)
+  - `signal_count`: Count field on Opportunities (counts linked signals)
+  - `signal_types`: Rollup field with ARRAYJOIN on signal types
+- [x] **SPEC-001 to SPEC-005 Verification Audit COMPLETE** ✅
+  - All 5 specs verified against acceptance criteria
+  - Exported missing workflows: `jobs-trigger.json` (4 nodes), `jobs-receiver.json` (14 nodes)
+  - All workflow exports now complete:
+    - WF1: `jobs-trigger.json` (4 nodes)
+    - WF2: `jobs-receiver.json` (14 nodes)
+    - WF3: `jobs-classifier.json` (19 nodes)
+    - WF4: `opportunity-creator.json` (23 nodes)
+    - WF5: `opportunity-enricher.json` (29 nodes)
 - [x] **SPEC-005: Opportunity Enricher COMPLETE** ✅
   - **WF5: MI: Opportunity Enricher** (`Lb5iOr1m93kUXBC0`)
   - Schedule: Every 15 minutes
@@ -74,21 +96,29 @@
   - Exported to `n8n/workflows/opportunity-creator.json`
 
 ## 🔄 In Progress
-*Nothing currently in progress*
+- [ ] **Phase 1 E2E Testing** — See [test plan](specs/PHASE-1-E2E-TEST.md)
+  - [ ] Test 1: Manual Pipeline Trigger
+  - [ ] Test 2: Irrelevant Signal Filtering
+  - [ ] Test 3: Force Matching (G-005)
+  - [ ] Test 4: Deduplication
+  - [ ] Test 5: Opportunity Consolidation
+  - [ ] Test 6: Monday Morning Experience
+  - [ ] Test 7: Production Burn-In (1 week)
 
 ## ⏳ Up Next (This Week)
-1. Activate WF3 + WF4 + WF5 schedules (manual in n8n UI)
-2. Full end-to-end test with real Bright Data scrape
-3. Phase 1 completion verification
+1. ~~Activate WF3 + WF4 + WF5 schedules~~ ✅ DONE
+2. ~~Create Airtable rollup fields~~ ✅ DONE
+3. ~~Full end-to-end test plan created~~ ✅ DONE
+4. **Execute E2E tests** ← CURRENT
+5. Phase 1 strategic verification (Chat)
 
 ---
 
 ## ⚠️ Blockers
 None
 
-**Manual tasks needed in Airtable UI:**
-- Delete "Table 2" (tblfPgxDCh8eSEC25) — default table
-- Add rollup fields to Opportunities: `signal_count` (COUNT), `signal_types` (ARRAYJOIN)
+**Optional cleanup (low priority):**
+- Delete "Table 2" (tblfPgxDCh8eSEC25) — unused default table in Airtable
 
 ## 💡 Decisions Made This Session
 | What | Logged? |
@@ -114,7 +144,7 @@ None
 **Acceptance criteria**: See [ROADMAP.md](ROADMAP.md#phase-1-core-jobs-pipeline)
 
 ```
-[██████████] 98% — Core Jobs Pipeline
+[██████████] 99% — Core Jobs Pipeline
 
 Completed:
   ✅ Project setup
@@ -131,16 +161,16 @@ Completed:
   ✅ /implement command created (stage-gated spec execution)
   ✅ Airtable schema created (4 tables: Forces, Contacts, Signals, Opportunities)
   ✅ 48 forces seeded
-  ✅ WF1: Jobs Trigger workflow (RqFcVMcQ7I8t4dIM)
-  ✅ WF2: Jobs Receiver workflow (nGBkihJb6279HOHD)
+  ✅ WF1: Jobs Trigger workflow (RqFcVMcQ7I8t4dIM) — ACTIVE
+  ✅ WF2: Jobs Receiver workflow (nGBkihJb6279HOHD) — ACTIVE
   ✅ SPEC-002: Jobs Ingestion complete (webhook, dedupe, logging)
-  ✅ WF3: Jobs Classifier workflow (w4Mw2wX9wBeimYP2) — TESTED & WORKING
-  ✅ WF4: Opportunity Creator workflow (7LYyzpLC5GzoJROn) — TESTED & WORKING
-  ✅ WF5: Opportunity Enricher workflow (Lb5iOr1m93kUXBC0) — TESTED & WORKING
+  ✅ WF3: Jobs Classifier workflow (w4Mw2wX9wBeimYP2) — ACTIVE (15min schedule)
+  ✅ WF4: Opportunity Creator workflow (7LYyzpLC5GzoJROn) — ACTIVE (15min schedule)
+  ✅ WF5: Opportunity Enricher workflow (Lb5iOr1m93kUXBC0) — ACTIVE (15min schedule)
+  ✅ Airtable rollup fields: signal_count, signal_types
 
 Remaining:
-  □ Activate WF3 + WF4 + WF5 schedules (manual in n8n UI)
-  □ End-to-end test with real data
+  □ End-to-end test with real Bright Data scrape
 ```
 
 ---

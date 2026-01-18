@@ -23,7 +23,12 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 - [ ] Can review opportunity and mark as sent
 - [ ] End-to-end test: fake job → classified → opportunity → reviewed
 
-**Spec**: `specs/phase-1-core-pipeline.md` (to be created)
+**Specs** (signed off 18 Jan 2025):
+- [x] SPEC-001: Airtable Schema — ✅ Aligned with strategy Section 6
+- [x] SPEC-002: Jobs Ingestion — ✅ Aligned with strategy Sections 5.1, 10
+- [x] SPEC-003: Signal Classification — ✅ Aligned (model deviation: gpt-4o-mini for cost)
+- [x] SPEC-004: Opportunity Creator — ✅ Aligned with strategy Section 7, 10
+- [x] SPEC-005: Opportunity Enricher — ✅ Aligned (model deviation: gpt-4o-mini for cost)
 
 **Duration**: ~4 weeks
 
@@ -178,4 +183,4 @@ A phase is complete when:
 
 ---
 
-*Last updated: 16 January 2025*
+*Last updated: 18 January 2025*

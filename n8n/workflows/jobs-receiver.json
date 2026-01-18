@@ -1,0 +1,271 @@
+{
+  "name": "MI: Jobs Receiver",
+  "id": "nGBkihJb6279HOHD",
+  "active": true,
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook: Receive Jobs",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "mi-jobs-receiver-webhook-id",
+      "parameters": {
+        "path": "mi-jobs-receiver",
+        "webhookId": "mi-jobs-receiver-wh-001",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "parse-results",
+      "name": "Code: Parse Bright Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "parameters": {
+        "jsCode": "// Parse webhook payload from Bright Data\nconst payload = $input.first().json;\nlet jobs = [];\n\n// Handle different payload structures from Bright Data\nif (payload.body && payload.body.body && payload.body.body.body && Array.isArray(payload.body.body.body)) {\n  jobs = payload.body.body.body;\n} else if (payload.body && payload.body.body && Array.isArray(payload.body.body)) {\n  jobs = payload.body.body;\n} else if (payload.body && Array.isArray(payload.body)) {\n  jobs = payload.body;\n} else if (Array.isArray(payload)) {\n  jobs = payload;\n} else if (payload.data && Array.isArray(payload.data)) {\n  jobs = payload.data;\n} else if (payload.results && Array.isArray(payload.results)) {\n  jobs = payload.results;\n} else {\n  const keys = Object.keys(payload);\n  for (const key of keys) {\n    if (Array.isArray(payload[key])) {\n      jobs = payload[key];\n      break;\n    }\n  }\n}\n\nconsole.log(`Parsed ${jobs.length} jobs from Bright Data webhook`);\n\nif (jobs.length === 0) {\n  return [{ json: { _no_jobs: true, _payload_received: JSON.stringify(payload).substring(0, 500) } }];\n}\n\nreturn jobs.map(job => ({ json: { ...job, received_at: new Date().toISOString() } }));"
+      }
+    },
+    {
+      "id": "filter-no-jobs",
+      "name": "IF: Has Jobs",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "has-jobs",
+              "leftValue": "={{ $json._no_jobs }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "filter-spam",
+      "name": "Code: Filter Spam URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 0],
+      "parameters": {
+        "jsCode": "// Source: patterns/job-portal-filters.js (v1 - Jan 2025)\nconst NON_JOB_PATTERNS = [\n  /\\/news\\//i,\n  /\\/article\\//i,\n  /\\/press-release/i,\n  /\\/blog\\//i\n];\n\nconst results = [];\nfor (const item of $input.all()) {\n  const url = item.json.url || item.json.link || '';\n  const isNonJob = NON_JOB_PATTERNS.some(p => p.test(url));\n  if (!isNonJob) {\n    results.push(item);\n  }\n}\n\nconsole.log(`Filtered: kept ${results.length} of ${$input.all().length} items`);\nreturn results;"
+      }
+    },
+    {
+      "id": "fetch-forces",
+      "name": "Airtable: Fetch Forces",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [600, -200],
+      "parameters": {
+        "operation": "search",
+        "resource": "record",
+        "base": { "__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id" },
+        "table": { "__rl": true, "value": "tblbAjBEdpv42Smpw", "mode": "id" },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account" }
+      }
+    },
+    {
+      "id": "wait-forces",
+      "name": "Merge: Wait For Forces",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [840, -100],
+      "parameters": { "mode": "append" }
+    },
+    {
+      "id": "force-match",
+      "name": "Code: Force Matching",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 0],
+      "parameters": {
+        "jsCode": "// Source: patterns/force-matching.js (v2 - Jan 2025)\nconst FORCE_PATTERNS = {\n  'metropolitan police': 'Metropolitan Police Service',\n  'met police': 'Metropolitan Police Service',\n  'city of london police': 'City of London Police',\n  'greater manchester police': 'Greater Manchester Police',\n  'west midlands police': 'West Midlands Police',\n  'west yorkshire police': 'West Yorkshire Police',\n  'merseyside police': 'Merseyside Police',\n  'south yorkshire police': 'South Yorkshire Police',\n  'thames valley police': 'Thames Valley Police',\n  'hampshire constabulary': 'Hampshire Constabulary',\n  'kent police': 'Kent Police',\n  'essex police': 'Essex Police',\n  'surrey police': 'Surrey Police',\n  'sussex police': 'Sussex Police',\n  'avon and somerset': 'Avon and Somerset Police',\n  'devon and cornwall': 'Devon & Cornwall Police',\n  'dorset police': 'Dorset Police',\n  'lancashire constabulary': 'Lancashire Constabulary',\n  'nottinghamshire police': 'Nottinghamshire Police',\n  'northumbria police': 'Northumbria Police',\n  'cleveland police': 'Cleveland Police',\n  'durham constabulary': 'Durham Constabulary',\n  'north yorkshire police': 'North Yorkshire Police',\n  'humberside police': 'Humberside Police',\n  'lincolnshire police': 'Lincolnshire Police',\n  'norfolk constabulary': 'Norfolk Constabulary',\n  'suffolk constabulary': 'Suffolk Constabulary',\n  'cambridgeshire constabulary': 'Cambridgeshire Constabulary',\n  'bedfordshire police': 'Bedfordshire Police',\n  'hertfordshire constabulary': 'Hertfordshire Constabulary',\n  'leicestershire police': 'Leicestershire Police',\n  'northamptonshire police': 'Northamptonshire Police',\n  'warwickshire police': 'Warwickshire Police',\n  'west mercia police': 'West Mercia Police',\n  'staffordshire police': 'Staffordshire Police',\n  'derbyshire constabulary': 'Derbyshire Constabulary',\n  'cheshire constabulary': 'Cheshire Constabulary',\n  'cumbria constabulary': 'Cumbria Constabulary',\n  'gloucestershire constabulary': 'Gloucestershire Constabulary',\n  'wiltshire police': 'Wiltshire Police',\n  'dyfed-powys police': 'Dyfed-Powys Police',\n  'gwent police': 'Gwent Police',\n  'north wales police': 'North Wales Police',\n  'south wales police': 'South Wales Police',\n  'british transport police': 'British Transport Police',\n  'counter terrorism policing': 'Counter Terrorism Policing',\n  'national crime agency': 'National Crime Agency',\n  'ministry of defence police': 'Ministry of Defence Police',\n  'civil nuclear constabulary': 'Civil Nuclear Constabulary'\n};\n\nfunction lookupForce(text) {\n  if (!text) return null;\n  const t = text.toLowerCase();\n  for (const [p, f] of Object.entries(FORCE_PATTERNS)) {\n    if (t.includes(p)) return f;\n  }\n  return null;\n}\n\nconst allItems = $input.all();\nconst forces = [];\nconst jobs = [];\n\nfor (const item of allItems) {\n  if (item.json.id && item.json.id.startsWith('rec') && item.json.name) {\n    forces.push(item);\n  } else {\n    jobs.push(item);\n  }\n}\n\nconst forceIdLookup = {};\nfor (const f of forces) {\n  forceIdLookup[f.json.name.toLowerCase()] = f.json.id;\n}\n\nconst results = [];\nfor (const item of jobs) {\n  const company = item.json.company_name || item.json.company || '';\n  const location = item.json.location || '';\n  const title = item.json.title || item.json.job_title || '';\n  \n  const matchedForce = lookupForce(company) || lookupForce(location) || lookupForce(title);\n  const forceRecordId = matchedForce ? forceIdLookup[matchedForce.toLowerCase()] : null;\n  \n  results.push({\n    json: {\n      ...item.json,\n      matched_force: matchedForce,\n      force_record_id: forceRecordId,\n      force_match_confidence: matchedForce ? 0.9 : 0\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+    {
+      "id": "generate-ids",
+      "name": "Code: Generate External IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 0],
+      "parameters": {
+        "jsCode": "function simpleHash(str) {\n  let h = 0;\n  for (let i = 0; i < str.length; i++) {\n    h = ((h << 5) - h) + str.charCodeAt(i);\n    h = h & h;\n  }\n  return Math.abs(h).toString(36);\n}\n\nconst results = [];\nfor (const item of $input.all()) {\n  const url = item.json.url || item.json.link || '';\n  const external_id = url\n    ? `indeed_${simpleHash(url)}`\n    : `indeed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n  \n  results.push({\n    json: {\n      ...item.json,\n      external_id,\n      source: 'indeed',\n      type: 'job_posting',\n      status: 'new',\n      detected_at: new Date().toISOString()\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+    {
+      "id": "dedupe-search",
+      "name": "Airtable: Check Existing",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1320, -100],
+      "parameters": {
+        "operation": "search",
+        "application": "appEEWaGtGUwOyOhm",
+        "table": "tblez9trodMzKKqXq",
+        "options": {},
+        "filterByFormula": "",
+        "base": { "__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id" }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account" }
+      }
+    },
+    {
+      "id": "dedupe-filter",
+      "name": "Code: Filter New Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 0],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const jobs = $('Code: Generate External IDs').all();\nconst airtableResults = $input.all();\nconst existingIds = new Set();\n\nfor (const result of airtableResults) {\n  if (result.json.external_id) {\n    existingIds.add(result.json.external_id);\n  }\n  if (result.json.raw_data) {\n    try {\n      const parsed = JSON.parse(result.json.raw_data);\n      if (parsed.external_id) {\n        existingIds.add(parsed.external_id);\n      }\n    } catch (e) {}\n  }\n}\n\nconst newJobs = jobs.filter(job => !existingIds.has(job.json.external_id));\nconst skipped = jobs.length - newJobs.length;\n\nconsole.log(`Dedupe: ${jobs.length} total, ${newJobs.length} new, ${skipped} skipped`);\n\nreturn newJobs;"
+      }
+    },
+    {
+      "id": "split-batches",
+      "name": "Split: Batch 10",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1600, 0],
+      "parameters": { "batchSize": 10, "options": {} }
+    },
+    {
+      "id": "airtable-create",
+      "name": "Airtable: Create Signal",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1560, 0],
+      "parameters": {
+        "operation": "create",
+        "base": { "__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id" },
+        "table": { "__rl": true, "value": "tblez9trodMzKKqXq", "mode": "id" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title || $json.job_title }}",
+            "type": "job_posting",
+            "source": "indeed",
+            "url": "={{ $json.url || $json.link }}",
+            "status": "new",
+            "raw_data": "={{ JSON.stringify($json) }}",
+            "detected_at": "={{ $json.detected_at }}",
+            "force": "={{ $json.force_record_id ? [$json.force_record_id] : [] }}",
+            "external_id": "={{ $json.external_id }}"
+          }
+        },
+        "options": { "typecast": true }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account" }
+      }
+    },
+    {
+      "id": "log-summary",
+      "name": "Set: Log Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1800, 0],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "workflow", "name": "workflow", "value": "MI: Jobs Receiver", "type": "string" },
+            { "id": "status", "name": "status", "value": "completed", "type": "string" },
+            { "id": "jobs_fetched", "name": "jobs_fetched", "value": "={{ $('Code: Parse Bright Data').all().length }}", "type": "number" },
+            { "id": "jobs_filtered", "name": "jobs_filtered", "value": "={{ $('Code: Filter Spam URLs').all().length }}", "type": "number" },
+            { "id": "jobs_created", "name": "jobs_created", "value": "={{ $input.all().length }}", "type": "number" },
+            { "id": "jobs_skipped", "name": "jobs_skipped", "value": "={{ $('Code: Generate External IDs').all().length - $input.all().length }}", "type": "number" },
+            { "id": "duration_ms", "name": "duration_ms", "value": "={{ Date.now() - new Date($('Webhook: Receive Jobs').first().json.receivedAt || $('Webhook: Receive Jobs').first().json.received_at || Date.now()).getTime() }}", "type": "number" },
+            { "id": "completed_at", "name": "completed_at", "value": "={{ new Date().toISOString() }}", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "log-no-jobs",
+      "name": "Set: Log No Jobs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 200],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "workflow", "name": "workflow", "value": "MI: Jobs Receiver", "type": "string" },
+            { "id": "status", "name": "status", "value": "no_jobs_received", "type": "string" },
+            { "id": "completed_at", "name": "completed_at", "value": "={{ new Date().toISOString() }}", "type": "string" }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: Receive Jobs": {
+      "main": [[{ "node": "Code: Parse Bright Data", "type": "main", "index": 0 }]]
+    },
+    "Code: Parse Bright Data": {
+      "main": [[{ "node": "IF: Has Jobs", "type": "main", "index": 0 }]]
+    },
+    "IF: Has Jobs": {
+      "main": [
+        [
+          { "node": "Code: Filter Spam URLs", "type": "main", "index": 0 },
+          { "node": "Airtable: Fetch Forces", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Set: Log No Jobs", "type": "main", "index": 0 }]
+      ]
+    },
+    "Code: Filter Spam URLs": {
+      "main": [[{ "node": "Merge: Wait For Forces", "type": "main", "index": 0 }]]
+    },
+    "Airtable: Fetch Forces": {
+      "main": [[{ "node": "Merge: Wait For Forces", "type": "main", "index": 1 }]]
+    },
+    "Merge: Wait For Forces": {
+      "main": [[{ "node": "Code: Force Matching", "type": "main", "index": 0 }]]
+    },
+    "Code: Force Matching": {
+      "main": [[{ "node": "Code: Generate External IDs", "type": "main", "index": 0 }]]
+    },
+    "Code: Generate External IDs": {
+      "main": [[{ "node": "Airtable: Check Existing", "type": "main", "index": 0 }]]
+    },
+    "Airtable: Check Existing": {
+      "main": [[{ "node": "Code: Filter New Jobs", "type": "main", "index": 0 }]]
+    },
+    "Code: Filter New Jobs": {
+      "main": [[{ "node": "Split: Batch 10", "type": "main", "index": 0 }]]
+    },
+    "Split: Batch 10": {
+      "main": [
+        [{ "node": "Set: Log Summary", "type": "main", "index": 0 }],
+        [{ "node": "Airtable: Create Signal", "type": "main", "index": 0 }]
+      ]
+    },
+    "Airtable: Create Signal": {
+      "main": [[{ "node": "Split: Batch 10", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  }
+}
