@@ -1,29 +1,32 @@
 # MI Platform — Session Status
 
 **Updated**: 19 January 2025
-**Phase**: 1 — Core Jobs Pipeline (completing)
-**Session Goal**: Comprehensive Review — Skills Integration & Spec Simplification
+**Phase**: 1 — Core Jobs Pipeline (95% — burn-in monitoring)
+**Session Goal**: Phase 1 completion — monitoring Test 7 burn-in
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Fix WF2 deduplication bug** — Resume Phase 1 completion
+> **Complete Test 7 burn-in** — Final validation before Phase 1 sign-off
 >
-> Documentation drift fixed (11 high-priority issues resolved). Now continue with:
-> 1. Debug WF2 deduplication issue
-> 2. Fix WF4 consolidation bug
-> 3. Re-run E2E test
-> 4. Complete Phase 1 sign-off
+> All bugs fixed. Tests 1-6 passing. Monitoring burn-in period (started 18 Jan).
+> 1. Monitor daily workflow execution (1 week)
+> 2. Verify no regressions in production
+> 3. Complete Phase 1 sign-off
 
-**Blockers**:
-- Workflow: WF2 deduplication bug, WF4 consolidation bug (see PHASE-1-E2E-TEST.md)
+**Blockers**: None — monitoring burn-in period
 
-**Next step**: Debug WF2 — why are duplicates getting through?
+**Next step**: Check workflow execution logs, verify Test 7 criteria met
 
 ---
 
 ## ✅ Done This Session (19 Jan)
+
+### Bug Status Update
+- [x] Investigated WF2/WF4 bugs — discovered already fixed on 18 Jan
+- [x] Verified fixes in workflow JSON files (returnAll=true, ARRAYJOIN formula)
+- [x] Updated STATUS.md to reflect current state
 
 ### Documentation Audit
 - [x] Ran /doc-audit comprehensive alignment check
@@ -81,9 +84,9 @@
 | Spec | Status | Notes |
 |------|--------|-------|
 | SPEC-001: Airtable Schema | ✅ Complete | 4 tables created |
-| SPEC-002: Jobs Ingestion | ✅ Built | WF1-WF2, bug in dedup |
+| SPEC-002: Jobs Ingestion | ✅ Built | WF1-WF2, dedup fixed 18 Jan |
 | SPEC-003: Signal Classification | ✅ Built | WF3 working |
-| SPEC-004: Opportunity Creator | ⚠️ Bug | WF4 consolidation issue |
+| SPEC-004: Opportunity Creator | ✅ Built | WF4 consolidation fixed 18 Jan |
 | SPEC-005: Opportunity Enricher | ✅ Built | WF5 working |
 | SPEC-006: Monday Review | 🔀 Absorbed | Into SPEC-007b |
 | SPEC-007: React Dashboard | 🔀 Replaced | By SPEC-007b |
@@ -96,10 +99,11 @@
 ## 🔄 In Progress
 
 ### Phase 1 Completion
-1. [ ] Fix WF2 deduplication bug
-2. [ ] Fix WF4 consolidation bug  
-3. [ ] Re-run E2E test
-4. [ ] Phase 1 sign-off
+1. [x] Fix WF2 deduplication bug (Fixed 18 Jan)
+2. [x] Fix WF4 consolidation bug (Fixed 18 Jan)
+3. [x] Tests 1-6 passing (Verified 18 Jan)
+4. [ ] Complete Test 7 burn-in (1 week monitoring)
+5. [ ] Phase 1 sign-off
 
 ### Phase 1c Dashboard MVP
 1. [ ] Add schema fields (draft_subject, draft_body, actioned_at, skip_reason)
@@ -112,19 +116,19 @@
 ## 📊 Phase Progress
 
 ```
-Phase 1: [████████░░] 85% — Core Jobs Pipeline
+Phase 1: [█████████░] 95% — Core Jobs Pipeline
 
   ✅ Airtable schema (4 tables, 48 forces)
   ✅ WF1: Jobs Trigger
-  ✅ WF2: Jobs Receiver (⚠️ dedup bug)
+  ✅ WF2: Jobs Receiver (dedup fixed 18 Jan)
   ✅ WF3: Jobs Classifier
-  ⚠️ WF4: Opportunity Creator (consolidation bug)
+  ✅ WF4: Opportunity Creator (fixed 18 Jan)
   ✅ WF5: Opportunity Enricher
   ✅ WF6: Send Outreach
-  
+  ✅ Tests 1-6 passing
+
   Remaining:
-  □ Fix WF2 + WF4 bugs
-  □ Complete E2E test
+  □ Test 7 burn-in (1 week monitoring)
   □ Phase 1 sign-off
 
 Phase 1c: [██████░░░░] 60% — Dashboard MVP
@@ -175,10 +179,9 @@ Future (Deferred):
 
 ## ⚠️ Blockers
 
-1. **WF2 Deduplication** — Allowing duplicates through
-2. **WF4 Consolidation** — Not grouping signals correctly
+None — bugs fixed, monitoring burn-in period.
 
-See `specs/PHASE-1-E2E-TEST.md` for details.
+See `specs/PHASE-1-E2E-TEST.md` for test results (Tests 1-6 passing).
 
 ---
 
