@@ -53,10 +53,10 @@ Do NOT use for:
 - HubSpot — CRM
 - Claude API — AI classification
 
-**Project Knowledge Files**:
-1. `peel-solutions-mi-platform-strategy.md` — Full strategy spec
-2. `mi-platform-monitoring-and-agents.md` — Monitoring + agentic design
-3. `mi-platform-agentic-deep-dive.md` — n8n AI agent implementation
+**Strategy Documents** (in `docs/` folder — read using view tool):
+1. `docs/STRATEGY.md` — Full strategy spec (main document)
+2. `docs/STRATEGY-N8N.md` — Monitoring, reliability, failure recovery
+3. `docs/STRATEGY-AGENTS.md` — Advanced n8n AI agent implementation
 
 **Key Process Docs** (in project folder):
 - `ROADMAP.md` — Phases, acceptance criteria, schema evolution, spec index
@@ -151,7 +151,7 @@ Before writing ANY spec content, Claude Chat MUST have:
    > "I need context before drafting. Run `/prep-spec [topic]` in Claude Code and share the output here."
 
 2. **Source documents only.** Never use generated/derived files (schema-reference.json, workflow JSON exports) as the source of truth. Always reference:
-   - `peel-solutions-mi-platform-strategy.md` for architecture
+   - `docs/STRATEGY.md` for architecture (read via Claude Code's view tool)
    - `ROADMAP.md` for acceptance criteria
    - `GUARDRAILS.md` for rules
 

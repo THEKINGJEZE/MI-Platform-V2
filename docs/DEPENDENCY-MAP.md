@@ -25,6 +25,9 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Document limits | docs/DOCUMENT-HYGIENE.md | Anywhere |
 | Architecture diagram | docs/architecture.md | Anywhere |
 | Architectural guardrails | docs/GUARDRAILS.md | Anywhere (link only) |
+| Platform strategy | docs/STRATEGY.md | Anywhere (reference only) |
+| n8n monitoring patterns | docs/STRATEGY-N8N.md | Anywhere (reference only) |
+| Agentic architecture | docs/STRATEGY-AGENTS.md | Anywhere (reference only) |
 | Reference data (forces, etc.) | reference-data/*.json | Anywhere (link only) |
 | Reusable patterns | patterns/*.js | Anywhere (link only) |
 | AI prompts | prompts/*.md | Anywhere (link only) |
@@ -64,7 +67,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 ### When You Change docs/CHAT-INSTRUCTIONS.md
 | Check | Why |
 |-------|-----|
-| Claude Chat Project Knowledge | Re-upload to Claude desktop app if substantive changes |
+| Nothing | Strategy docs now on filesystem, no Project Knowledge to update |
 
 ### When You Change docs/architecture.md
 | Check | Why |
@@ -75,6 +78,23 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Check | Why |
 |-------|-----|
 | Nothing | It's rules reference, nothing depends on it |
+
+### When You Change docs/STRATEGY.md
+| Check | Why |
+|-------|-----|
+| ROADMAP.md | Verify phase definitions still align |
+| docs/GUARDRAILS.md | Ensure guardrails referenced in strategy are documented |
+| specs/*.md | If workflow specifications changed, check relevant specs |
+
+### When You Change docs/STRATEGY-N8N.md
+| Check | Why |
+|-------|-----|
+| docs/STRATEGY.md | Monitoring patterns should align with main strategy workflows |
+
+### When You Change docs/STRATEGY-AGENTS.md
+| Check | Why |
+|-------|-----|
+| docs/STRATEGY.md | Agent patterns should align with main strategy AI integration |
 
 ### When You Change reference-data/*.json
 | Check | Why |
@@ -201,7 +221,7 @@ All documents that contain project information:
 | CLAUDE.md | Claude Code config | → all detail docs |
 | DECISIONS.md | Decision log | → relevant specs |
 | README.md | Entry point | → all key docs (links only) |
-| docs/CHAT-INSTRUCTIONS.md | Claude Chat config | → Claude Chat Project Knowledge |
+| docs/CHAT-INSTRUCTIONS.md | Claude Chat config | → strategy docs (filesystem) |
 | docs/SYNC-PROTOCOL.md | Process doc | None |
 | docs/DOCUMENT-HYGIENE.md | Process doc | None |
 | docs/DEPENDENCY-MAP.md | This file | Updated when dependencies change |
@@ -209,6 +229,9 @@ All documents that contain project information:
 | docs/architecture.md | Reference | → ROADMAP for phases |
 | docs/GUARDRAILS.md | Architectural rules | → All workflow implementations |
 | docs/SALES-STRATEGY.md | Sales approach | → SPEC-005, prompts/, enrichment |
+| docs/STRATEGY.md | Platform strategy | → ROADMAP, GUARDRAILS, specs |
+| docs/STRATEGY-N8N.md | n8n monitoring | → docs/STRATEGY.md |
+| docs/STRATEGY-AGENTS.md | Agentic architecture | → docs/STRATEGY.md |
 | .claude/hooks/*.sh | Automation | ← CLAUDE.md, DOCUMENT-HYGIENE |
 | specs/*.md | Build specs | ← ROADMAP acceptance criteria |
 | skills/*.md | Design patterns | ← skills/README.md |

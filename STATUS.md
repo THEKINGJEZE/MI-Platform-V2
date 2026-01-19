@@ -22,6 +22,16 @@
 
 ## ✅ Done This Session (19 Jan)
 
+### Strategy Document Integration
+- [x] Integrated strategy docs from Claude Chat Project Knowledge to filesystem
+- [x] Cleaned Section 11 duplicate content (removed old vertical scroll remnants)
+- [x] Added Sales Strategy reference to Section 7
+- [x] Added guardrail references (G-012 through G-015) to workflow 4.1 in Section 10
+- [x] Added supplementary docs reference to Section 12
+- [x] Updated CHAT-INSTRUCTIONS.md with filesystem locations
+- [x] Updated DEPENDENCY-MAP.md with strategy doc change impact rules
+- [x] Deleted strategy-section-11-update.md (content merged)
+
 ### Spec Restructuring
 - [x] Created SPEC-007b: Dashboard MVP (simplified Three-Zone layout)
 - [x] Updated SPEC-007a to "Future Phase" with prerequisites
