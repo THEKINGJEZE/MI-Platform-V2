@@ -1,6 +1,6 @@
 # SPEC-007: React Dashboard
 
-**Status**: Ready for implementation  
+**Status**: Replaced by SPEC-007b  
 **Phase**: 1c — React Dashboard  
 **Dependencies**: Phase 1 complete (burn-in ends 25 Jan)  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 11 (Dashboard Design), Section 13 (Technology Stack)

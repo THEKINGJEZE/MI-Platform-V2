@@ -61,7 +61,6 @@ Examples:
 | [SPEC-005-opportunity-enricher.md](SPEC-005-opportunity-enricher.md) | 1 | ✅ Complete |
 | [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | ✅ Complete |
 | SPEC-007-react-dashboard.md | 1c | Not started |
-| [phase-1-core-pipeline.md](phase-1-core-pipeline.md) | 1 | Overview |
 
 ## Archived Specs
 

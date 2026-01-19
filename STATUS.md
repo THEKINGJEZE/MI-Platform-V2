@@ -8,20 +8,18 @@
 
 ## 🎯 Immediate Next Action
 
-> **Fix documentation drift** — Audit found 11 high-priority issues
+> **Fix WF2 deduplication bug** — Resume Phase 1 completion
 >
-> Before resuming WF2/WF4 bug fixes, address critical documentation misalignments:
-> 1. Update 7 spec headers to match ROADMAP status
-> 2. Fix SPEC-004 wrong table ID (will cause workflow failure)
-> 3. Reconcile SPEC-005 status (ROADMAP vs STATUS conflict)
->
-> **Then**: Continue WF2/WF4 bug fixes
+> Documentation drift fixed (11 high-priority issues resolved). Now continue with:
+> 1. Debug WF2 deduplication issue
+> 2. Fix WF4 consolidation bug
+> 3. Re-run E2E test
+> 4. Complete Phase 1 sign-off
 
 **Blockers**:
-- Documentation: 11 high-severity issues in docs/AUDIT-REPORT.md
 - Workflow: WF2 deduplication bug, WF4 consolidation bug (see PHASE-1-E2E-TEST.md)
 
-**Next step**: Fix spec header statuses and SPEC-004 table ID, then return to WF2 debugging.
+**Next step**: Debug WF2 — why are duplicates getting through?
 
 ---
 
@@ -30,13 +28,17 @@
 ### Documentation Audit
 - [x] Ran /doc-audit comprehensive alignment check
 - [x] Generated docs/AUDIT-REPORT.md with 40 issues (11 high, 17 medium, 12 low)
+- [x] Fixed 7 spec headers to match ROADMAP status
+- [x] Fixed SPEC-004 wrong table ID (tbl3qHi21UzKqMXWo → tblJgZuI3LM2Az5id)
+- [x] Updated ROADMAP SPEC-005 status (Next → Built)
+- [x] Fixed 5 broken file references (specs/README.md, dashboard-v1-review.md, consistency-checker.md, SPEC-001, SPEC-002)
 
-**Key audit findings requiring action:**
-1. 7 spec headers misaligned with ROADMAP.md Spec Index (all say "Ready" but have different actual statuses)
-2. SPEC-004 has wrong Opportunities table ID (tbl3qHi21UzKqMXWo should be tblJgZuI3LM2Az5id)
-3. SPEC-005 status conflict: ROADMAP says "Next" but STATUS says "Built" — need reconciliation
-4. SPEC-005 missing sales guardrails G-012 through G-015
-5. Global ~/.claude/CLAUDE.md references different Airtable base (from different project — acceptable)
+**Key audit findings ✅ RESOLVED:**
+1. ~~7 spec headers misaligned~~ → Fixed
+2. ~~SPEC-004 wrong table ID~~ → Fixed
+3. ~~SPEC-005 status conflict~~ → Fixed (ROADMAP updated to Built)
+4. SPEC-005 missing sales guardrails G-012 through G-015 (medium priority — deferred)
+5. Global ~/.claude/CLAUDE.md references different Airtable base (acceptable — different project)
 
 **Mission alignment check**: No drift from ANCHOR.md mission detected. All issues are documentation hygiene, not mission deviation. The platform still targets 3-5 leads, ≤15 min review, ADHD-first design.
 

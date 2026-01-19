@@ -63,13 +63,13 @@ For each command in `.claude/commands/`:
 
 ## Implementation
 
-Create `scripts/consistency-check.js`:
+Create `scripts/consistency-check.cjs`:
 
 ```javascript
 #!/usr/bin/env node
 /**
  * Document Consistency Checker
- * Run: node scripts/consistency-check.js
+ * Run: node scripts/consistency-check.cjs
  */
 
 const fs = require('fs');
@@ -153,7 +153,7 @@ In `.claude/hooks/session-start.sh`, add:
 ```bash
 # Consistency check
 echo "🔍 CONSISTENCY CHECK:"
-node scripts/consistency-check.js 2>/dev/null || echo "   ⚠️  Run 'node scripts/consistency-check.js' for details"
+node scripts/consistency-check.cjs 2>/dev/null || echo "   ⚠️  Run 'node scripts/consistency-check.cjs' for details"
 echo ""
 ```
 
@@ -169,7 +169,7 @@ Verify document references and cross-document facts are aligned.
 ## Run
 
 ```bash
-node scripts/consistency-check.js
+node scripts/consistency-check.cjs
 ```
 
 If issues found, fix the source of truth first, then update references.

@@ -1,6 +1,6 @@
 # SPEC-002: Indeed Jobs Ingestion
 
-**Status**: Ready for implementation  
+**Status**: Built  
 **Phase**: 1 — Core Jobs Pipeline  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 5.1, Section 10 (Workflow 1.1)
 
@@ -236,7 +236,7 @@ From ROADMAP.md Phase 1:
 
 | File | Action |
 |------|--------|
-| `n8n/workflows/jobs-ingestion.json` | Create — workflow export |
+| `n8n/workflows/jobs-*.json` | Create — workflow exports (WF1-WF3) |
 | `STATUS.md` | Update — mark SPEC-002 in progress/complete |
 
 ---

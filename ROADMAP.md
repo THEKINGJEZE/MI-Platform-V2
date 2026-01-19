@@ -354,7 +354,7 @@ A phase is complete when:
 | SPEC-002: Jobs Ingestion | 1 | ✅ Built |
 | SPEC-003: Signal Classification | 1 | ✅ Built |
 | SPEC-004: Opportunity Creator | 1 | 🔄 In Progress |
-| SPEC-005: Opportunity Enricher | 1 | ⏳ Next |
+| SPEC-005: Opportunity Enricher | 1 | ✅ Built |
 | SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-007b |
 | SPEC-007: React Dashboard | 1c | 🔀 Replaced by SPEC-007b |
 | SPEC-007a: Full UI Foundation | Future | ⏸️ Deferred |

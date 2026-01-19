@@ -1,6 +1,6 @@
 # SPEC-004: Opportunity Creator
 
-**Status**: Ready for implementation  
+**Status**: In Progress (consolidation bug)  
 **Phase**: 1 — Core Jobs Pipeline  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 7 (Stage 3: GROUP), Section 10 (Workflow 3.1)
 
@@ -44,7 +44,7 @@
 
 **Reads from**: 
 - `Signals` table (`tblez9trodMzKKqXq`) — relevant signals needing grouping
-- `Opportunities` table (`tbl3qHi21UzKqMXWo`) — check for existing opportunities
+- `Opportunities` table (`tblJgZuI3LM2Az5id`) — check for existing opportunities
 
 **Writes to**:
 - `Opportunities` table — create new or update existing

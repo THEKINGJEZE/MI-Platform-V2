@@ -1,6 +1,6 @@
 # SPEC-001: Airtable Schema
 
-**Status**: Ready for implementation  
+**Status**: Complete  
 **Phase**: 1 — Core Jobs Pipeline  
 **Dependencies**: None (foundational)  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 6
@@ -194,7 +194,6 @@ After Forces table created, populate from `reference-data/uk-police-forces.json`
 
 | File | Action |
 |------|--------|
-| `.claude/skills/airtable-schema/SKILL.md` | Create — quick reference for field names and types |
 | `.claude/skills/airtable-schema/table-ids.json` | Create — store tableId and fieldId values after creation |
 | `STATUS.md` | Update — mark schema creation complete |
 

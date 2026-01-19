@@ -8,7 +8,7 @@
 
 > ✅ **Decision A8 (19 Jan 2025)**: V1's three-zone layout is now the canonical design for V2. The strategy document Section 11 will be updated to match this review's patterns. The problem with V1 was backend complexity, not UI design — V2's simplified backend solves the actual issue.
 >
-> This document now serves as the **authoritative reference** for V2 dashboard implementation. See `docs/strategy-section-11-update.md` for the strategy document changes.
+> This document now serves as the **authoritative reference** for V2 dashboard implementation. Strategy updates have been integrated into `docs/STRATEGY.md`.
 
 ---
 

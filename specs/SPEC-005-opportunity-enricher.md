@@ -1,6 +1,6 @@
 # SPEC-005: Opportunity Enricher
 
-**Status**: Ready for implementation  
+**Status**: Built  
 **Phase**: 1 — Core Jobs Pipeline  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 7 (Stage 4: ENRICH), Section 10 (Workflow 4.1)
 

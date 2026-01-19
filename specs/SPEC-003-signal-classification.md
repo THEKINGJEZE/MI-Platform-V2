@@ -1,6 +1,6 @@
 # SPEC-003: Signal Classification
 
-**Status**: Ready for implementation  
+**Status**: Built  
 **Phase**: 1 — Core Jobs Pipeline  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 7 (Stage 2: CLASSIFY), Section 10 (Workflow 2.1), Section 12.1
 
