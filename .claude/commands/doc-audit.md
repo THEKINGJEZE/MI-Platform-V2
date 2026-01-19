@@ -60,20 +60,20 @@ For each audit, read the detailed instructions from `.claude/agents/audit-*.md` 
 Task(
   subagent_type="Explore",
   prompt="[Read .claude/agents/audit-reference-integrity.md for full instructions] Audit all file references in markdown documents. Check @references, [markdown links](path), and `backtick paths`. Return structured findings with file:line evidence.",
-  model="haiku"
+  model="opus"
 )
 ```
 
 **Agent instruction files** (contain detailed audit logic):
 - `.claude/agents/audit-reference-integrity.md`
 - `.claude/agents/audit-single-source-truth.md`
-- `.claude/agents/audit-roadmap-alignment.md` (use model="sonnet" for reasoning)
+- `.claude/agents/audit-roadmap-alignment.md`
 - `.claude/agents/audit-schema-alignment.md`
 - `.claude/agents/audit-guardrail-compliance.md`
 
 **Alternative**: If custom agents are registered (check `Task` available types), you can use:
 ```
-Task(subagent_type="audit-reference-integrity", prompt="Run full audit", model="haiku")
+Task(subagent_type="audit-reference-integrity", prompt="Run full audit", model="opus")
 ```
 
 ### Step 3: Aggregate Results
