@@ -52,6 +52,38 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 ---
 
+### Phase 1c: React Dashboard
+**Goal**: Replace Airtable Interface with custom dashboard per strategy Section 11
+
+**Acceptance Criteria**:
+- [ ] Next.js 14 app deployed on Vercel
+- [ ] Queue view with Hot Leads section (top) and Ready to Send section
+- [ ] Opportunity cards show: Force, Why Now, Contact, Message, Actions
+- [ ] Message editing inline with save
+- [ ] Send Email button triggers WF6 webhook
+- [ ] LinkedIn button copies message + opens compose URL
+- [ ] Skip button with optional reason
+- [ ] Pipeline view (Kanban by status)
+- [ ] Signals view (raw feed for debugging)
+- [ ] Forces view (reference directory)
+- [ ] Tabs: Queue, Pipeline, Signals, Forces
+- [ ] Dark-first design with badge system (per V1 review)
+- [ ] React Query or SWR for data fetching (not manual fetch)
+- [ ] Full review of 5 opportunities takes ≤15 minutes
+
+**Dependencies**: Phase 1 complete
+
+**Spec**: `specs/SPEC-007-react-dashboard.md`
+
+**Duration**: ~3 weeks
+
+**Reference docs**:
+- Strategy Section 11 (Dashboard Design)
+- Strategy Section 13 (Technology Stack)
+- `docs/archive/dashboard-v1-review.md` (what to keep/avoid from V1)
+
+---
+
 ### Phase 2a: Email Integration
 **Goal**: Manage inbox — classify incoming emails, draft responses
 
@@ -149,6 +181,8 @@ Phase 1: Core Jobs Pipeline
     │
     ├──→ Phase 1b: Competitor Monitoring
     │
+    ├──→ Phase 1c: React Dashboard
+    │
     ├──→ Phase 2a: Email Integration
     │
     ├──→ Phase 2b: Tenders ──→ Phase 3: Awards
@@ -158,7 +192,7 @@ Phase 1: Core Jobs Pipeline
     └──→ Phase 5: News
 ```
 
-Phases 1b, 2a, 2b, 4, 5 can run in parallel after Phase 1.
+Phases 1b, 1c, 2a, 2b, 4, 5 can run in parallel after Phase 1.
 Phase 3 requires Phase 2b.
 
 ---
@@ -183,4 +217,4 @@ A phase is complete when:
 
 ---
 
-*Last updated: 18 January 2025*
+*Last updated: 19 January 2025*

@@ -71,7 +71,20 @@ Track decisions that **actively affect current work**. Not a historical record �
 
 ### Tier 2 — Phase-Level (Current Phase Only)
 
-*None yet — add as Phase 1 progresses*
+#### P1-01: Airtable Interface for Phase 1 Review UI
+**Date**: January 2025 (logged retroactively 19 Jan)
+**Decision**: Use Airtable Interface instead of React dashboard for Phase 1 Monday review
+**Strategy divergence**: Section 11 specifies Next.js dashboard
+**Why accepted**: Speed-to-value — validate pipeline before investing in custom UI. Airtable Interface delivers ≤15 min review target.
+**Deferred to**: Phase 2 or later — React dashboard per Section 11
+**Spec**: SPEC-006 Section 1
+
+#### P1-02: React Dashboard as Phase 1c
+**Date**: 19 January 2025
+**Decision**: Custom React dashboard (strategy Section 11) designated as Phase 1c, spec SPEC-007
+**Relationship**: Parallel to Phase 1b (competitors), both depend on Phase 1 complete
+**Replaces**: Airtable Interface from SPEC-006 (which remains as fallback)
+**Reference**: Strategy Section 11, Section 13, `docs/archive/dashboard-v1-review.md`
 
 ---
 

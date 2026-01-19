@@ -18,6 +18,7 @@ Valid topics and their context pointers. Use these to scope the context brief.
 | `opportunity-enricher` | Phase 1 → "Basic enrichment working" | G-011 | `prompts/opportunity-enrichment.md` |
 | `monday-review` | Phase 1 → Full phase | G-001, G-011 | All Phase 1 specs, `Opportunities` table |
 | `competitor-monitoring` | Phase 1b → Full phase | G-001, G-003, G-005 | `reference-data/competitors.json`, `patterns/force-matching.js` |
+| `react-dashboard` | Phase 1c → Full phase | G-002, G-011 | `docs/archive/dashboard-v1-review.md`, all Phase 1 specs |
 | `email-integration` | Phase 2a → Full phase | G-002, G-006 | `prompts/email-triage.md` |
 | `tenders` | Phase 2b → Full phase | G-001 | (no existing assets yet) |
 | `regulatory` | Phase 4 → Full phase | G-001, G-010 | `patterns/job-portal-filters.js` |
@@ -159,6 +160,18 @@ For: Claude Chat spec drafting
 | Decision | Date | Impact |
 |----------|------|--------|
 | [title] | [date] | [how it affects this spec] |
+
+---
+
+## Strategy Alignment Check
+
+Before drafting, Claude Chat must verify:
+- Which strategy document section(s) cover this topic?
+- Does the planned approach match the strategy specification?
+- If diverging: document why and get James's approval before drafting
+
+**If prep-spec identifies potential divergence, flag it here:**
+- [Topic] — Strategy Section X says [thing], but [reason for potential divergence]
 
 ---
 
