@@ -35,7 +35,7 @@ Examples:
 | [SPEC-003-signal-classification.md](SPEC-003-signal-classification.md) | 1 | ✅ Complete |
 | [SPEC-004-opportunity-creator.md](SPEC-004-opportunity-creator.md) | 1 | ✅ Complete |
 | [SPEC-005-opportunity-enricher.md](SPEC-005-opportunity-enricher.md) | 1 | ✅ Complete |
-| [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | Ready |
+| [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | ✅ Complete |
 | [phase-1-core-pipeline.md](phase-1-core-pipeline.md) | 1 | Overview |
 
 ## Archived Specs

@@ -140,8 +140,9 @@ Channel: email
 **WF6 Details**:
 - Workflow ID: `AeEDcJ5FD2YGCSV1`
 - Webhook URL: `https://n8n.srv1190997.hstgr.cloud/webhook/send-outreach`
-- Nodes: 6 (Webhook → Fetch Opp → Prepare Data → IF Skip → Update Skipped/Sent)
-- Status: ✅ **ACTIVE** (recreated with simplified IF node + typecast:true fix)
+- Nodes: 11 (Webhook → Fetch Opp → Prepare Opp → IF Skip → IF Email → Fetch Contact → Prepare Email → Make.com Draft → Update Sent)
+- Make.com Scenario: `8459893` (creates Outlook draft)
+- Status: ✅ **ACTIVE** (with Make.com integration for email drafts)
 
 **Checkpoint C: Airtable Interface** (Tasks 11-12) ✅ COMPLETE
 11. [x] Create "Monday Review" Interface in Airtable — Published
@@ -205,7 +206,7 @@ Channel: email
 | 3 | Hot leads visually distinguished and shown first | ✅ Pass | Sorted by priority_score desc |
 | 4 | Each opp shows: force, contact, why now, draft | ✅ Pass | All fields present |
 | 5 | Can edit draft before sending | ✅ Pass | Editable in Airtable |
-| 6 | Send Email triggers actual email | ⚠️ Partial | Status updates; Make.com webhook placeholder |
+| 6 | Send Email triggers actual email | ✅ Pass | Creates Outlook draft via Make.com (user sends manually) |
 | 7 | LinkedIn option copies/opens compose | ⚠️ Partial | Status updates; manual send required |
 | 8 | Skip moves opportunity out of queue | ✅ Pass | status → skipped |
 | 9 | Status updates correctly on each action | ✅ Pass | All 3 buttons verified |
@@ -220,8 +221,8 @@ Channel: email
 | 14 | Human confirms, system decides | ✅ Pass |
 | 15 | ≤3 decisions per lead | ✅ Pass |
 
-**Result**: 9/11 criteria pass, 2 partial (email/LinkedIn integrations are status-tracking only), 1 deferred.
-Core Monday Review experience is functional.
+**Result**: 10/11 criteria pass, 1 partial (LinkedIn is status-tracking only), 1 deferred (HubSpot logging).
+Core Monday Review experience is functional with email draft creation via Make.com.
 
 ### Stage 6: Document
 
@@ -239,8 +240,8 @@ Core Monday Review experience is functional.
 - [x] ROADMAP.md — Phase 1 acceptance criterion checked
 
 **Known limitations**:
-1. Email sending is status-tracking only (Make.com webhook placeholder)
-2. LinkedIn is manual send (status tracked)
+1. Email creates Outlook draft via Make.com (user clicks send in Outlook)
+2. LinkedIn is manual send (status tracked in Airtable)
 3. HubSpot activity logging deferred (missing API scopes)
 
 ---

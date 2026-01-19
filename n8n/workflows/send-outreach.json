@@ -30,10 +30,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Route based on action parameter\nconst action = $('Webhook').first().json.query.action;\nconst oppData = $input.first().json;\n\nreturn {\n  json: {\n    action: action,\n    opportunity_id: $('Webhook').first().json.query.opportunity_id,\n    opp_fields: oppData.fields\n  }\n};"
+        "jsCode": "// Extract opportunity data and prepare for contact fetch\nconst action = $('Webhook').first().json.query.action;\nconst oppData = $input.first().json;\nconst fields = oppData.fields || {};\n\n// Get linked contact ID if available\nconst contactId = fields.contact && fields.contact.length > 0 ? fields.contact[0] : null;\n\nreturn {\n  json: {\n    action: action,\n    opportunity_id: $('Webhook').first().json.query.opportunity_id,\n    contact_id: contactId,\n    opp_fields: fields,\n    subject_line: fields.subject_line || fields.name || 'Introduction from Peel Solutions',\n    outreach_draft: fields.outreach_draft || '',\n    force_name: fields.name || ''\n  }\n};"
       },
-      "id": "prep_data",
-      "name": "Prepare Data",
+      "id": "prep_opp",
+      "name": "Prepare Opportunity",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [440, 300]
@@ -69,7 +69,96 @@
       "name": "Update Skipped",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 200]
+      "position": [880, 180]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.action }}",
+              "value2": "send_email"
+            }
+          ]
+        }
+      },
+      "id": "if_email",
+      "name": "IF Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [880, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1/{{ $json.contact_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi"
+      },
+      "id": "fetch_contact",
+      "name": "Fetch Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 340],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine opportunity and contact data for Make.com\nconst oppData = $('Prepare Opportunity').first().json;\nconst contactData = $input.first().json;\nconst contactFields = contactData.fields || {};\n\nreturn {\n  json: {\n    opportunity_id: oppData.opportunity_id,\n    contact_email: contactFields.email || '',\n    contact_name: contactFields.name || '',\n    subject_line: oppData.subject_line,\n    outreach_draft: oppData.outreach_draft,\n    force_name: oppData.force_name\n  }\n};"
+      },
+      "id": "prep_email",
+      "name": "Prepare Email Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 340]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://eu2.make.com/api/v2/scenarios/8459893/run",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token d5d5c4c9-7768-4774-b7ae-73601a72059b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { data: { to: $json.contact_email, subject: $json.subject_line, body: $json.outreach_draft } } }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "make_draft",
+      "name": "Make.com: Create Draft",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 340],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $('Prepare Opportunity').first().json.opportunity_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"fields\": { \"status\": \"sent\", \"sent_at\": \"{{ $now.toISO() }}\" } }"
+      },
+      "id": "update_sent",
+      "name": "Update Sent (Email)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 340]
     },
     {
       "parameters": {
@@ -81,11 +170,11 @@
         "specifyBody": "json",
         "jsonBody": "={ \"fields\": { \"status\": \"sent\", \"sent_at\": \"{{ $now.toISO() }}\" } }"
       },
-      "id": "update_sent",
-      "name": "Update Sent",
+      "id": "update_linkedin",
+      "name": "Update Sent (LinkedIn)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 400]
+      "position": [1100, 500]
     }
   ],
   "connections": {
@@ -93,16 +182,31 @@
       "main": [[{"node": "Fetch Opportunity", "type": "main", "index": 0}]]
     },
     "Fetch Opportunity": {
-      "main": [[{"node": "Prepare Data", "type": "main", "index": 0}]]
+      "main": [[{"node": "Prepare Opportunity", "type": "main", "index": 0}]]
     },
-    "Prepare Data": {
+    "Prepare Opportunity": {
       "main": [[{"node": "IF Skip", "type": "main", "index": 0}]]
     },
     "IF Skip": {
       "main": [
         [{"node": "Update Skipped", "type": "main", "index": 0}],
-        [{"node": "Update Sent", "type": "main", "index": 0}]
+        [{"node": "IF Email", "type": "main", "index": 0}]
       ]
+    },
+    "IF Email": {
+      "main": [
+        [{"node": "Fetch Contact", "type": "main", "index": 0}],
+        [{"node": "Update Sent (LinkedIn)", "type": "main", "index": 0}]
+      ]
+    },
+    "Fetch Contact": {
+      "main": [[{"node": "Prepare Email Data", "type": "main", "index": 0}]]
+    },
+    "Prepare Email Data": {
+      "main": [[{"node": "Make.com: Create Draft", "type": "main", "index": 0}]]
+    },
+    "Make.com: Create Draft": {
+      "main": [[{"node": "Update Sent (Email)", "type": "main", "index": 0}]]
     }
   },
   "settings": {

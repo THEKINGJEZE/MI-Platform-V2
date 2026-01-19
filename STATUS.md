@@ -27,10 +27,11 @@
 ## ✅ Done This Session
 - [x] **SPEC-006: Monday Review — COMPLETE** ✅
   - All 6 stages complete (Parse → Audit → Plan → Build → Verify → Document)
-  - WF6 workflow: `MI: Send Outreach` (`AeEDcJ5FD2YGCSV1`) — ACTIVE
+  - WF6 workflow: `MI: Send Outreach` (`AeEDcJ5FD2YGCSV1`) — ACTIVE (11 nodes)
+  - Make.com integration: Creates Outlook drafts via scenario `8459893`
   - Airtable Interface: "Monday Review" — Published
-  - All 3 buttons tested: Skip ✅, Send Email ✅, LinkedIn ✅
-  - 9/11 acceptance criteria pass; 2 partial (email/LinkedIn are status-tracking only)
+  - All 3 buttons tested: Skip ✅, Send Email ✅ (creates draft), LinkedIn ✅
+  - 10/11 acceptance criteria pass; 1 partial (LinkedIn status-only), 1 deferred (HubSpot)
   - JSON export: `n8n/workflows/send-outreach.json`
 - [x] **Bug Fix: WF2 Deduplication + WF4 Consolidation** ✅
   - **Bug 1 (WF2)**: Added `returnAll: true` to Airtable search node — was only fetching first 100 records
