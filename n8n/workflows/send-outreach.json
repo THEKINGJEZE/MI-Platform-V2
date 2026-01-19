@@ -1,0 +1,111 @@
+{
+  "name": "MI: Send Outreach",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "send-outreach",
+        "httpMethod": "GET",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "send-outreach-wf6"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $json.query.opportunity_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi"
+      },
+      "id": "fetch_opp",
+      "name": "Fetch Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route based on action parameter\nconst action = $('Webhook').first().json.query.action;\nconst oppData = $input.first().json;\n\nreturn {\n  json: {\n    action: action,\n    opportunity_id: $('Webhook').first().json.query.opportunity_id,\n    opp_fields: oppData.fields\n  }\n};"
+      },
+      "id": "prep_data",
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.action }}",
+              "value2": "skip"
+            }
+          ]
+        }
+      },
+      "id": "if_skip",
+      "name": "IF Skip",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $json.opportunity_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"fields\": { \"status\": \"skipped\" }, \"typecast\": true }"
+      },
+      "id": "update_skipped",
+      "name": "Update Skipped",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 200]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id/{{ $json.opportunity_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"fields\": { \"status\": \"sent\", \"sent_at\": \"{{ $now.toISO() }}\" } }"
+      },
+      "id": "update_sent",
+      "name": "Update Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Fetch Opportunity", "type": "main", "index": 0}]]
+    },
+    "Fetch Opportunity": {
+      "main": [[{"node": "Prepare Data", "type": "main", "index": 0}]]
+    },
+    "Prepare Data": {
+      "main": [[{"node": "IF Skip", "type": "main", "index": 0}]]
+    },
+    "IF Skip": {
+      "main": [
+        [{"node": "Update Skipped", "type": "main", "index": 0}],
+        [{"node": "Update Sent", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

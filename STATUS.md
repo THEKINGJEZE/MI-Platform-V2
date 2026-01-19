@@ -1,33 +1,37 @@
 # MI Platform — Session Status
 
-**Updated**: 18 January 2025
+**Updated**: 19 January 2025
 **Phase**: 1 — Core Jobs Pipeline (99% COMPLETE)
-**Session Goal**: Phase 1 End-to-End Testing
+**Session Goal**: Implement SPEC-006 Monday Review
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **E2E Test Plan created. Execute tests to verify pipeline.**
+> **SPEC-006: Monday Review Experience — COMPLETE** ✅
 >
-> See [PHASE-1-E2E-TEST.md](specs/PHASE-1-E2E-TEST.md) for full test plan.
+> Tracker: [IMPL-006.md](specs/IMPL-006.md)
 >
-> **7 Tests to Complete**:
-> 1. Manual Pipeline Trigger (full flow WF1→WF5)
-> 2. Irrelevant Signal Filtering
-> 3. Force Matching (G-005 compliance)
-> 4. Deduplication
-> 5. Opportunity Consolidation
-> 6. Monday Morning Experience
-> 7. Production Burn-In (1 week)
+> All 6 stages complete. Monday Review interface is live and functional.
+>
+> **Artifacts**:
+> - WF6: `MI: Send Outreach` (`AeEDcJ5FD2YGCSV1`) — ACTIVE
+> - Interface: [Monday Review](https://airtable.com/appEEWaGtGUwOyOhm/pagKE7lTSnkbQ3tAL)
 
 **Blockers**: None
 
-**Next step**: Share `specs/NEXT-CONTEXT.md` with Claude Chat to draft SPEC-006: Monday Review Interface.
+**Next step**: Use Monday Review interface on Monday morning. Commit changes to git.
 
 ---
 
 ## ✅ Done This Session
+- [x] **SPEC-006: Monday Review — COMPLETE** ✅
+  - All 6 stages complete (Parse → Audit → Plan → Build → Verify → Document)
+  - WF6 workflow: `MI: Send Outreach` (`AeEDcJ5FD2YGCSV1`) — ACTIVE
+  - Airtable Interface: "Monday Review" — Published
+  - All 3 buttons tested: Skip ✅, Send Email ✅, LinkedIn ✅
+  - 9/11 acceptance criteria pass; 2 partial (email/LinkedIn are status-tracking only)
+  - JSON export: `n8n/workflows/send-outreach.json`
 - [x] **Bug Fix: WF2 Deduplication + WF4 Consolidation** ✅
   - **Bug 1 (WF2)**: Added `returnAll: true` to Airtable search node — was only fetching first 100 records
   - **Bug 2 (WF4)**: Fixed invalid formula `RECORD_ID(force)` → `{force}` in consolidation search

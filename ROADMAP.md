@@ -20,7 +20,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 - [ ] Signal classification working (Claude API, >90% accuracy)
 - [ ] Opportunities created from relevant signals
 - [ ] Basic enrichment working (contact lookup, message draft)
-- [ ] Can review opportunity and mark as sent
+- [x] Can review opportunity and mark as sent
 - [ ] End-to-end test: fake job → classified → opportunity → reviewed
 
 **Specs** (signed off 18 Jan 2025):
