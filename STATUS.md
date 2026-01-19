@@ -8,19 +8,37 @@
 
 ## 🎯 Immediate Next Action
 
-> **Fix WF2/WF4 bugs** — E2E test revealed deduplication and consolidation issues
+> **Fix documentation drift** — Audit found 11 high-priority issues
 >
-> Phase 1 pipeline works but has bugs. Dashboard spec simplified. Skills documented.
+> Before resuming WF2/WF4 bug fixes, address critical documentation misalignments:
+> 1. Update 7 spec headers to match ROADMAP status
+> 2. Fix SPEC-004 wrong table ID (will cause workflow failure)
+> 3. Reconcile SPEC-005 status (ROADMAP vs STATUS conflict)
 >
-> **Before dashboard**: Complete Phase 1 properly.
+> **Then**: Continue WF2/WF4 bug fixes
 
-**Blockers**: WF2 deduplication bug, WF4 consolidation bug (see PHASE-1-E2E-TEST.md)
+**Blockers**:
+- Documentation: 11 high-severity issues in docs/AUDIT-REPORT.md
+- Workflow: WF2 deduplication bug, WF4 consolidation bug (see PHASE-1-E2E-TEST.md)
 
-**Next step**: Debug WF2 deduplication logic, then WF4 consolidation.
+**Next step**: Fix spec header statuses and SPEC-004 table ID, then return to WF2 debugging.
 
 ---
 
 ## ✅ Done This Session (19 Jan)
+
+### Documentation Audit
+- [x] Ran /doc-audit comprehensive alignment check
+- [x] Generated docs/AUDIT-REPORT.md with 40 issues (11 high, 17 medium, 12 low)
+
+**Key audit findings requiring action:**
+1. 7 spec headers misaligned with ROADMAP.md Spec Index (all say "Ready" but have different actual statuses)
+2. SPEC-004 has wrong Opportunities table ID (tbl3qHi21UzKqMXWo should be tblJgZuI3LM2Az5id)
+3. SPEC-005 status conflict: ROADMAP says "Next" but STATUS says "Built" — need reconciliation
+4. SPEC-005 missing sales guardrails G-012 through G-015
+5. Global ~/.claude/CLAUDE.md references different Airtable base (from different project — acceptable)
+
+**Mission alignment check**: No drift from ANCHOR.md mission detected. All issues are documentation hygiene, not mission deviation. The platform still targets 3-5 leads, ≤15 min review, ADHD-first design.
 
 ### Strategy Document Integration
 - [x] Integrated strategy docs from Claude Chat Project Knowledge to filesystem
