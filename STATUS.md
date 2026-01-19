@@ -1,48 +1,56 @@
 # MI Platform — Session Status
 
 **Updated**: 19 January 2025
-**Phase**: 1 — Core Jobs Pipeline (99% COMPLETE)
-**Session Goal**: Production burn-in monitoring
+**Phase**: 1c — React Dashboard (BUILD COMPLETE)
+**Session Goal**: Implement SPEC-007 React Dashboard
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Production Burn-In in progress** (started 18 Jan)
+> **React Dashboard Build Complete** — Ready for Vercel deploy
 >
-> All 6 specs complete. Pipeline running. Monitor for 1 week.
+> 12/14 acceptance criteria verified. Pending: Vercel deploy + timing validation.
 >
-> **Monday Review**: [airtable.com/appEEWaGtGUwOyOhm/pagKE7lTSnkbQ3tAL](https://airtable.com/appEEWaGtGUwOyOhm/pagKE7lTSnkbQ3tAL)
+> **Local dev**: `cd dashboard && npm run dev` → http://localhost:3000
 
 **Blockers**: None
 
-**Next step**: Use Monday Review on Monday morning to verify ≤15 min timing criterion.
+**Next step**: Deploy to Vercel with environment variables, then test timing on Monday.
 
 ---
 
 ## ✅ Done This Session
-- [x] Finalized SPEC-006 with Make.com email draft integration
-- [x] Resolved HubSpot logging (criterion 10) via connected email feature
-- [x] Updated documentation (IMPL-006.md, specs/README.md)
-- [x] Committed all changes to GitHub
-- [x] Strategy divergence governance added (specs/README.md, prep-spec command)
-- [x] Phase 1c (React Dashboard) added to roadmap, SPEC-007 placeholder created
+- [x] Implemented SPEC-007 React Dashboard (all 32 tasks)
+- [x] Created Next.js 14 app with TypeScript, Tailwind, shadcn/ui
+- [x] Built 4 views: Queue, Pipeline, Signals, Forces
+- [x] Created API routes with Airtable integration
+- [x] Implemented React Query for data fetching
+- [x] Built 30+ badge variants (ported from V1)
+- [x] Dark-first theme applied
+- [x] Verified guardrails compliance (G-002, G-008, G-011)
+- [x] Build passes (12 pages generated)
+- [x] All routes tested and returning 200
+- [x] Fixed case-sensitivity bug (status values lowercase in Airtable)
+- [x] Browser-tested Queue (20 ready opps) and Pipeline (24 total) views
 
 ## 🔄 In Progress
-- [ ] **Test 7: Production Burn-In** (1 week) — Started 18 Jan, ends 25 Jan
-  - Monitor for: workflow failures, data quality issues, timing
+- [ ] Vercel deployment (user action)
+- [ ] Timing validation: review 5 opps ≤15 min (Monday test)
 
 ## ⏳ Up Next
-1. Monday morning: Use Monday Review interface (verify ≤15 min)
-2. End of week: Phase 1 strategic verification (Chat)
-3. After burn-in: Mark Phase 1 complete, begin Phase 1b or 2a
+1. Deploy dashboard to Vercel
+2. Monday morning: Test timing with React dashboard
+3. Phase 1 + 1c strategic verification (Chat)
+4. After validation: Mark Phase 1c complete
 
 ---
 
-## 📊 Phase 1 Progress
+## 📊 Phase Progress
 
 ```
-[██████████] 99% — Core Jobs Pipeline
+Phase 1: [██████████] 99% — Core Jobs Pipeline (burn-in)
+Phase 1c: [█████████░] 90% — React Dashboard (deploy pending)
 
 Active Workflows:
   ✅ WF1: Jobs Trigger (RqFcVMcQ7I8t4dIM) — Daily 06:00
@@ -52,7 +60,7 @@ Active Workflows:
   ✅ WF5: Opportunity Enricher (Lb5iOr1m93kUXBC0) — Every 15min
   ✅ WF6: Send Outreach (AeEDcJ5FD2YGCSV1) — Webhook (button-triggered)
 
-Specs Complete:
+Phase 1 Specs:
   ✅ SPEC-001: Airtable Schema
   ✅ SPEC-002: Jobs Ingestion
   ✅ SPEC-003: Signal Classification
@@ -60,9 +68,19 @@ Specs Complete:
   ✅ SPEC-005: Opportunity Enricher
   ✅ SPEC-006: Monday Review (11/11 criteria)
 
+Phase 1c (Dashboard):
+  ✅ SPEC-007: React Dashboard (12/14 criteria verified)
+
+Dashboard Stack:
+  - Next.js 14.2.35 + TypeScript
+  - TanStack Query 5.x
+  - Tailwind CSS + shadcn/ui
+  - Dark-first design
+
 Remaining:
-  □ Production burn-in (1 week)
-  □ Phase 1 strategic verification (Chat)
+  □ Vercel deployment
+  □ Timing validation (≤15 min)
+  □ Phase 1 + 1c strategic verification
 ```
 
 ---
