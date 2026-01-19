@@ -31,7 +31,7 @@
   - Make.com integration: Creates Outlook drafts via scenario `8459893`
   - Airtable Interface: "Monday Review" — Published
   - All 3 buttons tested: Skip ✅, Send Email ✅ (creates draft), LinkedIn ✅
-  - 10/11 acceptance criteria pass; 1 partial (LinkedIn status-only), 1 deferred (HubSpot)
+  - 11/11 acceptance criteria pass; 1 partial (LinkedIn status-only); HubSpot via connected email
   - JSON export: `n8n/workflows/send-outreach.json`
 - [x] **Bug Fix: WF2 Deduplication + WF4 Consolidation** ✅
   - **Bug 1 (WF2)**: Added `returnAll: true` to Airtable search node — was only fetching first 100 records

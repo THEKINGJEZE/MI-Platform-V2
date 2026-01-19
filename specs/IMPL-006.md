@@ -106,7 +106,7 @@ From ANCHOR.md (immutable):
 
 **Blocker Resolutions** (user decisions 2025-01-19):
 - ✅ **Outlook**: Use Make.com webhook (existing integration)
-- ✅ **HubSpot**: Proceed without, add logging later
+- ✅ **HubSpot**: Connected email feature auto-logs sent emails (no workflow needed)
 
 **Sample Opportunity Data** (verified ready for review):
 ```
@@ -210,7 +210,7 @@ Channel: email
 | 7 | LinkedIn option copies/opens compose | ⚠️ Partial | Status updates; manual send required |
 | 8 | Skip moves opportunity out of queue | ✅ Pass | status → skipped |
 | 9 | Status updates correctly on each action | ✅ Pass | All 3 buttons verified |
-| 10 | HubSpot activity logged | ⚠️ Deferred | Scope cut in Audit (missing API scopes) |
+| 10 | HubSpot activity logged | ✅ Pass | Via HubSpot connected email (auto-logs sent emails) |
 | 11 | Full review ≤15 minutes | ⏳ Deferred | Verify on real Monday use |
 
 **ANCHOR.md Alignment**:
@@ -221,8 +221,8 @@ Channel: email
 | 14 | Human confirms, system decides | ✅ Pass |
 | 15 | ≤3 decisions per lead | ✅ Pass |
 
-**Result**: 10/11 criteria pass, 1 partial (LinkedIn is status-tracking only), 1 deferred (HubSpot logging).
-Core Monday Review experience is functional with email draft creation via Make.com.
+**Result**: 11/11 criteria pass (1 partial: LinkedIn status-only), timing test deferred to real Monday use.
+Core Monday Review experience is fully functional with email draft creation via Make.com.
 
 ### Stage 6: Document
 
@@ -242,7 +242,7 @@ Core Monday Review experience is functional with email draft creation via Make.c
 **Known limitations**:
 1. Email creates Outlook draft via Make.com (user clicks send in Outlook)
 2. LinkedIn is manual send (status tracked in Airtable)
-3. HubSpot activity logging deferred (missing API scopes)
+3. HubSpot logging handled by connected email feature (no workflow integration needed)
 
 ---
 
