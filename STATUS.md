@@ -45,6 +45,11 @@
 - [x] Migrated 13 skills from V1 to `skills/` folder
 - [x] Updated CLAUDE.md with skills table
 
+### Developer Tooling
+- [x] Created `/doc-audit` slash command — multi-agent documentation alignment audit
+- [x] Created 5 audit subagents (reference-integrity, single-source-truth, roadmap-alignment, schema-alignment, guardrail-compliance)
+- [x] Updated CLAUDE.md and CLAUDE-CODE-CAPABILITIES.md with new command
+
 ### Dashboard Build (Previous Session)
 - [x] Built Next.js 14 dashboard (SPEC-007)
 - [x] Note: Dashboard exists but spec has been restructured

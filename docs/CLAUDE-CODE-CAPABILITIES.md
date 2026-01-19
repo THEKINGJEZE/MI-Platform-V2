@@ -33,8 +33,8 @@
 
 | Category | Count | Examples |
 |----------|-------|----------|
-| **Specialized Agents** | 3 | alignment-checker, workflow-builder, signal-triage |
-| **Slash Commands** | 5 | /check-alignment, /health-check, /consistency-check, /deploy-workflow, /hygiene-check |
+| **Specialized Agents** | 8 | alignment-checker, workflow-builder, signal-triage, audit-* (5) |
+| **Slash Commands** | 6 | /check-alignment, /health-check, /consistency-check, /deploy-workflow, /hygiene-check, /doc-audit |
 | **Skills** | 1 | force-matching |
 | **MCP Integrations** | 5 | Airtable (12 tools), n8n (16 tools), HubSpot (6 tools), Playwright (17 tools), Context7 (2 tools) |
 | **Built-in Tools** | 10+ | Bash, Read, Write, Edit, Grep, Glob, WebSearch, TodoWrite, Task, AskUserQuestion |
@@ -242,6 +242,7 @@ Task(subagent_type="workflow-builder", ...)
 | `/project:consistency-check` | 3s | Missing refs, fact mismatches | Weekly maintenance, before commits |
 | `/project:deploy-workflow` | 30s | n8n workflow imported | After building workflow |
 | `/project:hygiene-check` | 5s | Doc size warnings | Weekly/monthly cleanup |
+| `/project:doc-audit` | 60s | AUDIT-REPORT.md with findings | Deep alignment check, before releases |
 
 ---
 
@@ -404,6 +405,50 @@ Task(subagent_type="workflow-builder", ...)
 
 **Location**: `.claude/commands/hygiene-check.md`
 **Reference**: `docs/DOCUMENT-HYGIENE.md`
+
+---
+
+### doc-audit
+
+**Purpose**: Comprehensive documentation alignment audit across 5 dimensions
+
+**What It Does**: Spawns 5 specialized subagents to audit:
+1. **Reference Integrity** — Validates all @references, markdown links, file paths exist
+2. **Single Source of Truth** — Detects duplicated information per DEPENDENCY-MAP.md rules
+3. **Roadmap Alignment** — Verifies STATUS.md/specs match ROADMAP.md criteria
+4. **Schema Alignment** — Checks schema references match SPEC-001
+5. **Guardrail Compliance** — Verifies G-XXX references are valid and complete
+
+**Output**: Creates `docs/AUDIT-REPORT.md` with:
+- Executive summary (pass/warn/fail)
+- Findings by dimension with severity levels
+- Action items table prioritized by severity
+- Evidence index with file:line references
+
+**Arguments**:
+- `--fix`: Append suggested fix instructions to report
+
+**When to Run**:
+- Before major releases
+- Weekly maintenance
+- After restructuring documentation
+- When drift suspected across documents
+
+**Example**:
+```bash
+/doc-audit           # Full audit, generate report
+/doc-audit --fix     # Audit with fix suggestions
+```
+
+**Subagents Used**:
+- `audit-reference-integrity` (Haiku)
+- `audit-single-source-truth` (Haiku)
+- `audit-roadmap-alignment` (Sonnet)
+- `audit-schema-alignment` (Haiku)
+- `audit-guardrail-compliance` (Haiku)
+
+**Location**: `.claude/commands/doc-audit.md`
+**Subagents**: `.claude/agents/audit-*.md`
 
 ---
 

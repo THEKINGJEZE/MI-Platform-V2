@@ -145,6 +145,7 @@ When all specs in a phase are complete:
 | `/deploy-workflow <name>` | Import workflow to n8n |
 | `/hygiene-check` | Check document sizes, trigger cleanup |
 | `/consistency-check` | Verify document references are valid |
+| `/doc-audit` | Comprehensive documentation alignment check |
 | `/prep-spec <topic>` | Generate context brief for spec creation |
 | `git status` | Check uncommitted changes |
 | `git add . && git commit -m "[scope] msg" && git push` | Commit and push |
