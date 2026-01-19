@@ -225,6 +225,70 @@ const JOB_PORTAL_PATTERNS = [/careers/i, /jobs/i, /vacancies/i, ...];
 
 ---
 
+## G-012: Value Proposition First (Never "We Have Candidates")
+
+**Rule**: All outreach messages must lead with Peel's value proposition (outcome-based delivery, accountability), not "we have candidates."
+
+**Why**: "We have candidates" is a commodity pitch that invites price competition. Peel's differentiation is the managed, accountable delivery model.
+
+**Violation Sign**: Message starts with "We have experienced investigators available" or similar.
+
+**Correct Pattern**:
+```
+❌ "We have experienced PIP2 investigators available for your vacancy."
+✅ "We help forces address investigation capacity challenges through managed, outcome-based delivery."
+```
+
+**Reference**: `docs/SALES-STRATEGY.md` — Messaging Framework section
+
+---
+
+## G-013: Competitor Signals Get P1 Priority
+
+**Rule**: Any signal from a competitor source (Red Snapper, Investigo, Reed, Adecco, Service Care, Matrix) must be flagged as P1 (highest priority) automatically.
+
+**Why**: Competitor postings confirm active need, allocated budget, and active supplier engagement. Peel should be part of that conversation before decisions are made.
+
+**Violation Sign**: Competitor signals treated as standard priority or not flagged distinctly.
+
+**Reference**: `docs/SALES-STRATEGY.md` — Lead Prioritisation Model
+
+---
+
+## G-014: Contact the Problem Owner
+
+**Rule**: The enrichment workflow should target the "problem owner" (operational leader who owns the capability gap), not default to HR.
+
+**Why**: HR fills vacancies; operational leaders solve capacity problems. Peel's value proposition resonates with the latter.
+
+**Contact Mapping**:
+| Role Being Hired | Target Contact |
+|------------------|----------------|
+| PIP2 Investigators | Head of Crime / Head of Investigations |
+| Digital Forensics | Head of Digital/Cyber / Forensic Services Manager |
+| Intelligence Analyst | Head of Intelligence |
+| Disclosure Officer | Head of Criminal Justice |
+
+**Fallback**: If problem owner cannot be identified, HR is acceptable as interim contact — but message should still present full value proposition.
+
+**Violation Sign**: All contacts defaulting to "HR Department" or generic recruitment emails.
+
+**Reference**: `docs/SALES-STRATEGY.md` — Contact Strategy section
+
+---
+
+## G-015: Message Structure (Hook → Bridge → Value → CTA)
+
+**Rule**: All AI-drafted messages must follow the four-part structure: Hook (reference signal) → Bridge (acknowledge challenge) → Value (Peel's approach) → CTA (request conversation).
+
+**Why**: Consistent structure ensures messages are professional, relevant, and action-oriented.
+
+**Violation Sign**: Messages that jump straight to "Would you like to discuss?" without establishing relevance, or messages that describe Peel's services without connecting to the recipient's specific situation.
+
+**Reference**: `docs/SALES-STRATEGY.md` — Messaging Framework section
+
+---
+
 ## Updating Guardrails
 
 New guardrails should only be added when:

@@ -59,9 +59,14 @@ Do NOT use for:
 3. `mi-platform-agentic-deep-dive.md` — n8n AI agent implementation
 
 **Key Process Docs** (in project folder):
-- `ROADMAP.md` — Phases and acceptance criteria
+- `ROADMAP.md` — Phases, acceptance criteria, schema evolution, spec index
+- `docs/SALES-STRATEGY.md` — Lead prioritisation, contacts, messaging
 - `docs/DEPENDENCY-MAP.md` — What to check when changing docs
 - `docs/DOCUMENT-HYGIENE.md` — Preventing decay
+- `skills/README.md` — Guide to V1 design patterns
+
+**Skills Folder** (reference, not requirements):
+The `skills/` folder contains design patterns validated in V1 (scoring, visualisation, ADHD UX). These are reference material — not every skill applies to every phase. Check `skills/README.md` for which skills to use when.
 
 ---
 
@@ -222,6 +227,20 @@ From ANCHOR.md (immutable):
 - ❌ A tool that requires daily attention
 - ❌ Something that sends emails without human approval
 - ❌ Features for "later" before current phase is done
+
+---
+
+## Spec Structure
+
+Specs follow a progressive enhancement pattern:
+
+| Spec | Status | Purpose |
+|------|--------|----------|
+| SPEC-007b | Active | Dashboard MVP (current schema) |
+| SPEC-007a | Deferred | Full UI (needs scoring model) |
+| SPEC-008 | Deferred | Morning Brief (needs infrastructure) |
+
+**When creating new specs**: Check ROADMAP.md for the current spec index and ensure the spec fits the phase it's assigned to. Don't build infrastructure for future phases.
 
 ---
 

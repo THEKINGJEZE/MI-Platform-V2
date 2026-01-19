@@ -10,6 +10,11 @@ When you change document X, you need to check documents Y and Z. This map preven
 
 | Information | Single Source | Never Duplicate To |
 |-------------|---------------|--------------------|
+| Sales strategy (prioritisation, contacts, messaging) | docs/SALES-STRATEGY.md | specs/, prompts/ |
+| Spec status and evolution | ROADMAP.md (Spec Index) | specs/, STATUS |
+| Schema evolution path | ROADMAP.md (Schema Evolution) | specs/, CLAUDE.md |
+| Dashboard evolution path | ROADMAP.md (Dashboard Evolution) | specs/ |
+| Skills usage guidance | skills/README.md | CLAUDE.md, specs/ |
 | Mission & success criteria | ANCHOR.md | Anywhere (link only) |
 | Phase definitions & acceptance criteria | ROADMAP.md | README, STATUS, specs |
 | Current session state | STATUS.md | Anywhere |
@@ -87,6 +92,13 @@ When you change document X, you need to check documents Y and Z. This map preven
 |-------|-----|
 | Workflows using prompts | If prompt structure changed |
 
+### When You Change docs/SALES-STRATEGY.md
+| Check | Why |
+|-------|-----|
+| prompts/enrichment.md | Message templates may need updating |
+| SPEC-005 (Enrichment) | Contact strategy affects enrichment logic |
+| skills/lead-scoring-methodology | Priority model alignment |
+
 ### When You Change .claude/hooks/*.sh
 | Check | Why |
 |-------|-----|
@@ -109,7 +121,21 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Check | Why |
 |-------|-----|
 | ROADMAP.md | Ensure acceptance criteria match |
+| ROADMAP.md (Spec Index) | Add to spec index table |
 | CLAUDE.md | Update "Current spec" reference if it's the active phase |
+
+### When You Add/Modify a Skill
+| Check | Why |
+|-------|-----|
+| skills/README.md | Update skill inventory table |
+| ROADMAP.md | Note which phase skill applies to |
+
+### When You Defer a Spec
+| Check | Why |
+|-------|-----|
+| ROADMAP.md (Spec Index) | Update status to Deferred |
+| ROADMAP.md (Future Features) | Add to future features table |
+| The spec itself | Add "Why Deferred" section with prerequisites |
 
 ### When You Complete a Phase
 | Check | Why |
@@ -182,8 +208,11 @@ All documents that contain project information:
 | docs/GIT-WORKFLOW.md | Process doc | None |
 | docs/architecture.md | Reference | → ROADMAP for phases |
 | docs/GUARDRAILS.md | Architectural rules | → All workflow implementations |
+| docs/SALES-STRATEGY.md | Sales approach | → SPEC-005, prompts/, enrichment |
 | .claude/hooks/*.sh | Automation | ← CLAUDE.md, DOCUMENT-HYGIENE |
 | specs/*.md | Build specs | ← ROADMAP acceptance criteria |
+| skills/*.md | Design patterns | ← skills/README.md |
+| skills/README.md | Skills usage guide | → ROADMAP (which phase) |
 | reference-data/*.json | Reference data | None (source of truth) |
 | patterns/*.js | Reusable patterns | None |
 | prompts/*.md | AI prompts | None |

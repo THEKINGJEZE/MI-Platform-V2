@@ -6,7 +6,9 @@
 
 ---
 
-> ⚠️ **Critical Distinction**: This review captures TECHNICAL patterns only (badges, state management, data fetching, theming). The V2 dashboard LAYOUT must follow **Section 11 of the strategy document** (`peel-solutions-mi-platform-strategy.md`), NOT the V1 three-zone design. When in doubt, the strategy document wins.
+> ✅ **Decision A8 (19 Jan 2025)**: V1's three-zone layout is now the canonical design for V2. The strategy document Section 11 will be updated to match this review's patterns. The problem with V1 was backend complexity, not UI design — V2's simplified backend solves the actual issue.
+>
+> This document now serves as the **authoritative reference** for V2 dashboard implementation. See `docs/strategy-section-11-update.md` for the strategy document changes.
 
 ---
 
@@ -84,18 +86,18 @@
 
 ## UI Patterns Worth Keeping
 
-### ~~Three-Zone Focus Layout~~ — DO NOT USE
+### Three-Zone Focus Layout — ✅ CANONICAL DESIGN
 
-The V1 dashboard used a three-column split (Queue/Now/Actions). This was a custom design that diverged from the strategy specification.
+The V1 dashboard used a three-column split (Queue/Now/Actions). Per Decision A8, this is now the canonical design for V2.
 
-**V2 must use the strategy document layout (Section 11):**
-- Vertical scroll with sectioned card list
-- Hot Leads section at top (competitor interceptions)
-- Ready to Send section below
-- Each opportunity as an expandable card with: Why Now, Contact, Message, Actions
-- Single-focus flow: review → tweak → send → next
+**V2 will use this layout:**
+- Queue Panel (left) — prioritised opportunity list with J/K navigation
+- Now Card (centre) — context capsule with What/Why/Next/When/Source
+- Composer Dock (right) — draft message and action buttons
+- Progress header — session stats for dopamine feedback
+- Keyboard navigation — E/S/D/Z for actions
 
-The strategy layout is optimised for the "Monday Morning Experience" — 15 minutes to review and send a week's outreach.
+This layout is optimised for the "Monday Morning Experience" — 15 minutes to review and send a week's outreach. The strategy document Section 11 will be updated to match.
 
 ### Badge System
 30+ semantic badge variants for rapid visual scanning:
@@ -156,17 +158,23 @@ The manual fetch/refresh logic was brittle. Pick one and use it:
 - Background revalidation
 - Optimistic updates for snappy UI
 
-### 2. Implement Strategy Document Layout (Section 11)
-**Do NOT port the V1 three-zone layout.** Build the dashboard exactly as specified in the strategy document:
-- Queue view with Hot Leads + Ready to Send sections
-- Opportunity cards with Why Now / Contact / Message / Actions
-- Pipeline view (Kanban by status)
-- Signals view (raw feed for debugging)
-- Forces view (reference with intelligence summary)
-- Email view (Phase 2a)
-- Tenders view (Phase 2b)
+### 2. Port V1 Three-Zone Layout (Decision A8)
+**Port the V1 three-zone layout as the canonical design.** The strategy document Section 11 will be updated to match.
 
-Reference V1 only for technical implementation (how to build cards, badges, data fetching) — not for what to build.
+**Layout to implement:**
+- Queue Panel (left) — prioritised opportunity list
+- Now Card (centre) — context capsule with What/Why/Next/When/Source
+- Composer Dock (right) — draft message and actions
+
+**Views to build:**
+- Queue (home) — three-zone layout
+- Pipeline (Kanban by status)
+- Signals (raw feed for debugging)
+- Forces (reference with intelligence summary)
+- Email (Phase 2a)
+- Tenders (Phase 2b)
+
+See SPEC-007a for full implementation details.
 
 ### 3. Port the Badge System
 The 30+ semantic variants provide rapid visual scanning. Copy these Tailwind classes to V2 design system.
@@ -179,17 +187,18 @@ Use cursor-based pagination for all Airtable list endpoints. The `offset` token 
 
 ---
 
-## V1 vs Strategy Document: Quick Reference
+## V2 Design: Decision A8 Resolution
 
-| Aspect | V1 Did | V2 Must Do (per Strategy) |
-|--------|--------|---------------------------|
-| Main layout | Three-zone split (Queue/Now/Actions) | Vertical scroll with sections |
-| Navigation | Tab-based board views | Tab-based: Queue, Pipeline, Signals, Forces, Email, Tenders |
-| Opportunity display | Split across zones | Single card with all context |
-| Primary flow | Unclear focus | Review → Tweak → Send → Next |
-| Hot leads | Not distinguished | Top section, visually prominent |
+| Aspect | V1 Design | V2 Design (Decision A8) |
+|--------|-----------|-------------------------|
+| Main layout | Three-zone split (Queue/Now/Actions) | ✅ Three-zone split (adopted) |
+| Navigation | Tab-based board views | ✅ Tab-based (kept) |
+| Opportunity display | Split across zones | ✅ Split across zones (adopted) |
+| Primary flow | Review → Tweak → Send → Next | ✅ Same (this was always the goal) |
+| Progress tracking | Session header with stats | ✅ Session header (adopted) |
+| Keyboard nav | J/K/E/S/D/Z | ✅ Full keyboard support (adopted) |
 
-**When building V2, always check Section 11 of the strategy document first.**
+**V1's layout is now canonical. Strategy document Section 11 will be updated to match.**
 
 ---
 

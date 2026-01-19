@@ -6,8 +6,9 @@ That file defines WHY. It never changes. If anything conflicts with ANCHOR.md, A
 
 ## Current Focus
 **Phase**: 1 — Core Jobs Pipeline  
-**Goal**: Indeed jobs → classified signals → opportunities  
-**Blocker**: None  
+**Goal**: Fix WF2/WF4 bugs, complete E2E test  
+**Blocker**: WF2 deduplication, WF4 consolidation  
+**Next Phase**: 1c — Dashboard MVP (SPEC-007b)  
 
 See @STATUS.md for session-level tracking.
 
@@ -39,10 +40,13 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 ## Load On-Demand (Never Memorize)
 | Topic | Reference |
 |-------|-----------|
+| Sales strategy | @docs/SALES-STRATEGY.md |
+| Skills usage guide | @skills/README.md |
 | Roadmap | @ROADMAP.md |
-| Current spec | @specs/consistency-checker.md (build this first) |
+| Current spec | @specs/SPEC-007b-dashboard-mvp.md (Phase 1c) |
 | Airtable patterns | @.claude/rules/airtable.md |
 | n8n patterns | @.claude/rules/n8n.md |
+| Skills usage rules | @.claude/rules/skills-usage.md |
 | Full architecture | @docs/architecture.md |
 | Decisions | @DECISIONS.md |
 | Guardrails | @docs/GUARDRAILS.md |
@@ -52,6 +56,37 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 | Reference data | @reference-data/ (forces, competitors, capabilities) |
 | Patterns | @patterns/ (force-matching, keywords, filters) |
 | AI prompts | @prompts/ (job-classification, email-triage) |
+
+## Project Skills
+
+Design system and domain skills available in `/skills/`. Read `@skills/README.md` for guidance on which skills to use when.
+
+**Key principle**: Skills are reference material, not requirements. Use what's relevant to current phase.
+
+### UI/UX Skills
+| Skill | When to Read |
+|-------|--------------|
+| `uk-police-design-system` | Colour tokens, typography, spacing, component specs |
+| `adhd-interface-design` | Focus modes, cognitive load, Context Capsule pattern |
+| `action-oriented-ux` | Three-Zone Model, keyboard navigation, 2-minute loop |
+| `b2b-visualisation` | Charts, sparklines, score display, badges |
+| `notification-system` | Alerts, toasts, batched delivery, severity tiers |
+| `board-dashboard-design` | Executive KPI dashboards (future) |
+| `competitive-analysis` | Best-in-class dashboard patterns reference |
+
+### Domain Skills
+| Skill | When to Read |
+|-------|--------------|
+| `uk-police-market-domain` | Police workforce, PIP levels, vetting, HMICFRS |
+| `lead-scoring-methodology` | Dual-track scoring (Managed Services + Agency) |
+| `intelligence-source-grading` | Data quality scoring, Admiralty Code |
+
+### Integration Skills
+| Skill | When to Read |
+|-------|--------------|
+| `hubspot-integration` | HubSpot ↔ Airtable sync patterns |
+| `technical-architecture` | React + n8n + Airtable stack patterns |
+| `uk-public-sector-procurement` | Tender APIs, frameworks (Phase 2+) |
 
 ## Session Protocol
 1. **Start**: Hooks inject context. Read STATUS.md.

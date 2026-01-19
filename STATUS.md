@@ -1,107 +1,160 @@
 # MI Platform — Session Status
 
 **Updated**: 19 January 2025
-**Phase**: 1c — React Dashboard (BUILD COMPLETE)
-**Session Goal**: Implement SPEC-007 React Dashboard
+**Phase**: 1 — Core Jobs Pipeline (completing)
+**Session Goal**: Comprehensive Review — Skills Integration & Spec Simplification
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **React Dashboard Build Complete** — Ready for Vercel deploy
+> **Fix WF2/WF4 bugs** — E2E test revealed deduplication and consolidation issues
 >
-> 12/14 acceptance criteria verified. Pending: Vercel deploy + timing validation.
+> Phase 1 pipeline works but has bugs. Dashboard spec simplified. Skills documented.
 >
-> **Local dev**: `cd dashboard && npm run dev` → http://localhost:3000
+> **Before dashboard**: Complete Phase 1 properly.
 
-**Blockers**: None
+**Blockers**: WF2 deduplication bug, WF4 consolidation bug (see PHASE-1-E2E-TEST.md)
 
-**Next step**: Deploy to Vercel with environment variables, then test timing on Monday.
+**Next step**: Debug WF2 deduplication logic, then WF4 consolidation.
 
 ---
 
-## ✅ Done This Session
-- [x] Implemented SPEC-007 React Dashboard (all 32 tasks)
-- [x] Created Next.js 14 app with TypeScript, Tailwind, shadcn/ui
-- [x] Built 4 views: Queue, Pipeline, Signals, Forces
-- [x] Created API routes with Airtable integration
-- [x] Implemented React Query for data fetching
-- [x] Built 30+ badge variants (ported from V1)
-- [x] Dark-first theme applied
-- [x] Verified guardrails compliance (G-002, G-008, G-011)
-- [x] Build passes (12 pages generated)
-- [x] All routes tested and returning 200
-- [x] Fixed case-sensitivity bug (status values lowercase in Airtable)
-- [x] Browser-tested Queue (20 ready opps) and Pipeline (24 total) views
+## ✅ Done This Session (19 Jan)
+
+### Spec Restructuring
+- [x] Created SPEC-007b: Dashboard MVP (simplified Three-Zone layout)
+- [x] Updated SPEC-007a to "Future Phase" with prerequisites
+- [x] Updated SPEC-008 to "Future Phase" with prerequisites
+- [x] Created skills/README.md with usage guide
+- [x] Updated ROADMAP.md with schema evolution path
+- [x] Updated ROADMAP.md with dashboard evolution path
+- [x] Added future features section to ROADMAP.md
+
+### Skills Migration (Previous Session)
+- [x] Migrated 13 skills from V1 to `skills/` folder
+- [x] Updated CLAUDE.md with skills table
+
+### Dashboard Build (Previous Session)
+- [x] Built Next.js 14 dashboard (SPEC-007)
+- [x] Note: Dashboard exists but spec has been restructured
+
+---
+
+## 📋 Spec Status
+
+| Spec | Status | Notes |
+|------|--------|-------|
+| SPEC-001: Airtable Schema | ✅ Complete | 4 tables created |
+| SPEC-002: Jobs Ingestion | ✅ Built | WF1-WF2, bug in dedup |
+| SPEC-003: Signal Classification | ✅ Built | WF3 working |
+| SPEC-004: Opportunity Creator | ⚠️ Bug | WF4 consolidation issue |
+| SPEC-005: Opportunity Enricher | ✅ Built | WF5 working |
+| SPEC-006: Monday Review | 🔀 Absorbed | Into SPEC-007b |
+| SPEC-007: React Dashboard | 🔀 Replaced | By SPEC-007b |
+| **SPEC-007a: Full UI** | ⏸️ Deferred | Needs scoring model |
+| **SPEC-007b: Dashboard MVP** | ✅ Ready | Simplified spec |
+| **SPEC-008: Morning Brief** | ⏸️ Deferred | Needs infrastructure |
+
+---
 
 ## 🔄 In Progress
-- [ ] Vercel deployment (user action)
-- [ ] Timing validation: review 5 opps ≤15 min (Monday test)
 
-## ⏳ Up Next
-1. Deploy dashboard to Vercel
-2. Monday morning: Test timing with React dashboard
-3. Phase 1 + 1c strategic verification (Chat)
-4. After validation: Mark Phase 1c complete
+### Phase 1 Completion
+1. [ ] Fix WF2 deduplication bug
+2. [ ] Fix WF4 consolidation bug  
+3. [ ] Re-run E2E test
+4. [ ] Phase 1 sign-off
+
+### Phase 1c Dashboard MVP
+1. [ ] Add schema fields (draft_subject, draft_body, actioned_at, skip_reason)
+2. [ ] Align existing dashboard build to SPEC-007b
+3. [ ] Test timing (≤15 min for 5 opps)
+4. [ ] Deploy to production
 
 ---
 
 ## 📊 Phase Progress
 
 ```
-Phase 1: [██████████] 99% — Core Jobs Pipeline (burn-in)
-Phase 1c: [█████████░] 90% — React Dashboard (deploy pending)
+Phase 1: [████████░░] 85% — Core Jobs Pipeline
 
-Active Workflows:
-  ✅ WF1: Jobs Trigger (RqFcVMcQ7I8t4dIM) — Daily 06:00
-  ✅ WF2: Jobs Receiver (nGBkihJb6279HOHD) — Webhook
-  ✅ WF3: Jobs Classifier (w4Mw2wX9wBeimYP2) — Every 15min
-  ✅ WF4: Opportunity Creator (7LYyzpLC5GzoJROn) — Every 15min
-  ✅ WF5: Opportunity Enricher (Lb5iOr1m93kUXBC0) — Every 15min
-  ✅ WF6: Send Outreach (AeEDcJ5FD2YGCSV1) — Webhook (button-triggered)
+  ✅ Airtable schema (4 tables, 48 forces)
+  ✅ WF1: Jobs Trigger
+  ✅ WF2: Jobs Receiver (⚠️ dedup bug)
+  ✅ WF3: Jobs Classifier
+  ⚠️ WF4: Opportunity Creator (consolidation bug)
+  ✅ WF5: Opportunity Enricher
+  ✅ WF6: Send Outreach
+  
+  Remaining:
+  □ Fix WF2 + WF4 bugs
+  □ Complete E2E test
+  □ Phase 1 sign-off
 
-Phase 1 Specs:
-  ✅ SPEC-001: Airtable Schema
-  ✅ SPEC-002: Jobs Ingestion
-  ✅ SPEC-003: Signal Classification
-  ✅ SPEC-004: Opportunity Creator
-  ✅ SPEC-005: Opportunity Enricher
-  ✅ SPEC-006: Monday Review (11/11 criteria)
+Phase 1c: [██████░░░░] 60% — Dashboard MVP
 
-Phase 1c (Dashboard):
-  ✅ SPEC-007: React Dashboard (12/14 criteria verified)
+  ✅ SPEC-007b written
+  ✅ Next.js app exists (from SPEC-007)
+  □ Schema fields added
+  □ Aligned to SPEC-007b
+  □ Timing validated
+  □ Deployed
 
-Dashboard Stack:
-  - Next.js 14.2.35 + TypeScript
-  - TanStack Query 5.x
-  - Tailwind CSS + shadcn/ui
-  - Dark-first design
-
-Remaining:
-  □ Vercel deployment
-  □ Timing validation (≤15 min)
-  □ Phase 1 + 1c strategic verification
+Future (Deferred):
+  ⏸️ SPEC-007a: Full UI (needs scoring)
+  ⏸️ SPEC-008: Morning Brief (needs infrastructure)
 ```
+
+---
+
+## 🏗️ Schema Status
+
+**Current (4 tables)**:
+- Forces: 48 records ✅
+- Signals: Active ✅
+- Opportunities: Active ✅
+- Contacts: Ready ✅
+
+**Phase 1c additions needed**:
+- [ ] Opportunities.draft_subject
+- [ ] Opportunities.draft_body
+- [ ] Opportunities.actioned_at
+- [ ] Opportunities.skip_reason
+
+---
+
+## 💡 Decisions Made This Session
+
+| Decision | Rationale |
+|----------|-----------|
+| Created SPEC-007b (Dashboard MVP) | SPEC-007a requires schema expansion V2 doesn't have |
+| Deferred SPEC-007a | Dual-track scoring needs Phase 1b + schema fields |
+| Deferred SPEC-008 | Morning Brief needs overnight tracking infrastructure |
+| Created skills/README.md | Skills are reference, not requirements |
+| Updated ROADMAP with evolution paths | Future features documented, won't be forgotten |
+
+**Log in DECISIONS.md**: Yes, after this session.
 
 ---
 
 ## ⚠️ Blockers
-None
+
+1. **WF2 Deduplication** — Allowing duplicates through
+2. **WF4 Consolidation** — Not grouping signals correctly
+
+See `specs/PHASE-1-E2E-TEST.md` for details.
 
 ---
 
 ## 🚨 Mission Reminder
+
 *From [ANCHOR.md](ANCHOR.md):*
 - 3-5 ready-to-send leads every Monday
-- ≤15 min review time
+- ≤15 min review time  
 - Reduce James's cognitive load
 
-**Pipeline flow:**
-```
-Indeed jobs → WF1 triggers → WF2 ingests → WF3 classifies
-→ WF4 creates opportunities → WF5 enriches → WF6 sends
-→ Monday: Review and send in ≤15 minutes
-```
+**Today's simplification serves the mission**: Build what works with current schema, defer complexity that requires infrastructure we don't have.
 
 ---
 

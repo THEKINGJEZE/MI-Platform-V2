@@ -67,6 +67,22 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Rule**: If same info exists in two places, delete the duplicate.  
 **Files**: `docs/DEPENDENCY-MAP.md`, updated `README.md`
 
+#### A8: Three-Zone Dashboard Layout + Morning Brief
+**Date**: 19 January 2025  
+**Decision**: Adopt V1's three-zone dashboard layout (Queue | Context | Action) and Morning Brief ritual as the canonical UI patterns for V2.  
+**Context**: Strategy document Section 11 specified a "vertical scroll with sectioned card list" design. V1 implemented a three-zone split instead. Skills were created to codify V1's patterns.  
+**Resolution**: The skills represent tested, deliberate design. The strategy document Section 11 was theoretical and never built. Update strategy to match skills, not vice versa.  
+**Rationale**:
+- V1's layout was tested and works well for ADHD workflows
+- Skills codify the patterns: Action-Oriented UX (three-zone), ADHD Interface Design (Morning Flow Protocol)
+- The real problem with V1 was backend complexity, not UI design
+- V2's simplified backend (fewer tables, cleaner workflows) solves the actual issue  
+**Action**:
+- SPEC-007a aligned as written (implements Three-Zone Model)
+- SPEC-008 aligned as written (implements Morning Flow Protocol)
+- Strategy document Section 11 to be updated to match skills  
+**Skills referenced**: `action-oriented-ux`, `adhd-interface-design`, `uk-police-design-system`, `notification-system`, `b2b-visualisation`
+
 ---
 
 ### Tier 2 — Phase-Level (Current Phase Only)
@@ -85,6 +101,37 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Relationship**: Parallel to Phase 1b (competitors), both depend on Phase 1 complete
 **Replaces**: Airtable Interface from SPEC-006 (which remains as fallback)
 **Reference**: Strategy Section 11, Section 13, `docs/archive/dashboard-v1-review.md`
+
+#### P1c-01: Dashboard MVP (SPEC-007b) Before Full UI (SPEC-007a)
+**Date**: 19 January 2025
+**Decision**: Create simplified dashboard spec (SPEC-007b) that works with current 4-table schema. Defer full UI features (SPEC-007a) until schema supports them.
+**Context**: V1 skills describe dual-track scoring, score breakdowns, contact confidence — features requiring schema fields that don't exist. Building the full UI would require premature schema expansion.
+**Resolution**:
+- SPEC-007b: Dashboard MVP with Three-Zone layout, keyboard nav, progress feedback, undo
+- SPEC-007a: Deferred until Phase 1b complete + schema expanded
+- SPEC-008: Deferred until dashboard validated + overnight tracking exists
+**Why**: Avoids V1's mistake (complexity creep). Build what works now, enhance later.
+**Specs affected**: SPEC-007a (deferred), SPEC-007b (created), SPEC-008 (deferred)
+
+#### P1c-02: Skills Are Reference, Not Requirements
+**Date**: 19 January 2025
+**Decision**: Skills folder contains patterns validated in V1, but they are reference material for future phases, not mandatory implementations for Phase 1.
+**Context**: 13 skills migrated from V1 covering scoring, visualisation, notifications, procurement — patterns that require infrastructure V2 doesn't have yet.
+**Resolution**: Created `skills/README.md` documenting which skills to use when. Skills inform design but don't define scope.
+**Why**: Prevents scope creep while preserving valuable knowledge.
+**Files**: `skills/README.md`
+
+#### P1c-03: Schema Evolution Path Documented
+**Date**: 19 January 2025
+**Decision**: Document exactly how schema will grow across phases, not just current state.
+**Context**: V1 suffered from undocumented schema growth — too many tables, unclear field purposes.
+**Resolution**: ROADMAP.md now includes "Schema Evolution" section showing:
+- Current: 4 tables (Forces, Signals, Opportunities, Contacts)
+- Phase 1c: +4 fields on Opportunities (draft_subject, draft_body, actioned_at, skip_reason)
+- Future SPEC-007a: +7 fields for scoring
+- Future SPEC-008: +2 fields for follow-ups
+**Why**: Prevents ad-hoc schema changes. Every addition planned.
+**Files**: `ROADMAP.md` (Schema Evolution section)
 
 ---
 
