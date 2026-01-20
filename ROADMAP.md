@@ -38,19 +38,26 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 **Goal**: Detect when competitors post jobs for police forces, trigger interception
 
 **Acceptance Criteria**:
-- [ ] Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care)
-- [ ] Competitor signals classified and attributed to correct force
-- [ ] Hot lead flagging working (competitor signal = higher priority)
-- [ ] Alert on hot leads (Slack or email)
-- [ ] Interception message template in use
+- [ ] Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care) — ⚠️ Blocked on Bright Data config
+- [x] Competitor signals classified and attributed to correct force
+- [x] Hot lead flagging working (competitor signal = higher priority)
+- [ ] Alert on hot leads (Slack or email) — Dashboard P1 filter provides visibility
+- [x] Interception message template in use
 
 **Dependencies**: Phase 1 complete
 
-**Spec**: `specs/phase-1b-competitors.md` (to be created)
+**Spec**: `specs/SPEC-1b-competitor-monitoring.md` ✅ Built
+**Implementation**: `specs/IMPL-1b-competitor-monitoring.md`
+
+**Workflows**:
+- WF8: MI: Competitor Trigger (`rt3K4H5NAco5VeI0`) — Inactive, blocked on Bright Data
+- WF9: MI: Competitor Receiver (`VLbSZp5cGp1OUQZy`) — Active ✅
 
 **Skills used**: `competitive-analysis`, `intelligence-source-grading`
 
 **Duration**: ~2 weeks
+
+**Status**: Workflows built. Blocked on external task (Bright Data collector configuration).
 
 ---
 
@@ -360,6 +367,7 @@ A phase is complete when:
 | SPEC-007a: Full UI Foundation | Future | ⏸️ Deferred |
 | SPEC-007b: Dashboard MVP | 1c | ✅ Built |
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
+| SPEC-1b: Competitor Monitoring | 1b | ✅ Built (blocked on Bright Data) |
 
 ---
 

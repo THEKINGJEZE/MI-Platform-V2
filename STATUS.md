@@ -29,6 +29,27 @@
 
 ## ✅ Done This Session (20 Jan)
 
+### SPEC-1b Competitor Monitoring — Workflows Built ✅
+- [x] Stage 1 PARSE — Extracted acceptance criteria from ROADMAP.md
+- [x] Stage 2 AUDIT — Verified schema, explored archived workflow
+- [x] Stage 3 PLAN — 21 tasks across 5 phases
+- [x] Stage 4 BUILD — All phases complete:
+  - Phase A: Created `prompts/competitor-interception.md`
+  - Phase B: Built WF9 (MI: Competitor Receiver) — 21 nodes, ACTIVE
+  - Phase C: Built WF8 (MI: Competitor Trigger) — 8 nodes, INACTIVE (blocked)
+  - Phase D: Testing PASSED — Signal + Opportunity creation verified
+  - Phase E: WF9 activated, WF8 blocked on Bright Data collectors
+- [x] Stage 5 VERIFY — 3/5 acceptance criteria pass, 1 blocked, 1 deferred
+- [x] Stage 6 DOCUMENT — ROADMAP.md and this file updated
+
+**Workflows Created**:
+- WF9: `VLbSZp5cGp1OUQZy` — MI: Competitor Receiver (ACTIVE)
+- WF8: `rt3K4H5NAco5VeI0` — MI: Competitor Trigger (INACTIVE - needs Bright Data)
+
+**Blocker**: WF8 requires Bright Data collector configuration (external task)
+
+**Implementation tracker**: `specs/IMPL-1b-competitor-monitoring.md`
+
 ### VPS Deployment Complete
 - [x] Created `dashboard/ecosystem.config.js` — PM2 process manager config
 - [x] Created `dashboard/deploy.sh` — VPS deployment script
@@ -169,8 +190,9 @@
 | SPEC-006: Monday Review | 🔀 Absorbed | Into SPEC-007b |
 | SPEC-007: React Dashboard | 🔀 Replaced | By SPEC-007b |
 | **SPEC-007a: Full UI** | ⏸️ Deferred | Aligned with Sales Strategy (P1/P2/P3 priority model) |
-| **SPEC-007b: Dashboard MVP** | ✅ Ready | Simplified spec |
+| **SPEC-007b: Dashboard MVP** | ✅ Deployed | Live at dashboard.peelplatforms.co.uk |
 | **SPEC-008: Morning Brief** | ⏸️ Deferred | Needs infrastructure |
+| **SPEC-1b: Competitor Monitoring** | ✅ Built | WF8/WF9 built; WF8 blocked on Bright Data |
 
 ---
 

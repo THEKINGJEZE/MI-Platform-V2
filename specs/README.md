@@ -60,7 +60,8 @@ Examples:
 | [SPEC-004-opportunity-creator.md](SPEC-004-opportunity-creator.md) | 1 | ✅ Complete |
 | [SPEC-005-opportunity-enricher.md](SPEC-005-opportunity-enricher.md) | 1 | ✅ Complete |
 | [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | ✅ Complete |
-| SPEC-007-react-dashboard.md | 1c | Not started |
+| [SPEC-007b-dashboard-mvp.md](SPEC-007b-dashboard-mvp.md) | 1c | ✅ Complete |
+| [SPEC-1b-competitor-monitoring.md](SPEC-1b-competitor-monitoring.md) | 1b | 📝 Draft |
 
 ## Archived Specs
 
