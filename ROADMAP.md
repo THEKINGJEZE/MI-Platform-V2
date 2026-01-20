@@ -358,7 +358,7 @@ A phase is complete when:
 | SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-007b |
 | SPEC-007: React Dashboard | 1c | 🔀 Replaced by SPEC-007b |
 | SPEC-007a: Full UI Foundation | Future | ⏸️ Deferred |
-| SPEC-007b: Dashboard MVP | 1c | ✅ Ready |
+| SPEC-007b: Dashboard MVP | 1c | ✅ Built |
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
 
 ---
@@ -373,4 +373,4 @@ A phase is complete when:
 
 ---
 
-*Last updated: 19 January 2025*
+*Last updated: 20 January 2025*
