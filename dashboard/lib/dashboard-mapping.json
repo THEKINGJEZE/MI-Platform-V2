@@ -1,0 +1,127 @@
+{
+  "tableToDashboard": {
+    "tblhYLp3Inv3oYMAl": {
+      "tableName": "Opportunities",
+      "dashboardPages": ["Focus Mode", "Morning Brief", "Board"],
+      "components": [
+        "Focus Mode > Queue Panel",
+        "Focus Mode > Now Card",
+        "Morning Brief > Overnight Summary",
+        "Board > Executive Snapshot > KPIs"
+      ]
+    },
+    "tblWCmkGvazhS4eRm": {
+      "tableName": "Signal_History",
+      "dashboardPages": ["Board", "Morning Brief"],
+      "components": [
+        "Board > Executive Snapshot > Signal Feed",
+        "Board > Strategic Signals Tab",
+        "Morning Brief > Priority Alerts"
+      ]
+    },
+    "tbl7WqTYwcPl3V2c8": {
+      "tableName": "Forces",
+      "dashboardPages": ["Forces Dashboard", "Board"],
+      "components": [
+        "Forces Dashboard > Priority List",
+        "Forces Dashboard > KPI Cards",
+        "Board > Market Landscape"
+      ]
+    },
+    "tbl8kxbzdxjJZFXOl": {
+      "tableName": "Organisations",
+      "dashboardPages": ["Board"],
+      "components": [
+        "Board > Executive Snapshot > KPIs (Legacy)"
+      ]
+    },
+    "tblpTmJqo5L3Ia666": {
+      "tableName": "Jobs (Clean)",
+      "dashboardPages": [],
+      "components": [],
+      "note": "Feeds Signal_History indirectly via MI: Process: Signal Detector"
+    }
+  },
+  "componentDefinitions": [
+    {
+      "id": "focus-queue",
+      "label": "Focus Mode > Queue Panel",
+      "sourceTable": "tblhYLp3Inv3oYMAl",
+      "apiRoute": "/api/opportunities",
+      "storeFile": "opportunities-store.ts",
+      "uiFile": "app/focus/page.tsx"
+    },
+    {
+      "id": "focus-now-card",
+      "label": "Focus Mode > Now Card",
+      "sourceTable": "tblhYLp3Inv3oYMAl",
+      "apiRoute": "/api/opportunities/[id]",
+      "storeFile": "opportunities-store.ts",
+      "uiFile": "app/focus/page.tsx"
+    },
+    {
+      "id": "board-kpis",
+      "label": "Board > Executive Snapshot > KPIs",
+      "sourceTables": ["tbl8kxbzdxjJZFXOl", "tblhYLp3Inv3oYMAl"],
+      "apiRoute": "/api/board/kpis",
+      "storeFile": "board-store.ts",
+      "uiFile": "app/board/tabs/executive-snapshot.tsx"
+    },
+    {
+      "id": "board-signals",
+      "label": "Board > Executive Snapshot > Signal Feed",
+      "sourceTable": "tblWCmkGvazhS4eRm",
+      "apiRoute": "/api/board/signals",
+      "storeFile": "board-store.ts",
+      "uiFile": "app/board/tabs/executive-snapshot.tsx"
+    },
+    {
+      "id": "board-strategic-signals",
+      "label": "Board > Strategic Signals Tab",
+      "sourceTable": "tblWCmkGvazhS4eRm",
+      "apiRoute": "/api/board/signals",
+      "storeFile": "board-store.ts",
+      "uiFile": "app/board/tabs/strategic-signals.tsx"
+    },
+    {
+      "id": "board-market-landscape",
+      "label": "Board > Market Landscape",
+      "sourceTable": "tbl7WqTYwcPl3V2c8",
+      "apiRoute": "/api/board/market-landscape",
+      "storeFile": "board-store.ts",
+      "uiFile": "app/board/tabs/market-landscape.tsx"
+    },
+    {
+      "id": "forces-list",
+      "label": "Forces Dashboard > Priority List",
+      "sourceTable": "tbl7WqTYwcPl3V2c8",
+      "apiRoute": "/api/forces",
+      "storeFile": "forces-store.ts",
+      "uiFile": "app/forces/page.tsx"
+    },
+    {
+      "id": "forces-kpis",
+      "label": "Forces Dashboard > KPI Cards",
+      "sourceTable": "tbl7WqTYwcPl3V2c8",
+      "apiRoute": "/api/forces/metrics",
+      "storeFile": "forces-store.ts",
+      "uiFile": "app/forces/page.tsx"
+    },
+    {
+      "id": "morning-overnight",
+      "label": "Morning Brief > Overnight Summary",
+      "sourceTables": ["tblhYLp3Inv3oYMAl", "tblWCmkGvazhS4eRm"],
+      "apiRoute": "/api/morning/summary",
+      "storeFile": "session-store.ts",
+      "uiFile": "app/morning/page.tsx"
+    },
+    {
+      "id": "morning-alerts",
+      "label": "Morning Brief > Priority Alerts",
+      "sourceTable": "tblWCmkGvazhS4eRm",
+      "apiRoute": "/api/board/signals",
+      "storeFile": "session-store.ts",
+      "uiFile": "app/morning/page.tsx"
+    }
+  ]
+}

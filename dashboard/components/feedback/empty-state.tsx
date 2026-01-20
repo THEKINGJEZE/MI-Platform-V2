@@ -1,53 +1,132 @@
-/**
- * Empty State — When queue is empty
- *
- * Per SPEC-007b: "All done!" message with pipeline link
- */
+"use client";
 
-'use client';
-
-import * as React from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight, RefreshCw } from 'lucide-react';
+import { type LucideIcon, Inbox, RefreshCw, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface EmptyStateProps {
-  onRefresh: () => void;
+  /** Icon to display */
+  icon?: LucideIcon;
+  /** Main title */
+  title: string;
+  /** Description text */
+  description: string;
+  /** Primary action button */
+  primaryAction?: {
+    label: string;
+    onClick: () => void;
+    icon?: LucideIcon;
+  };
+  /** Secondary action button */
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+    icon?: LucideIcon;
+  };
+  className?: string;
 }
 
-export function EmptyState({ onRefresh }: EmptyStateProps) {
+/**
+ * Empty State Component
+ *
+ * From spec: "Component States - Empty State"
+ * - Friendly illustration (not generic)
+ * - Clear message explaining why empty
+ * - Primary action: "Refresh" or "Adjust Filters"
+ * - Secondary action: "View All Leads"
+ */
+export function EmptyState({
+  icon: Icon = Inbox,
+  title,
+  description,
+  primaryAction,
+  secondaryAction,
+  className,
+}: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-muted">
-        <CheckCircle2 className="h-8 w-8 text-success" />
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center py-12 text-center",
+        className
+      )}
+    >
+      {/* Icon Container */}
+      <div className="rounded-full bg-surface-1 p-4 mb-4">
+        <Icon className="h-8 w-8 text-muted" />
       </div>
 
-      <h2 className="text-xl font-semibold text-primary">All done!</h2>
+      {/* Title */}
+      <h3 className="text-lg font-medium text-primary mb-1">{title}</h3>
 
-      <p className="mt-2 max-w-sm text-secondary">
-        No opportunities ready to review. Check back later or view the Pipeline
-        for in-progress items.
-      </p>
+      {/* Description */}
+      <p className="text-sm text-muted max-w-sm mb-4">{description}</p>
 
-      <div className="mt-6 flex gap-3">
-        <Link href="/pipeline">
-          <Button
-            variant="outline"
-            className="border-default bg-surface-1 text-secondary hover:bg-surface-2"
-          >
-            View Pipeline
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </Link>
-
-        <Button
-          onClick={onRefresh}
-          className="bg-action text-primary hover:bg-action-hover"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
+      {/* Actions */}
+      {(primaryAction || secondaryAction) && (
+        <div className="flex items-center gap-3">
+          {primaryAction && (
+            <Button
+              onClick={primaryAction.onClick}
+              className="gap-2"
+            >
+              {primaryAction.icon && (
+                <primaryAction.icon className="h-4 w-4" />
+              )}
+              {primaryAction.label}
+            </Button>
+          )}
+          {secondaryAction && (
+            <Button
+              variant="ghost"
+              onClick={secondaryAction.onClick}
+              className="gap-2 text-muted hover:text-secondary"
+            >
+              {secondaryAction.label}
+              {secondaryAction.icon ? (
+                <secondaryAction.icon className="h-4 w-4" />
+              ) : (
+                <ArrowRight className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+/**
+ * Pre-configured Empty State for Leads
+ */
+export function LeadsEmptyState({
+  onRefresh,
+  onViewAll,
+}: {
+  onRefresh?: () => void;
+  onViewAll?: () => void;
+}) {
+  return (
+    <EmptyState
+      icon={Inbox}
+      title="No leads to show"
+      description="There are no leads matching your current filters. Try adjusting your filters or refresh to check for new leads."
+      primaryAction={
+        onRefresh
+          ? {
+              label: "Refresh",
+              onClick: onRefresh,
+              icon: RefreshCw,
+            }
+          : undefined
+      }
+      secondaryAction={
+        onViewAll
+          ? {
+              label: "View All Leads",
+              onClick: onViewAll,
+            }
+          : undefined
+      }
+    />
   );
 }

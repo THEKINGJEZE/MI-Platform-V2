@@ -1,0 +1,60 @@
+# MI Platform Dashboard (React/Next.js) - Docker Compose
+# Uses Traefik for reverse proxy and SSL
+# Replaces the Reflex dashboard on dashboard.peelplatforms.co.uk
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mi-dashboard-react
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - traefik-public
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+
+      # Frontend (Next.js) - Main entry point
+      - "traefik.http.routers.dashboard-react.rule=Host(`dashboard.peelplatforms.co.uk`)"
+      - "traefik.http.routers.dashboard-react.entrypoints=websecure"
+      - "traefik.http.routers.dashboard-react.tls=true"
+      - "traefik.http.routers.dashboard-react.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard-react.service=dashboard-react"
+      - "traefik.http.routers.dashboard-react.middlewares=dashboard-react-headers"
+      - "traefik.http.services.dashboard-react.loadbalancer.server.port=3000"
+
+      # Headers middleware for HTTPS proxy
+      - "traefik.http.middlewares.dashboard-react-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+
+      # Health check label (use /forces since / redirects)
+      - "traefik.http.services.dashboard-react.loadbalancer.healthcheck.path=/forces"
+      - "traefik.http.services.dashboard-react.loadbalancer.healthcheck.interval=30s"
+
+    healthcheck:
+      # Accept 2xx or 3xx (redirects) as healthy
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/forces', (r) => process.exit(r.statusCode >= 200 && r.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  traefik-public:
+    external: true

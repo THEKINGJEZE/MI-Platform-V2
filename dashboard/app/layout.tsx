@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Providers } from "@/components/providers";
 import "./globals.css";
-import { Providers } from "./providers";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MI Platform | Peel Solutions",
-  description: "Market Intelligence Dashboard for UK Police Business Development",
+  title: "MI Platform | Market Intelligence",
+  description: "UK Police Market Intelligence Dashboard",
 };
 
 export default function RootLayout({
@@ -27,8 +29,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${ibmPlexMono.variable} antialiased`}
       >
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-action focus:text-white focus:rounded-md"
+        >
+          Skip to main content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

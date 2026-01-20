@@ -1,22 +1,36 @@
 /**
- * Airtable API Client
+ * Airtable Integration for V2
  *
- * Handles all Airtable operations for the MI Platform dashboard.
- * Uses REST API directly (no SDK) for full control.
+ * Simplified adapter for 4-table schema.
+ * No dual-track scoring, contracts, or email features.
  */
 
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY!;
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID!;
+import type {
+  Opportunity,
+  Force,
+  Signal,
+  Contact,
+  PriorityTier,
+  OpportunityStatus,
+  ContactConfidence,
+  OutreachChannel,
+} from '@/lib/types/opportunity';
 
-// Table IDs from MI Platform base
-export const TABLES = {
+// Environment variables
+const API_KEY = process.env.AIRTABLE_API_KEY;
+const BASE_ID = process.env.AIRTABLE_BASE_ID;
+
+// Table IDs from .env.local
+const TABLES = {
   forces: process.env.AIRTABLE_TABLE_FORCES!,
   contacts: process.env.AIRTABLE_TABLE_CONTACTS!,
   signals: process.env.AIRTABLE_TABLE_SIGNALS!,
   opportunities: process.env.AIRTABLE_TABLE_OPPORTUNITIES!,
-} as const;
+};
 
-type TableName = keyof typeof TABLES;
+// =============================================================================
+// AIRTABLE API HELPERS
+// =============================================================================
 
 interface AirtableRecord<T = Record<string, unknown>> {
   id: string;
@@ -24,225 +38,406 @@ interface AirtableRecord<T = Record<string, unknown>> {
   fields: T;
 }
 
-interface AirtableListResponse<T> {
+interface AirtableResponse<T> {
   records: AirtableRecord<T>[];
   offset?: string;
 }
 
-interface AirtableError {
-  error: {
-    type: string;
-    message: string;
-  };
-}
-
-/**
- * Base fetch function with authentication and error handling
- */
 async function airtableFetch<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${endpoint}`;
+  tableId: string,
+  options?: {
+    filterByFormula?: string;
+    maxRecords?: number;
+    sort?: { field: string; direction: 'asc' | 'desc' }[];
+    fields?: string[];
+  }
+): Promise<AirtableRecord<T>[]> {
+  if (!API_KEY || !BASE_ID) {
+    throw new Error('Missing Airtable credentials');
+  }
+
+  const params = new URLSearchParams();
+  if (options?.filterByFormula) {
+    params.set('filterByFormula', options.filterByFormula);
+  }
+  if (options?.maxRecords) {
+    params.set('maxRecords', options.maxRecords.toString());
+  }
+  if (options?.sort) {
+    options.sort.forEach((s, i) => {
+      params.set(`sort[${i}][field]`, s.field);
+      params.set(`sort[${i}][direction]`, s.direction);
+    });
+  }
+  if (options?.fields) {
+    options.fields.forEach((f) => params.append('fields[]', f));
+  }
+
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${tableId}?${params.toString()}`;
 
   const response = await fetch(url, {
-    ...options,
     headers: {
-      'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+      Authorization: `Bearer ${API_KEY}`,
       'Content-Type': 'application/json',
-      ...options.headers,
     },
+    next: { revalidate: 60 },
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const error = data as AirtableError;
-    throw new Error(`Airtable error: ${error.error?.message || response.statusText}`);
+    const error = await response.text();
+    throw new Error(`Airtable API error: ${response.status} - ${error}`);
   }
 
-  return data as T;
+  const data: AirtableResponse<T> = await response.json();
+  return data.records;
 }
 
-/**
- * List records from a table with optional filtering
- */
-export async function listRecords<T>(
-  table: TableName,
-  options: {
-    filterByFormula?: string;
-    sort?: Array<{ field: string; direction?: 'asc' | 'desc' }>;
-    maxRecords?: number;
-    offset?: string;
-    fields?: string[];
-  } = {}
-): Promise<{ records: AirtableRecord<T>[]; offset?: string }> {
-  const params = new URLSearchParams();
-
-  if (options.filterByFormula) {
-    params.append('filterByFormula', options.filterByFormula);
+async function airtableUpdate(
+  tableId: string,
+  recordId: string,
+  fields: Record<string, unknown>
+): Promise<void> {
+  if (!API_KEY || !BASE_ID) {
+    throw new Error('Missing Airtable credentials');
   }
 
-  if (options.sort) {
-    options.sort.forEach((s, i) => {
-      params.append(`sort[${i}][field]`, s.field);
-      if (s.direction) {
-        params.append(`sort[${i}][direction]`, s.direction);
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${tableId}/${recordId}`;
+
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fields }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Airtable API error: ${response.status} - ${error}`);
+  }
+}
+
+// =============================================================================
+// TYPE MAPPERS
+// =============================================================================
+
+function mapPriorityTier(tier?: string): PriorityTier {
+  const mapping: Record<string, PriorityTier> = {
+    hot: 'hot',
+    high: 'high',
+    medium: 'medium',
+    low: 'low',
+  };
+  return mapping[tier?.toLowerCase() || ''] || 'medium';
+}
+
+function mapStatus(status?: string): OpportunityStatus {
+  const mapping: Record<string, OpportunityStatus> = {
+    new: 'new',
+    ready: 'ready',
+    sent: 'sent',
+    replied: 'replied',
+    won: 'won',
+    lost: 'lost',
+    dormant: 'dormant',
+    // V1 compatibility
+    researching: 'new',
+    actioned: 'sent',
+  };
+  return mapping[status?.toLowerCase() || ''] || 'new';
+}
+
+function mapContactConfidence(confidence?: string): ContactConfidence {
+  const mapping: Record<string, ContactConfidence> = {
+    verified: 'verified',
+    likely: 'likely',
+    guess: 'guess',
+    none: 'none',
+  };
+  return mapping[confidence?.toLowerCase() || ''] || 'none';
+}
+
+function mapChannel(channel?: string): OutreachChannel {
+  return channel?.toLowerCase() === 'linkedin' ? 'linkedin' : 'email';
+}
+
+// =============================================================================
+// AIRTABLE FIELD TYPES
+// =============================================================================
+
+interface AirtableOpportunityFields {
+  name?: string;
+  force?: string[];
+  signals?: string[];
+  signal_count?: number;
+  signal_types?: string;
+  priority_tier?: string;
+  status?: string;
+  contact?: string[];
+  contact_confidence?: string;
+  why_now?: string;
+  outreach_draft?: string;
+  outreach_channel?: string;
+  notes?: string;
+  created_at?: string;
+}
+
+interface AirtableForceFields {
+  name?: string;
+  short_name?: string;
+  region?: string;
+  size?: string;
+}
+
+interface AirtableSignalFields {
+  type?: string;
+  source?: string;
+  title?: string;
+  detected_at?: string;
+}
+
+interface AirtableContactFields {
+  name?: string;
+  role?: string;
+  email?: string;
+  linkedin_url?: string;
+}
+
+// =============================================================================
+// CACHES
+// =============================================================================
+
+let forcesCache: Map<string, Force> | null = null;
+let forcesCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getForces(): Promise<Map<string, Force>> {
+  const now = Date.now();
+  if (forcesCache && now - forcesCacheTime < CACHE_TTL) {
+    return forcesCache;
+  }
+
+  const records = await airtableFetch<AirtableForceFields>(TABLES.forces);
+  forcesCache = new Map(
+    records.map((r) => [
+      r.id,
+      {
+        id: r.id,
+        name: r.fields.name || 'Unknown Force',
+        shortName: r.fields.short_name,
+        region: r.fields.region,
+        size: r.fields.size,
+      },
+    ])
+  );
+  forcesCacheTime = now;
+  return forcesCache;
+}
+
+// =============================================================================
+// PUBLIC API
+// =============================================================================
+
+/**
+ * Fetch opportunities for the review queue
+ */
+export async function fetchOpportunities(options?: {
+  status?: string;
+  limit?: number;
+}): Promise<Opportunity[]> {
+  const filters: string[] = [];
+
+  if (options?.status) {
+    filters.push(`{status} = "${options.status}"`);
+  } else {
+    // Default: show actionable opportunities
+    filters.push(
+      `NOT(OR({status} = "won", {status} = "lost", {status} = "dormant"))`
+    );
+  }
+
+  const filterFormula =
+    filters.length > 1 ? `AND(${filters.join(', ')})` : filters[0] || '';
+
+  const records = await airtableFetch<AirtableOpportunityFields>(
+    TABLES.opportunities,
+    {
+      filterByFormula: filterFormula,
+      maxRecords: options?.limit || 50,
+      sort: [{ field: 'created_at', direction: 'desc' }],
+    }
+  );
+
+  // Get forces for lookup
+  const forces = await getForces();
+
+  // Fetch linked signals
+  const signalIds = new Set<string>();
+  records.forEach((r) => {
+    r.fields.signals?.forEach((id) => signalIds.add(id));
+  });
+
+  const signalsMap = new Map<string, Signal>();
+  if (signalIds.size > 0) {
+    const signalRecords = await airtableFetch<AirtableSignalFields>(
+      TABLES.signals,
+      {
+        filterByFormula: `OR(${Array.from(signalIds)
+          .map((id) => `RECORD_ID()='${id}'`)
+          .join(',')})`,
       }
+    );
+    signalRecords.forEach((s) => {
+      signalsMap.set(s.id, {
+        id: s.id,
+        type: s.fields.type || 'unknown',
+        source: s.fields.source || 'unknown',
+        title: s.fields.title || '',
+        detectedAt: s.fields.detected_at || s.createdTime,
+      });
     });
   }
 
-  if (options.maxRecords) {
-    params.append('maxRecords', String(options.maxRecords));
+  // Fetch linked contacts
+  const contactIds = new Set<string>();
+  records.forEach((r) => {
+    r.fields.contact?.forEach((id) => contactIds.add(id));
+  });
+
+  const contactsMap = new Map<string, Contact>();
+  if (contactIds.size > 0) {
+    const contactRecords = await airtableFetch<AirtableContactFields>(
+      TABLES.contacts,
+      {
+        filterByFormula: `OR(${Array.from(contactIds)
+          .map((id) => `RECORD_ID()='${id}'`)
+          .join(',')})`,
+      }
+    );
+    contactRecords.forEach((c) => {
+      contactsMap.set(c.id, {
+        id: c.id,
+        name: c.fields.name || 'Unknown',
+        role: c.fields.role,
+        email: c.fields.email,
+        linkedinUrl: c.fields.linkedin_url,
+        confidence: 'likely', // Default, will be overridden
+      });
+    });
   }
 
-  if (options.offset) {
-    params.append('offset', options.offset);
-  }
+  // Transform records
+  const opportunities = records.map((record): Opportunity => {
+    const fields = record.fields;
+    const forceId = fields.force?.[0];
+    const force = forceId ? forces.get(forceId) : undefined;
 
-  if (options.fields) {
-    options.fields.forEach(f => params.append('fields[]', f));
-  }
+    const signals = (fields.signals || [])
+      .map((id) => signalsMap.get(id))
+      .filter((s): s is Signal => s !== undefined);
 
-  const queryString = params.toString();
-  const endpoint = `${TABLES[table]}${queryString ? `?${queryString}` : ''}`;
+    const contactId = fields.contact?.[0];
+    const contact = contactId ? contactsMap.get(contactId) : undefined;
+    if (contact) {
+      contact.confidence = mapContactConfidence(fields.contact_confidence);
+    }
 
-  return airtableFetch<AirtableListResponse<T>>(endpoint);
-}
+    return {
+      id: record.id,
+      name: fields.name || 'Untitled',
+      force: force || { id: '', name: 'Unknown Force' },
+      signals,
+      contact,
+      signalCount: fields.signal_count || signals.length,
+      signalTypes: fields.signal_types?.split(', ') || [],
+      priorityTier: mapPriorityTier(fields.priority_tier),
+      status: mapStatus(fields.status),
+      contactConfidence: mapContactConfidence(fields.contact_confidence),
+      whyNow: fields.why_now,
+      outreachDraft: fields.outreach_draft,
+      outreachChannel: mapChannel(fields.outreach_channel),
+      notes: fields.notes,
+      createdAt: fields.created_at || record.createdTime,
+    };
+  });
 
-/**
- * Get a single record by ID
- */
-export async function getRecord<T>(
-  table: TableName,
-  recordId: string
-): Promise<AirtableRecord<T>> {
-  return airtableFetch<AirtableRecord<T>>(`${TABLES[table]}/${recordId}`);
-}
+  // Sort by priority tier (hot first), then by created_at desc
+  const priorityOrder: Record<PriorityTier, number> = {
+    hot: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
 
-/**
- * Update a record (PATCH - partial update)
- * G-011: Upsert only, no DELETE operations
- */
-export async function updateRecord<T>(
-  table: TableName,
-  recordId: string,
-  fields: Partial<T>
-): Promise<AirtableRecord<T>> {
-  return airtableFetch<AirtableRecord<T>>(`${TABLES[table]}/${recordId}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ fields, typecast: true }),
+  return opportunities.sort((a, b) => {
+    const priorityDiff = priorityOrder[a.priorityTier] - priorityOrder[b.priorityTier];
+    if (priorityDiff !== 0) return priorityDiff;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 }
 
 /**
- * Create a new record
+ * Fetch a single opportunity by ID
  */
-export async function createRecord<T>(
-  table: TableName,
-  fields: T
-): Promise<AirtableRecord<T>> {
-  return airtableFetch<AirtableRecord<T>>(TABLES[table], {
-    method: 'POST',
-    body: JSON.stringify({ fields, typecast: true }),
+export async function fetchOpportunityById(
+  id: string
+): Promise<Opportunity | null> {
+  const opportunities = await fetchOpportunities({ limit: 100 });
+  return opportunities.find((o) => o.id === id) || null;
+}
+
+/**
+ * Update opportunity status
+ */
+export async function updateOpportunityStatus(
+  id: string,
+  status: OpportunityStatus
+): Promise<void> {
+  const statusMapping: Record<OpportunityStatus, string> = {
+    new: 'new',
+    ready: 'ready',
+    sent: 'sent',
+    replied: 'replied',
+    won: 'won',
+    lost: 'lost',
+    dormant: 'dormant',
+  };
+
+  await airtableUpdate(TABLES.opportunities, id, {
+    status: statusMapping[status],
   });
 }
 
-// Type definitions for MI Platform tables
-export interface Force {
-  name: string;
-  short_name?: string;
-  region?: string;
-  country?: string;
-  size?: string;
-  officer_count?: number;
-  website?: string;
-  careers_url?: string;
-  procurement_url?: string;
-  hubspot_company_id?: string;
-  current_relationship?: string;
-  competitor_incumbent?: string[];
-  peel_investigating?: string;
-  peel_pvp?: string;
-  peel_last_inspection?: string;
-  active_contracts?: string;
-  contract_renewals?: string;
-  notes?: string;
+/**
+ * Mark opportunity as sent
+ */
+export async function markOpportunitySent(id: string): Promise<void> {
+  await airtableUpdate(TABLES.opportunities, id, {
+    status: 'sent',
+  });
 }
 
-export interface Contact {
-  name: string;
-  first_name?: string;
-  force?: string[];  // Linked record IDs
-  role?: string;
-  department?: string;
-  seniority?: string;
-  email?: string;
-  linkedin_url?: string;
-  phone?: string;
-  relationship_status?: string;
-  last_interaction?: string;
-  interaction_count?: number;
-  source?: string;
-  verified?: boolean;
-  notes?: string;
-  // SPEC-007a: Contact confidence fields
-  research_confidence?: number;  // 0-100 confidence score
-  confidence_sources?: string;   // JSON array of source strings
+/**
+ * Skip opportunity
+ */
+export async function skipOpportunity(
+  id: string,
+  reason?: string
+): Promise<void> {
+  const fields: Record<string, unknown> = {
+    status: 'dormant',
+  };
+  if (reason) {
+    fields.notes = `Skipped: ${reason}`;
+  }
+  await airtableUpdate(TABLES.opportunities, id, fields);
 }
 
-export interface Signal {
-  title: string;
-  type?: string;
-  source?: string;
-  force?: string[];  // Linked record IDs
-  url?: string;
-  raw_data?: string;
-  relevance_score?: number;
-  relevance_reason?: string;
-  status?: string;
-  detected_at?: string;
-  expires_at?: string;
-  competitor_source?: string;
-  external_id?: string;
-}
-
-export interface Opportunity {
-  name: string;
-  force?: string[];  // Linked record IDs
-  signals?: string[];  // Linked record IDs
-  priority_score?: number;
-  priority_tier?: string;
-  status?: string;
-  contact?: string[];  // Linked record IDs
-  contact_confidence?: string;
-  outreach_draft?: string;
-  outreach_channel?: string;
-  outreach_angle?: string;
-  last_contact_date?: string;
-  next_action_date?: string;
-  is_competitor_intercept?: boolean;
-  competitor_detected?: string;
-  notes?: string;
-  created_at?: string;
-  updated_at?: string;
-  why_now?: string;
-  signal_count?: number;
-  signal_types?: string;
-  subject_line?: string;
-  skipped_reason?: string;
-  sent_at?: string;
-  // SPEC-007a: Priority and contact type fields
-  priority_signals?: string;  // JSON array of detected signal patterns
-  response_window?: 'Same Day' | 'Within 48h' | 'This Week' | string;
-  contact_type?: 'problem_owner' | 'deputy' | 'hr_fallback' | string;
-}
-
-// Extended Opportunity with lookup fields (returned by API)
-export interface OpportunityExpanded extends Opportunity {
-  // Lookup fields (populated by Airtable formulas or API expansion)
-  force_name?: string[];  // Lookup from Force
-  contact_name?: string[];  // Lookup from Contact
-  contact_email?: string[];  // Lookup from Contact
-  contact_linkedin?: string[];  // Lookup from Contact
+/**
+ * Fetch all forces
+ */
+export async function fetchForces(): Promise<Force[]> {
+  const forces = await getForces();
+  return Array.from(forces.values());
 }

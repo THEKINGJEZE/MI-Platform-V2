@@ -1,0 +1,349 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Metropolitan Police", "code": "met" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.51, 51.28], [-0.51, 51.69], [0.34, 51.69], [0.34, 51.28], [-0.51, 51.28]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Thames Valley", "code": "thames-valley" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.78, 51.35], [-1.78, 51.98], [-0.55, 51.98], [-0.55, 51.35], [-1.78, 51.35]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kent", "code": "kent" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.03, 51.05], [0.03, 51.48], [1.45, 51.48], [1.45, 51.05], [0.03, 51.05]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Surrey", "code": "surrey" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.79, 51.08], [-0.79, 51.35], [0.03, 51.35], [0.03, 51.08], [-0.79, 51.08]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sussex", "code": "sussex" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.95, 50.72], [-0.95, 51.15], [0.03, 51.15], [0.03, 50.72], [-0.95, 50.72]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Hampshire", "code": "hampshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.85, 50.70], [-1.85, 51.35], [-0.79, 51.35], [-0.79, 50.70], [-1.85, 50.70]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Essex", "code": "essex" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.34, 51.52], [0.34, 52.08], [1.28, 52.08], [1.28, 51.52], [0.34, 51.52]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Hertfordshire", "code": "hertfordshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.51, 51.69], [-0.51, 52.08], [0.28, 52.08], [0.28, 51.69], [-0.51, 51.69]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Bedfordshire", "code": "bedfordshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.72, 51.88], [-0.72, 52.25], [-0.08, 52.25], [-0.08, 51.88], [-0.72, 51.88]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cambridgeshire", "code": "cambridgeshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.52, 52.08], [-0.52, 52.75], [0.52, 52.75], [0.52, 52.08], [-0.52, 52.08]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Norfolk", "code": "norfolk" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.45, 52.38], [0.45, 53.02], [1.78, 53.02], [1.78, 52.38], [0.45, 52.38]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Suffolk", "code": "suffolk" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.35, 51.98], [0.35, 52.50], [1.75, 52.50], [1.75, 51.98], [0.35, 51.98]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Northamptonshire", "code": "northamptonshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.35, 52.05], [-1.35, 52.65], [-0.38, 52.65], [-0.38, 52.05], [-1.35, 52.05]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Leicestershire", "code": "leicestershire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.52, 52.38], [-1.52, 52.92], [-0.65, 52.92], [-0.65, 52.38], [-1.52, 52.38]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Lincolnshire", "code": "lincolnshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.70, 52.75], [-0.70, 53.58], [0.38, 53.58], [0.38, 52.75], [-0.70, 52.75]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Nottinghamshire", "code": "nottinghamshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.32, 52.78], [-1.32, 53.35], [-0.70, 53.35], [-0.70, 52.78], [-1.32, 52.78]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Derbyshire", "code": "derbyshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.92, 52.78], [-1.92, 53.42], [-1.28, 53.42], [-1.28, 52.78], [-1.92, 52.78]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Staffordshire", "code": "staffordshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.32, 52.58], [-2.32, 53.15], [-1.58, 53.15], [-1.58, 52.58], [-2.32, 52.58]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "West Midlands", "code": "west-midlands" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.15, 52.32], [-2.15, 52.68], [-1.62, 52.68], [-1.62, 52.32], [-2.15, 52.32]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Warwickshire", "code": "warwickshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.85, 52.05], [-1.85, 52.52], [-1.28, 52.52], [-1.28, 52.05], [-1.85, 52.05]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "West Mercia", "code": "west-mercia" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.12, 51.95], [-3.12, 52.85], [-2.12, 52.85], [-2.12, 51.95], [-3.12, 51.95]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Gloucestershire", "code": "gloucestershire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.72, 51.52], [-2.72, 52.12], [-1.72, 52.12], [-1.72, 51.52], [-2.72, 51.52]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Wiltshire", "code": "wiltshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.32, 51.02], [-2.32, 51.62], [-1.52, 51.62], [-1.52, 51.02], [-2.32, 51.02]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dorset", "code": "dorset" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.95, 50.55], [-2.95, 51.08], [-1.82, 51.08], [-1.82, 50.55], [-2.95, 50.55]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Devon and Cornwall", "code": "devon-cornwall" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-5.72, 50.02], [-5.72, 51.25], [-2.88, 51.25], [-2.88, 50.02], [-5.72, 50.02]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Avon and Somerset", "code": "avon-somerset" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.65, 50.95], [-3.65, 51.62], [-2.28, 51.62], [-2.28, 50.95], [-3.65, 50.95]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "South Yorkshire", "code": "south-yorkshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.85, 53.28], [-1.85, 53.62], [-1.08, 53.62], [-1.08, 53.28], [-1.85, 53.28]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "West Yorkshire", "code": "west-yorkshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.18, 53.55], [-2.18, 54.02], [-1.28, 54.02], [-1.28, 53.55], [-2.18, 53.55]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "North Yorkshire", "code": "north-yorkshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.58, 53.92], [-2.58, 54.55], [-0.75, 54.55], [-0.75, 53.92], [-2.58, 53.92]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Humberside", "code": "humberside" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.12, 53.48], [-1.12, 53.95], [0.18, 53.95], [0.18, 53.48], [-1.12, 53.48]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cleveland", "code": "cleveland" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1.38, 54.42], [-1.38, 54.72], [-0.82, 54.72], [-0.82, 54.42], [-1.38, 54.42]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Durham", "code": "durham" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.35, 54.52], [-2.35, 54.92], [-1.35, 54.92], [-1.35, 54.52], [-2.35, 54.52]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Northumbria", "code": "northumbria" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.65, 54.82], [-2.65, 55.82], [-1.38, 55.82], [-1.38, 54.82], [-2.65, 54.82]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cumbria", "code": "cumbria" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.58, 54.05], [-3.58, 55.18], [-2.18, 55.18], [-2.18, 54.05], [-3.58, 54.05]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Lancashire", "code": "lancashire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.08, 53.55], [-3.08, 54.18], [-2.12, 54.18], [-2.12, 53.55], [-3.08, 53.55]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Greater Manchester", "code": "greater-manchester" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-2.72, 53.35], [-2.72, 53.68], [-1.98, 53.68], [-1.98, 53.35], [-2.72, 53.35]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Merseyside", "code": "merseyside" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.22, 53.28], [-3.22, 53.58], [-2.72, 53.58], [-2.72, 53.28], [-3.22, 53.28]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cheshire", "code": "cheshire" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.12, 52.95], [-3.12, 53.42], [-2.28, 53.42], [-2.28, 52.95], [-3.12, 52.95]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "North Wales", "code": "north-wales" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-4.78, 52.72], [-4.78, 53.42], [-3.02, 53.42], [-3.02, 52.72], [-4.78, 52.72]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dyfed-Powys", "code": "dyfed-powys" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-5.32, 51.62], [-5.32, 52.85], [-3.08, 52.85], [-3.08, 51.62], [-5.32, 51.62]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "South Wales", "code": "south-wales" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-4.35, 51.38], [-4.35, 51.78], [-3.18, 51.78], [-3.18, 51.38], [-4.35, 51.38]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Gwent", "code": "gwent" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-3.28, 51.52], [-3.28, 51.92], [-2.68, 51.92], [-2.68, 51.52], [-3.28, 51.52]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "City of London", "code": "city-of-london" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-0.11, 51.51], [-0.11, 51.52], [-0.07, 51.52], [-0.07, 51.51], [-0.11, 51.51]]]
+      }
+    }
+  ]
+}

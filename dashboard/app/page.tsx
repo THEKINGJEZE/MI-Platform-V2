@@ -1,11 +1,11 @@
+import { redirect } from "next/navigation";
+
 /**
- * Home Page — Redirect to Review
+ * Root Page (/)
  *
- * Per SPEC-007b: Main entry point redirects to Three-Zone review layout
+ * Redirects to Review page — the primary Monday Review workflow.
+ * V2 uses /review instead of /focus per SPEC-009.
  */
-
-import { redirect } from 'next/navigation';
-
-export default function HomePage() {
-  redirect('/review');
+export default function RootPage() {
+  redirect("/review");
 }

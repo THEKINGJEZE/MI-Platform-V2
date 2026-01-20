@@ -1,126 +1,257 @@
-@import '../styles/tokens.css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/tokens.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Dark mode variant for Tailwind v4 */
+@custom-variant dark (&:is(.dark *));
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* ============================================
+   TAILWIND THEME INLINE CONFIG
+   Maps CSS variables to Tailwind utilities
+   ============================================ */
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Background colours */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  /* Canvas & Surfaces */
+  --color-canvas: hsl(var(--bg-canvas));
+  --color-surface-0: hsl(var(--bg-surface-0));
+  --color-surface-1: hsl(var(--bg-surface-1));
+  --color-surface-2: hsl(var(--bg-surface-2));
+
+  /* Semantic colours */
+  --color-action: hsl(var(--color-action));
+  --color-success: hsl(var(--color-success));
+  --color-warning: hsl(var(--color-warning));
+  --color-danger: hsl(var(--color-danger));
+  --color-info: hsl(var(--color-info));
+
+  /* Text colours */
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-muted: hsl(var(--text-muted));
+
+  /* shadcn compatibility */
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Border radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: calc(var(--radius-lg) + 4px);
+  --radius-2xl: calc(var(--radius-lg) + 8px);
 }
 
-
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
-
-
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
 @layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    /* Force dark mode - this is a dark-first application */
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-canvas text-text-primary;
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Tabular numerals for all data */
+  .tabular-nums,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* ========== FOCUS MODE (from V1) ========== */
-/* ADHD-optimized: dims non-focused elements to reduce distraction */
+/* ============================================
+   FOCUS STATES
+   Accessibility: visible ring using action colour
+   ============================================ */
 
-.focus-mode-active [data-dimmable]:not([data-focused]) {
-  opacity: 0.4;
-  filter: grayscale(0.3);
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--color-action));
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   Accessibility: honour user preference
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   CUSTOM UTILITY CLASSES
+   ============================================ */
+
+@layer utilities {
+  /* Surface backgrounds */
+  .bg-canvas {
+    background-color: hsl(var(--bg-canvas));
+  }
+  .bg-surface-0 {
+    background-color: hsl(var(--bg-surface-0));
+  }
+  .bg-surface-1 {
+    background-color: hsl(var(--bg-surface-1));
+  }
+  .bg-surface-2 {
+    background-color: hsl(var(--bg-surface-2));
+  }
+
+  /* Text colours */
+  .text-primary {
+    color: hsl(var(--text-primary));
+  }
+  .text-secondary {
+    color: hsl(var(--text-secondary));
+  }
+  .text-muted {
+    color: hsl(var(--text-muted));
+  }
+
+  /* Semantic text colours */
+  .text-action {
+    color: hsl(var(--color-action));
+  }
+  .text-success {
+    color: hsl(var(--color-success));
+  }
+  .text-warning {
+    color: hsl(var(--color-warning));
+  }
+  .text-danger {
+    color: hsl(var(--color-danger));
+  }
+  .text-info {
+    color: hsl(var(--color-info));
+  }
+
+  /* Semantic muted backgrounds */
+  .bg-action-muted {
+    background-color: hsl(var(--color-action) / 0.15);
+  }
+  .bg-success-muted {
+    background-color: hsl(var(--color-success) / 0.15);
+  }
+  .bg-warning-muted {
+    background-color: hsl(var(--color-warning) / 0.15);
+  }
+  .bg-danger-muted {
+    background-color: hsl(var(--color-danger) / 0.15);
+  }
+  .bg-info-muted {
+    background-color: hsl(var(--color-info) / 0.15);
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   FOCUS MODE DIMMING
+   From adhd-interface-design skill: "Visual Isolation"
+   ============================================ */
+
+.sidebar-dimmed {
+  opacity: 0.35;
+  filter: brightness(0.7);
   pointer-events: none;
-  transition: opacity var(--duration-normal) var(--ease-out),
-              filter var(--duration-normal) var(--ease-out);
+  transition: all var(--transition-normal);
 }
 
-.focus-mode-active [data-focused] {
-  position: relative;
-  z-index: 10;
+.sidebar-dimmed:hover {
+  opacity: 0.6;
+  pointer-events: auto;
 }
 
-/* Restore on hover for quick peek */
-.focus-mode-active [data-dimmable]:not([data-focused]):hover {
-  opacity: 0.7;
-  filter: grayscale(0.1);
+.sidebar-dimmed .nav-item-active {
+  opacity: 1;
 }
 
-/* ========== SELECTION HIGHLIGHT ========== */
-/* Visual feedback for keyboard navigation */
-
-[data-selected="true"] {
-  background-color: var(--bg-surface-1);
-  outline: 2px solid var(--color-action);
-  outline-offset: -2px;
+.sidebar-full-opacity {
+  opacity: 1;
+  transition: opacity var(--transition-normal);
 }
-
-/* ========== CONFIDENCE INDICATORS ========== */
-/* Semantic colors for contact confidence levels */
-
-.confidence-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.confidence-high { background-color: hsl(var(--color-success)); }
-.confidence-medium { background-color: hsl(var(--color-action)); }
-.confidence-low { background-color: hsl(var(--color-warning)); }
-.confidence-none { background-color: hsl(var(--color-danger)); }
