@@ -1,29 +1,44 @@
 # MI Platform — Session Status
 
 **Updated**: 20 January 2025
-**Phase**: 1c — Dashboard MVP (SPEC-007b verified, ready for deployment)
-**Session Goal**: Deploy dashboard and test timing criterion
+**Phase**: 1c — Dashboard MVP ✅ DEPLOYED
+**Session Goal**: ~~Deploy dashboard and test timing criterion~~ **COMPLETE**
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Deploy SPEC-007b Dashboard MVP** — Ready for production
+> **Dashboard MVP is LIVE** — https://dashboard.peelplatforms.co.uk/review
 >
-> All stages complete. Build verified.
-> - ✅ `npm install` — packages installed
+> All stages complete. Deployed and tested.
 > - ✅ `npm run build` — TypeScript passes
-> - ⏳ Manual timing test (criterion #17) — test after deploy
+> - ✅ Deployed to VPS (PM2 + Traefik)
+> - ✅ SSL certificate active
+> - ✅ 32 opportunities loading from Airtable
+> - ✅ Keyboard navigation tested (J/K/?/Esc)
+> - ✅ Filter tabs tested (Ready/Sent/All)
+> - ⏳ Manual timing test (criterion #17) — James to test Monday morning
 
 **Blockers**: None
 
-**Next step**: Deploy to Vercel (or `npm run dev` for local testing)
+**Next step**: Use dashboard Monday morning, validate ≤15 min for 5 opps
 
 **Implementation tracker**: `specs/IMPL-007b.md`
 
 ---
 
 ## ✅ Done This Session (20 Jan)
+
+### VPS Deployment Complete
+- [x] Created `dashboard/ecosystem.config.js` — PM2 process manager config
+- [x] Created `dashboard/deploy.sh` — VPS deployment script
+- [x] Created `dashboard/nginx.conf.example` — Reference config (VPS uses Traefik)
+- [x] Deployed to VPS at `72.61.202.117`
+- [x] Configured Traefik dynamic routing at `/docker/n8n/dynamic/dashboard.yml`
+- [x] SSL certificate provisioned via Let's Encrypt
+- [x] Tested keyboard navigation (J/K/?/Esc) — all working
+- [x] Tested filter tabs (Ready/Sent/All) — all working
+- [x] 32 opportunities loading from Airtable
 
 ### Global Config Fix
 - [x] Updated ~/.claude/CLAUDE.md to correct Airtable base (`appEEWaGtGUwOyOhm`)
@@ -164,8 +179,8 @@
 2. [x] Dashboard built to SPEC-007b (18 new files)
 3. [x] npm install complete
 4. [x] npm run build passed (TypeScript verified)
-5. [ ] Test timing (≤15 min for 5 opps)
-6. [ ] Deploy to production
+5. [x] **Deployed to VPS** — https://dashboard.peelplatforms.co.uk/review
+6. [ ] Test timing (≤15 min for 5 opps) — Monday morning test
 
 ---
 
@@ -187,7 +202,7 @@ Phase 1: [█████████░] 95% — Core Jobs Pipeline
   □ Test 7 burn-in (1 week monitoring)
   □ Phase 1 sign-off
 
-Phase 1c: [█████████░] 90% — Dashboard MVP
+Phase 1c: [██████████] 95% — Dashboard MVP ✅ DEPLOYED
 
   ✅ SPEC-007b written
   ✅ Stage 4 BUILD complete (22 tasks, 18 new files)
@@ -197,8 +212,9 @@ Phase 1c: [█████████░] 90% — Dashboard MVP
   ✅ Progress header with session stats
   ✅ npm install complete
   ✅ TypeScript verification passed
-  □ Timing validated (≤15 min for 5 opps)
-  □ Deployed
+  ✅ DEPLOYED to VPS (PM2 + Traefik + SSL)
+  ✅ 32 opportunities loading
+  □ Timing validated (≤15 min for 5 opps) — Monday test
 
 Future (Deferred):
   ⏸️ SPEC-007a: Full UI (needs scoring)
