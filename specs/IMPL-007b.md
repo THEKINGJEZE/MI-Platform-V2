@@ -11,17 +11,17 @@
 | Stage | Name | Status | Completed |
 |-------|------|--------|-----------|
 | 1 | Parse | ✅ | 2025-01-20 |
-| 2 | Audit | 🔄 | - |
-| 3 | Plan | ⬜ | - |
+| 2 | Audit | ✅ | 2025-01-20 |
+| 3 | Plan | 🔄 | - |
 | 4 | Build | ⬜ | - |
 | 5 | Verify | ⬜ | - |
 | 6 | Document | ⬜ | - |
 
 ## Current State
 
-**Working on**: Stage 2 AUDIT complete - awaiting gate approval
-**Blockers**: AIRTABLE_API_KEY not configured in dashboard/.env.local
-**Next action**: Stage 3 PLAN - create detailed task list for adapting existing dashboard
+**Working on**: Stage 3 PLAN complete - awaiting gate approval
+**Blockers**: AIRTABLE_API_KEY not configured (Task 1 will resolve)
+**Next action**: Stage 4 BUILD - execute 22 tasks in 7 phases
 
 ## STATUS.md Context
 
@@ -168,7 +168,75 @@
 5. Map field names to actual schema
 
 ### Stage 3: Plan
-*To be completed after Stage 2 gate*
+
+**Completed**: 2025-01-20
+
+**Approach**: Adapt existing dashboard rather than rebuild. Key refactors:
+1. Layout → Three-Zone Model
+2. State → Zustand with undo support
+3. Add keyboard navigation
+4. Add toast/feedback system
+
+**Task List** (22 tasks, ~15 min each):
+
+#### Phase A: Configuration & Foundation (Tasks 1-4)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 1 | Copy AIRTABLE_API_KEY to dashboard/.env.local | dashboard/.env.local | 2m |
+| 2 | Create design tokens CSS file | dashboard/styles/tokens.css | 10m |
+| 3 | Update globals.css to import tokens | dashboard/app/globals.css | 5m |
+| 4 | Install zustand if not present | package.json | 2m |
+
+#### Phase B: State Management (Tasks 5-7)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 5 | Create review-store.ts with Zustand | dashboard/lib/stores/review-store.ts | 15m |
+| 6 | Add undo stack logic to store | dashboard/lib/stores/review-store.ts | 10m |
+| 7 | Add session stats to store | dashboard/lib/stores/review-store.ts | 10m |
+
+#### Phase C: Layout Refactor (Tasks 8-11)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 8 | Create Three-Zone layout wrapper | dashboard/components/review/review-layout.tsx | 15m |
+| 9 | Create QueuePanel component | dashboard/components/review/queue-panel.tsx | 15m |
+| 10 | Create NowCard component | dashboard/components/review/now-card.tsx | 15m |
+| 11 | Create ComposerDock component | dashboard/components/review/composer-dock.tsx | 15m |
+
+#### Phase D: Feedback Components (Tasks 12-15)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 12 | Create SessionHeader component | dashboard/components/review/session-header.tsx | 15m |
+| 13 | Create Toast system | dashboard/components/feedback/toast.tsx | 15m |
+| 14 | Create DismissModal component | dashboard/components/review/dismiss-modal.tsx | 10m |
+| 15 | Create ShortcutOverlay component | dashboard/components/review/shortcut-overlay.tsx | 10m |
+
+#### Phase E: Keyboard Navigation (Tasks 16-17)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 16 | Create useKeyboardNav hook | dashboard/lib/hooks/use-keyboard-nav.ts | 15m |
+| 17 | Integrate keyboard nav into review page | dashboard/app/review/page.tsx | 10m |
+
+#### Phase F: Page Integration (Tasks 18-20)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 18 | Refactor /review page with Three-Zone | dashboard/app/review/page.tsx | 15m |
+| 19 | Update home page to redirect to /review | dashboard/app/page.tsx | 5m |
+| 20 | Add empty/error state components | dashboard/components/feedback/ | 10m |
+
+#### Phase G: API & Field Mapping (Tasks 21-22)
+| # | Task | Files | Est |
+|---|------|-------|-----|
+| 21 | Update API route field mappings | dashboard/app/api/opportunities/route.ts | 10m |
+| 22 | Update type definitions | dashboard/lib/airtable.ts | 10m |
+
+**Total estimated**: ~4 hours
+
+**Checkpoints**: After tasks 4, 7, 11, 15, 17, 20, 22
+
+**Dependencies**:
+- Task 1 blocks all other tasks (API key needed)
+- Tasks 5-7 block tasks 8-17 (store needed for components)
+- Tasks 8-11 block task 18 (components needed for page)
 
 ### Stage 4: Build
 *To be completed after Stage 3 gate*
