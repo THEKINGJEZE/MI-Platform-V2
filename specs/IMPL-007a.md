@@ -2,16 +2,16 @@
 
 **Spec**: UI Foundation — Full Feature Dashboard
 **Started**: 2025-01-20T14:00:00Z
-**Last Updated**: 2025-01-20T14:00:00Z
-**Current Stage**: 1
+**Last Updated**: 2025-01-20T14:30:00Z
+**Current Stage**: 2
 **Status**: in_progress
 
 ## Progress
 
 | Stage | Name | Status | Completed |
 |-------|------|--------|-----------|
-| 1 | Parse | ⏳ | - |
-| 2 | Audit | ⬜ | - |
+| 1 | Parse | ✅ | 2025-01-20 |
+| 2 | Audit | ⏳ | - |
 | 3 | Plan | ⬜ | - |
 | 4 | Build | ⬜ | - |
 | 5 | Verify | ⬜ | - |
@@ -19,9 +19,9 @@
 
 ## Current State
 
-**Working on**: Stage 1 — Extracting acceptance criteria, guardrails, and dependencies
-**Blockers**: None identified yet
-**Next action**: Complete parse, gate for user approval
+**Working on**: Stage 2 — Audit complete, awaiting gate approval
+**Blockers**: None — all prerequisites verified
+**Next action**: Proceed to Stage 3 PLAN after user approval
 
 ## Stage Outputs
 
@@ -60,9 +60,9 @@
 |------------|--------|-------|
 | SPEC-007b (MVP Dashboard) | ✅ Complete | Deployed at dashboard.peelplatforms.co.uk |
 | Phase 1b (Competitor Monitoring) | ✅ Complete | WF9 live, Bright Data connected |
-| Schema expansion | ⏳ Pending | 6 new fields needed |
+| Schema expansion | ✅ **Complete** | 6 fields added (per STATUS.md) |
 | Workflow updates (WF3 + WF5) | ⏳ Pending | Priority/contact type output |
-| V1 Codebase | Reference | Source for porting patterns |
+| V1 Codebase | ✅ Available | `/Users/jamesjeram/Documents/MI-Platform/dashboard-react` |
 
 **Schema Prerequisites** (must exist before build):
 
@@ -128,7 +128,97 @@
 - Morning Brief rituals (SPEC-008)
 
 ### Stage 2: Audit
-*To be completed after Stage 1 gate*
+
+**Airtable Schema Verification**:
+
+*Opportunities Table (`tblJgZuI3LM2Az5id`):*
+| Field | ID | Status |
+|-------|-----|--------|
+| `priority_tier` | `fldsr6VuIcRZsahl1` | ✅ Exists |
+| `priority_signals` | `fldndARwS5fJfnqNe` | ✅ Exists |
+| `response_window` | `fldUzF30gHpReACJH` | ✅ Exists |
+| `contact_type` | `fldMHa0Y9JfARUSPa` | ✅ Exists |
+
+*Contacts Table (`tbl0u9vy71jmyaDx1`):*
+| Field | ID | Status |
+|-------|-----|--------|
+| `research_confidence` | `fldUi8gxrXylLYr81` | ✅ Exists |
+| `confidence_sources` | `fldhj98M4WDeqnBZA` | ✅ Exists |
+
+**All 6 schema fields verified** ✅
+
+---
+
+**Dashboard Codebase Verification**:
+
+*Directory: `/dashboard`*
+- `app/review/page.tsx` — Review page (Three-zone layout) ✅
+- `components/review/queue-panel.tsx` — Queue panel ✅
+- `components/review/now-card.tsx` — Context display ✅
+- `components/review/composer-dock.tsx` — Action panel ✅
+- `components/review/session-header.tsx` — Progress display ✅
+- `components/review/dismiss-modal.tsx` — Dismiss modal ✅
+- `components/review/shortcut-overlay.tsx` — Keyboard shortcuts ✅
+- `components/feedback/toast.tsx` — Toast notifications ✅
+- `lib/stores/review-store.ts` — Zustand store ✅
+- `lib/airtable.ts` — Types (needs updating for new fields)
+
+**MVP dashboard structure exists and is solid foundation.**
+
+---
+
+**V1 Codebase Reference**:
+
+*Directory: `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`*
+- `styles/tokens.css` — Design tokens ✅ Available for porting
+- `lib/stores/` — Zustand patterns ✅ Available for reference
+- `components/` — Component patterns ✅ Available for reference
+
+---
+
+**n8n Workflows Verification**:
+
+| Workflow | ID | Status | Needs Update |
+|----------|-----|--------|--------------|
+| WF1: Jobs Trigger | `RqFcVMcQ7I8t4dIM` | Active ✅ | No |
+| WF2: Jobs Receiver | `nGBkihJb6279HOHD` | Active ✅ | No |
+| WF3: Jobs Classifier | `w4Mw2wX9wBeimYP2` | Active ✅ | **Yes** — Add priority_tier, priority_signals, response_window |
+| WF4: Opportunity Creator | `7LYyzpLC5GzoJROn` | Active ✅ | No |
+| WF5: Opportunity Enricher | `Lb5iOr1m93kUXBC0` | Active ✅ | **Yes** — Add contact_type, research_confidence |
+| WF6: Send Outreach | `AeEDcJ5FD2YGCSV1` | Active ✅ | No |
+| WF9: Competitor Receiver | `VLbSZp5cGp1OUQZy` | Active ✅ | No (already sets priority_tier for competitors) |
+
+---
+
+**Guardrails Achievability**:
+- **G-012** (keyboard-only): Existing MVP has J/K/E/S/D — achievable ✅
+- **G-013** (progress feedback): SessionHeader exists — achievable ✅
+- **G-014** (single-focus): Three-zone layout exists — achievable ✅
+
+---
+
+**Blockers**: None
+
+**Dependencies Resolved**:
+| Dependency | Status |
+|------------|--------|
+| SPEC-007b (MVP) | ✅ Deployed |
+| Phase 1b (Competitors) | ✅ Complete |
+| Schema fields | ✅ **Already added** |
+| V1 Reference | ✅ Available |
+| Workflows | ⚠️ Need prompt updates (can be done in parallel with UI) |
+
+---
+
+**Audit Summary**:
+- All schema prerequisites are met — fields already exist in Airtable
+- MVP dashboard codebase provides solid foundation
+- V1 codebase available for reference
+- Workflow prompt updates (WF3, WF5) are the main outstanding prerequisite
+- **Can proceed with UI enhancements** — workflow updates can run in parallel
+- UI work will have data to display once workflows are updated
+
+**Recommendation**: Proceed to BUILD. Do workflow updates first (Phase A), then UI enhancements (Phase B).
 
 ### Stage 3: Plan
 *To be completed after Stage 2 gate*
