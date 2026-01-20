@@ -2,6 +2,7 @@
  * Queue Panel — Left zone showing opportunity list
  *
  * Per SPEC-007b: Filter tabs, priority indicators, J/K selection
+ * Per SPEC-007a: Priority-sorted queue (P1 → P2 → P3), tier badges with icons
  */
 
 'use client';
@@ -15,10 +16,48 @@ import {
   type FilterType,
   type ReviewOpportunity,
 } from '@/lib/stores/review-store';
+import { PriorityTierBadge } from '@/components/mi-badge';
+
+// SPEC-007a: Priority tier order for sorting (P1 = highest priority)
+const PRIORITY_ORDER: Record<string, number> = {
+  p1: 1,
+  hot: 1,
+  high: 2,
+  p2: 2,
+  medium: 3,
+  p3: 3,
+  low: 4,
+};
+
+function sortByPriority(opportunities: ReviewOpportunity[]): ReviewOpportunity[] {
+  return [...opportunities].sort((a, b) => {
+    const priorityA = PRIORITY_ORDER[a.priority?.toLowerCase()] || 99;
+    const priorityB = PRIORITY_ORDER[b.priority?.toLowerCase()] || 99;
+
+    // Sort by priority first
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    // Within same priority tier, sort by competitor intercept (hot leads first)
+    if (a.isCompetitorIntercept !== b.isCompetitorIntercept) {
+      return a.isCompetitorIntercept ? -1 : 1;
+    }
+
+    // Then by name for consistency
+    return (a.force?.name || a.name).localeCompare(b.force?.name || b.name);
+  });
+}
 
 export function QueuePanel() {
   const { filter, setFilter, currentId, selectOpportunity } = useReviewStore();
-  const opportunities = useFilteredOpportunities();
+  const filteredOpportunities = useFilteredOpportunities();
+
+  // SPEC-007a: Sort by priority tier (P1 first, then P2, then P3)
+  const opportunities = React.useMemo(
+    () => sortByPriority(filteredOpportunities),
+    [filteredOpportunities]
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -123,24 +162,38 @@ function QueueItem({ opportunity, isSelected, onClick }: QueueItemProps) {
           )}
         </div>
 
-        {/* Status Badge */}
+        {/* Status Badge + Priority Tier */}
         <div className="mt-2 flex items-center gap-2">
           <StatusBadge status={opportunity.status} />
-          <PriorityBadge priority={opportunity.priority} />
+          {/* SPEC-007a: Show P1/P2/P3 tier badge with icon */}
+          <PriorityTierBadge tier={normalizePriorityToTier(opportunity.priority)} />
         </div>
       </button>
     </li>
   );
 }
 
+// SPEC-007a: Map various priority values to P1/P2/P3 tier format
+function normalizePriorityToTier(priority: string): string {
+  const lower = priority?.toLowerCase() || '';
+  if (lower === 'hot' || lower === 'p1') return 'P1';
+  if (lower === 'high' || lower === 'p2') return 'P2';
+  if (lower === 'medium' || lower === 'p3') return 'P3';
+  if (lower === 'low') return 'P3'; // Map low to P3
+  return 'P3'; // Default to P3
+}
+
 function getPriorityColor(priority: string): string {
   switch (priority.toLowerCase()) {
     case 'hot':
     case 'high':
+    case 'p1':
       return 'border-l-danger';
     case 'medium':
+    case 'p2':
       return 'border-l-warning';
     case 'low':
+    case 'p3':
       return 'border-l-muted';
     default:
       return 'border-l-action';
@@ -159,21 +212,6 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span className={cn('rounded px-1.5 py-0.5 text-xs font-medium', styles)}>
       {status}
-    </span>
-  );
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  const styles = {
-    Hot: 'bg-danger-muted text-danger',
-    High: 'bg-warning-muted text-warning',
-    Medium: 'bg-action/20 text-action',
-    Low: 'bg-surface-2 text-muted',
-  }[priority] || 'bg-surface-2 text-muted';
-
-  return (
-    <span className={cn('rounded px-1.5 py-0.5 text-xs font-medium', styles)}>
-      {priority}
     </span>
   );
 }

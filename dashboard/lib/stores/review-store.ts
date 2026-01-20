@@ -60,11 +60,18 @@ export interface ReviewOpportunity {
     title: string;
     email: string;
     linkedin?: string;
+    // SPEC-007a: Contact confidence fields
+    researchConfidence?: number;  // 0-100 confidence score
+    confidenceSources?: string[];  // Array of source strings
   } | null;
   whyNow: string | null;
   draftSubject: string | null;
   draftBody: string | null;
   isCompetitorIntercept: boolean;
+  // SPEC-007a: Priority and contact type fields
+  prioritySignals?: string[];  // Array of detected signal patterns (e.g., "competitor", "urgent")
+  responseWindow?: 'Same Day' | 'Within 48h' | 'This Week' | string;
+  contactType?: 'problem_owner' | 'deputy' | 'hr_fallback' | string;
 }
 
 interface ReviewState {
@@ -463,6 +470,18 @@ export function mapOpportunityToReview(
   const f = record.fields || record;
   const id = record.id;
 
+  // SPEC-007a: Parse priority_signals JSON array
+  let prioritySignals: string[] | undefined;
+  if (f.priority_signals) {
+    try {
+      prioritySignals = typeof f.priority_signals === 'string'
+        ? JSON.parse(f.priority_signals)
+        : f.priority_signals;
+    } catch {
+      prioritySignals = [];
+    }
+  }
+
   return {
     id,
     name: f.name || 'Unknown',
@@ -486,6 +505,9 @@ export function mapOpportunityToReview(
             title: '', // Would need lookup
             email: f.contact_email?.[0] || '',
             linkedin: f.contact_linkedin?.[0],
+            // SPEC-007a: Contact confidence (would need lookup from Contacts table)
+            researchConfidence: undefined,
+            confidenceSources: undefined,
           }
         : null,
     whyNow: f.why_now || null,
@@ -493,5 +515,9 @@ export function mapOpportunityToReview(
     draftSubject: f.subject_line || null,
     draftBody: f.outreach_draft || null,
     isCompetitorIntercept: f.is_competitor_intercept || false,
+    // SPEC-007a: Priority and contact type fields
+    prioritySignals,
+    responseWindow: f.response_window || undefined,
+    contactType: f.contact_type || undefined,
   };
 }

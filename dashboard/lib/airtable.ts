@@ -186,6 +186,9 @@ export interface Contact {
   source?: string;
   verified?: boolean;
   notes?: string;
+  // SPEC-007a: Contact confidence fields
+  research_confidence?: number;  // 0-100 confidence score
+  confidence_sources?: string;   // JSON array of source strings
 }
 
 export interface Signal {
@@ -229,6 +232,10 @@ export interface Opportunity {
   subject_line?: string;
   skipped_reason?: string;
   sent_at?: string;
+  // SPEC-007a: Priority and contact type fields
+  priority_signals?: string;  // JSON array of detected signal patterns
+  response_window?: 'Same Day' | 'Within 48h' | 'This Week' | string;
+  contact_type?: 'problem_owner' | 'deputy' | 'hr_fallback' | string;
 }
 
 // Extended Opportunity with lookup fields (returned by API)

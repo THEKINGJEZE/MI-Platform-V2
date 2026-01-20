@@ -35,6 +35,11 @@
   --priority-medium: var(--color-action);
   --priority-low: var(--text-muted);
 
+  /* SPEC-007a: Priority tier colours (P1/P2/P3) */
+  --priority-p1: var(--color-danger);    /* 🔴 Hot/Urgent - Same Day */
+  --priority-p2: var(--color-warning);   /* 🟠 Warm - Within 48h */
+  --priority-p3: hsl(45 93% 47%);        /* 🟡 Standard - This Week */
+
   /* Border colours */
   --border-default: hsl(220 15% 20%);
   --border-subtle: hsl(220 15% 15%);

@@ -34,6 +34,16 @@ const miBadgeVariants = cva(
         high: 'bg-orange-400/10 text-orange-400 ring-orange-400/30',
         medium: 'bg-yellow-400/10 text-yellow-400 ring-yellow-400/30',
         low: 'bg-gray-400/10 text-gray-400 ring-gray-400/30',
+        // SPEC-007a: Priority tier variants (P1=danger, P2=warning, P3=info)
+        p1: 'bg-red-500/10 text-red-400 ring-red-500/30',
+        p2: 'bg-orange-400/10 text-orange-400 ring-orange-400/30',
+        p3: 'bg-yellow-400/10 text-yellow-400 ring-yellow-400/30',
+      },
+      // SPEC-007a: Contact type badges
+      contactType: {
+        problem_owner: 'bg-green-400/10 text-green-400 ring-green-400/30',
+        deputy: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
+        hr_fallback: 'bg-amber-400/10 text-amber-400 ring-amber-400/30',
       },
       // Source badges
       source: {
@@ -57,15 +67,18 @@ const miBadgeVariants = cva(
 
 // Type definitions for badge variants
 type StatusVariant = 'new' | 'researching' | 'ready' | 'sent' | 'replied' | 'meeting' | 'proposal' | 'won' | 'lost' | 'dormant' | 'skipped';
-type PriorityVariant = 'hot' | 'high' | 'medium' | 'low';
+type PriorityVariant = 'hot' | 'high' | 'medium' | 'low' | 'p1' | 'p2' | 'p3';
 type SourceVariant = 'indeed' | 'competitor' | 'tender' | 'news' | 'regulatory' | 'hmicfrs' | 'email';
 type ChannelVariant = 'email' | 'linkedin';
+// SPEC-007a: Contact type variants
+type ContactTypeVariant = 'problem_owner' | 'deputy' | 'hr_fallback';
 
 type BadgeVariant = {
   status?: StatusVariant;
   priority?: PriorityVariant;
   source?: SourceVariant;
   channel?: ChannelVariant;
+  contactType?: ContactTypeVariant;
 };
 
 interface MiBadgeProps extends BadgeVariant {
@@ -83,6 +96,7 @@ export function MiBadge({
   priority,
   source,
   channel,
+  contactType,
 }: MiBadgeProps) {
   // Build variant props - only one should be used at a time
   const variant = status
@@ -93,7 +107,9 @@ export function MiBadge({
         ? { source }
         : channel
           ? { channel }
-          : {};
+          : contactType
+            ? { contactType }
+            : {};
 
   return (
     <span className={cn(miBadgeVariants(variant as VariantProps<typeof miBadgeVariants>), className)}>
@@ -129,6 +145,63 @@ export function SignalCountBadge({ count }: { count: number }) {
   return (
     <span className="inline-flex items-center rounded-md bg-slate-400/10 px-2 py-0.5 text-xs font-medium text-slate-400 ring-1 ring-inset ring-slate-400/30">
       {count} signal{count !== 1 ? 's' : ''}
+    </span>
+  );
+}
+
+// SPEC-007a: Priority tier badge with icon indicators
+export function PriorityTierBadge({ tier }: { tier: string }) {
+  // Normalize "P1", "P2", "P3" to lowercase for variant lookup
+  const normalizedTier = tier?.toLowerCase() as PriorityVariant;
+
+  // Icon and label mapping
+  const tierConfig: Record<string, { icon: string; label: string }> = {
+    p1: { icon: '🔴', label: 'P1' },
+    p2: { icon: '🟠', label: 'P2' },
+    p3: { icon: '🟡', label: 'P3' },
+  };
+
+  const config = tierConfig[normalizedTier] || { icon: '', label: tier };
+
+  return (
+    <MiBadge priority={normalizedTier}>
+      {config.icon} {config.label}
+    </MiBadge>
+  );
+}
+
+// SPEC-007a: Contact type badge with descriptive labels
+export function ContactTypeBadge({ type }: { type: string }) {
+  const normalizedType = type?.toLowerCase() as ContactTypeVariant;
+
+  // Map internal values to display labels
+  const typeLabels: Record<string, string> = {
+    problem_owner: 'Problem Owner',
+    deputy: 'Deputy',
+    hr_fallback: 'HR Fallback',
+  };
+
+  const label = typeLabels[normalizedType] || type;
+
+  return <MiBadge contactType={normalizedType}>{label}</MiBadge>;
+}
+
+// SPEC-007a: Response window badge
+export function ResponseWindowBadge({ window }: { window: string }) {
+  // Different styling based on urgency
+  const isUrgent = window === 'Same Day';
+  const isWarm = window === 'Within 48h';
+
+  const icon = isUrgent ? '⚡' : isWarm ? '⏰' : '📅';
+  const className = isUrgent
+    ? 'bg-red-500/10 text-red-400 ring-red-500/30'
+    : isWarm
+      ? 'bg-orange-400/10 text-orange-400 ring-orange-400/30'
+      : 'bg-blue-400/10 text-blue-400 ring-blue-400/30';
+
+  return (
+    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${className}`}>
+      {icon} {window}
     </span>
   );
 }

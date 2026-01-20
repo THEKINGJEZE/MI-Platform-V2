@@ -2,7 +2,7 @@
  * Now Card — Center zone showing opportunity context
  *
  * Per SPEC-007b (MVP): Force, Why Now, Signals, Contact
- * Score breakdowns deferred to SPEC-007a
+ * Per SPEC-007a: Context Capsule, Signal Pattern Cards, Contact Confidence, Response Window
  */
 
 'use client';
@@ -19,7 +19,22 @@ import {
   useCurrentOpportunity,
   type ReviewOpportunity,
 } from '@/lib/stores/review-store';
-import { Lightbulb, BarChart3, User, ExternalLink } from 'lucide-react';
+import {
+  PriorityTierBadge,
+  ContactTypeBadge,
+  ResponseWindowBadge,
+} from '@/components/mi-badge';
+import {
+  Lightbulb,
+  BarChart3,
+  User,
+  ExternalLink,
+  Clock,
+  AlertTriangle,
+  TrendingUp,
+  Shield,
+  Target,
+} from 'lucide-react';
 
 export function NowCard() {
   const opportunity = useCurrentOpportunity();
@@ -30,8 +45,16 @@ export function NowCard() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      {/* Header */}
+      {/* Header with Priority Tier */}
       <NowCardHeader opportunity={opportunity} />
+
+      {/* SPEC-007a: Context Capsule — Why/Next/When/Source */}
+      <ContextCapsule opportunity={opportunity} />
+
+      {/* SPEC-007a: Signal Pattern Cards */}
+      {opportunity.prioritySignals && opportunity.prioritySignals.length > 0 && (
+        <SignalPatternCards patterns={opportunity.prioritySignals} />
+      )}
 
       {/* Why Now Section */}
       <WhyNowSection whyNow={opportunity.whyNow} />
@@ -42,8 +65,11 @@ export function NowCard() {
         signalTypes={opportunity.signalTypes}
       />
 
-      {/* Contact Section */}
-      <ContactSection contact={opportunity.contact} />
+      {/* Contact Section with SPEC-007a confidence */}
+      <ContactSection
+        contact={opportunity.contact}
+        contactType={opportunity.contactType}
+      />
     </div>
   );
 }
@@ -64,6 +90,9 @@ function NowCardEmpty() {
 }
 
 function NowCardHeader({ opportunity }: { opportunity: ReviewOpportunity }) {
+  // SPEC-007a: Map priority to tier format
+  const tier = normalizePriorityToTier(opportunity.priority);
+
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
@@ -74,40 +103,135 @@ function NowCardHeader({ opportunity }: { opportunity: ReviewOpportunity }) {
           <p className="mt-1 text-secondary">{opportunity.name}</p>
         )}
       </div>
-      <PriorityBadge
-        priority={opportunity.priority}
-        isCompetitor={opportunity.isCompetitorIntercept}
-      />
+      <div className="flex flex-col items-end gap-2">
+        {/* SPEC-007a: Priority tier badge */}
+        {opportunity.isCompetitorIntercept ? (
+          <span className="rounded-md bg-danger px-3 py-1.5 text-sm font-semibold text-primary">
+            🔥 COMPETITOR
+          </span>
+        ) : (
+          <PriorityTierBadge tier={tier} />
+        )}
+        {/* SPEC-007a: Response window badge */}
+        {opportunity.responseWindow && (
+          <ResponseWindowBadge window={opportunity.responseWindow} />
+        )}
+      </div>
     </div>
   );
 }
 
-function PriorityBadge({
-  priority,
-  isCompetitor,
-}: {
-  priority: string;
-  isCompetitor: boolean;
-}) {
-  if (isCompetitor) {
-    return (
-      <span className="rounded-md bg-danger px-3 py-1.5 text-sm font-semibold text-primary">
-        COMPETITOR
-      </span>
-    );
-  }
+// SPEC-007a: Map various priority values to P1/P2/P3 tier format
+function normalizePriorityToTier(priority: string): string {
+  const lower = priority?.toLowerCase() || '';
+  if (lower === 'hot' || lower === 'p1') return 'P1';
+  if (lower === 'high' || lower === 'p2') return 'P2';
+  if (lower === 'medium' || lower === 'p3') return 'P3';
+  if (lower === 'low') return 'P3';
+  return 'P3';
+}
 
-  const styles = {
-    Hot: 'bg-danger text-primary',
-    High: 'bg-warning text-canvas',
-    Medium: 'bg-action text-primary',
-    Low: 'bg-surface-2 text-secondary',
-  }[priority] || 'bg-surface-2 text-secondary';
+// SPEC-007a: Context Capsule — Quick summary of Why/Next/When/Source
+function ContextCapsule({ opportunity }: { opportunity: ReviewOpportunity }) {
+  const hasContent = opportunity.whyNow ||
+    opportunity.responseWindow ||
+    opportunity.prioritySignals?.length ||
+    opportunity.isCompetitorIntercept;
+
+  if (!hasContent) return null;
 
   return (
-    <span className={cn('rounded-md px-3 py-1.5 text-sm font-semibold', styles)}>
-      {priority}
-    </span>
+    <Card className="border-default bg-surface-0">
+      <CardContent className="p-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {/* Why */}
+          {opportunity.whyNow && (
+            <div className="flex items-start gap-2">
+              <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-warning" />
+              <div>
+                <span className="text-xs font-medium uppercase text-muted">Why</span>
+                <p className="text-sm text-primary line-clamp-2">{opportunity.whyNow}</p>
+              </div>
+            </div>
+          )}
+
+          {/* When (Response Window) */}
+          {opportunity.responseWindow && (
+            <div className="flex items-start gap-2">
+              <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-action" />
+              <div>
+                <span className="text-xs font-medium uppercase text-muted">When</span>
+                <p className="text-sm text-primary">{opportunity.responseWindow}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Source */}
+          {opportunity.isCompetitorIntercept && (
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-danger" />
+              <div>
+                <span className="text-xs font-medium uppercase text-muted">Source</span>
+                <p className="text-sm text-danger font-medium">Competitor Signal</p>
+              </div>
+            </div>
+          )}
+
+          {/* Signal Count */}
+          {opportunity.signalCount > 0 && (
+            <div className="flex items-start gap-2">
+              <BarChart3 className="mt-0.5 h-4 w-4 flex-shrink-0 text-success" />
+              <div>
+                <span className="text-xs font-medium uppercase text-muted">Signals</span>
+                <p className="text-sm text-primary">
+                  {opportunity.signalCount} signal{opportunity.signalCount !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// SPEC-007a: Signal Pattern Cards — Visual display of detected priority signals
+function SignalPatternCards({ patterns }: { patterns: string[] }) {
+  // Map signal pattern strings to display info
+  const patternConfig: Record<string, { icon: React.ElementType; color: string; label: string }> = {
+    competitor: { icon: AlertTriangle, color: 'text-danger', label: 'Competitor Activity' },
+    urgent: { icon: Clock, color: 'text-danger', label: 'Urgent Language' },
+    volume: { icon: TrendingUp, color: 'text-warning', label: 'Volume Signal' },
+    senior: { icon: Shield, color: 'text-action', label: 'Senior Role' },
+    specialist: { icon: Target, color: 'text-purple-400', label: 'Specialist Role' },
+    leadership: { icon: Shield, color: 'text-action', label: 'Leadership Role' },
+    backlog: { icon: Clock, color: 'text-danger', label: 'Backlog Mentioned' },
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {patterns.map((pattern, index) => {
+        const config = patternConfig[pattern.toLowerCase()] || {
+          icon: Target,
+          color: 'text-muted',
+          label: pattern,
+        };
+        const Icon = config.icon;
+
+        return (
+          <div
+            key={index}
+            className={cn(
+              'flex items-center gap-1.5 rounded-md border border-subtle bg-surface-1 px-2.5 py-1.5',
+              'text-sm font-medium'
+            )}
+          >
+            <Icon className={cn('h-4 w-4', config.color)} />
+            <span className="text-secondary">{config.label}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -163,25 +287,76 @@ function SignalsSection({
 
 function ContactSection({
   contact,
+  contactType,
 }: {
   contact: ReviewOpportunity['contact'];
+  contactType?: string;
 }) {
   return (
     <Card className="border-default bg-surface-0">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base text-secondary">
-          <User className="h-4 w-4 text-success" />
-          Contact
+        <CardTitle className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-base text-secondary">
+            <User className="h-4 w-4 text-success" />
+            Contact
+          </span>
+          {/* SPEC-007a: Contact type badge */}
+          {contactType && <ContactTypeBadge type={contactType} />}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {contact ? (
-          <div className="space-y-2">
-            <p className="font-medium text-primary">{contact.name}</p>
-            {contact.title && (
-              <p className="text-sm text-secondary">{contact.title}</p>
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium text-primary">{contact.name}</p>
+              {contact.title && (
+                <p className="text-sm text-secondary">{contact.title}</p>
+              )}
+            </div>
+
+            {/* SPEC-007a: Confidence indicator */}
+            {contact.researchConfidence !== undefined && (
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted">Research Confidence</span>
+                    <span className="font-medium text-secondary">
+                      {contact.researchConfidence}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+                    <div
+                      className={cn(
+                        'h-full rounded-full transition-all',
+                        contact.researchConfidence >= 70
+                          ? 'bg-success'
+                          : contact.researchConfidence >= 40
+                            ? 'bg-warning'
+                            : 'bg-danger'
+                      )}
+                      style={{ width: `${contact.researchConfidence}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
-            <div className="flex flex-wrap gap-3 pt-2">
+
+            {/* SPEC-007a: Confidence sources */}
+            {contact.confidenceSources && contact.confidenceSources.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {contact.confidenceSources.map((source, index) => (
+                  <span
+                    key={index}
+                    className="rounded bg-surface-2 px-1.5 py-0.5 text-xs text-muted"
+                  >
+                    {source.replace(/_/g, ' ')}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Contact links */}
+            <div className="flex flex-wrap gap-3 pt-1">
               {contact.email && (
                 <a
                   href={`mailto:${contact.email}`}
