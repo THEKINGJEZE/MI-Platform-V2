@@ -10,6 +10,7 @@
 - ✅ Deleted duplicate "MI: Send Outreach" workflow (`M5d8dnDehvOBq65s`)
 - ✅ Tested with real Bright Data exports — 10+ competitor signals created correctly
 - ✅ Generated context brief for SPEC-007a (`specs/NEXT-CONTEXT.md`)
+- ✅ SPEC-007a schema fields added (6 fields: priority_tier, priority_signals, response_window, contact_type, research_confidence, confidence_sources)
 
 ---
 
