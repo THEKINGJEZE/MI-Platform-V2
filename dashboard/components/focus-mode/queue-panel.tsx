@@ -45,42 +45,45 @@ export function QueuePanel({
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-surface-0 border-r border-surface-1",
+        "flex flex-col h-full bg-surface-0",
         className
       )}
     >
       {/* Queue Mode Tabs */}
       <div className="p-3 border-b border-surface-1">
-        <div className="flex gap-1">
-          <Button
-            variant={queueMode === "hot" ? "secondary" : "ghost"}
-            size="sm"
-            className={cn(
-              "flex-1 text-xs gap-1",
-              queueMode === "hot" && "bg-surface-1"
-            )}
-            onClick={() => onQueueModeChange("hot")}
-          >
-            <Flame className="h-3 w-3" />
-            Hot
-          </Button>
-          <Button
-            variant={queueMode === "all" ? "secondary" : "ghost"}
-            size="sm"
-            className={cn(
-              "flex-1 text-xs gap-1",
-              queueMode === "all" && "bg-surface-1"
-            )}
-            onClick={() => onQueueModeChange("all")}
-          >
-            <LayoutList className="h-3 w-3" />
-            All
-          </Button>
+        <div className="flex items-center gap-2">
+          {/* Segmented Control */}
+          <div className="flex flex-1 p-1 bg-surface-1 rounded-lg">
+            <button
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all",
+                queueMode === "hot"
+                  ? "bg-error/20 text-error shadow-sm"
+                  : "text-muted hover:text-secondary"
+              )}
+              onClick={() => onQueueModeChange("hot")}
+            >
+              <Flame className={cn("h-3.5 w-3.5", queueMode === "hot" && "text-error")} />
+              Hot
+            </button>
+            <button
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all",
+                queueMode === "all"
+                  ? "bg-surface-0 text-primary shadow-sm"
+                  : "text-muted hover:text-secondary"
+              )}
+              onClick={() => onQueueModeChange("all")}
+            >
+              <LayoutList className="h-3.5 w-3.5" />
+              All
+            </button>
+          </div>
           {onRefresh && (
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-muted hover:text-secondary"
+              className="text-muted hover:text-secondary shrink-0"
               onClick={onRefresh}
             >
               <RefreshCw className="h-4 w-4" />

@@ -10,6 +10,7 @@ import {
   DismissModal,
   type QueueMode,
 } from "@/components/focus-mode";
+import { NavRail } from "@/components/app-shell/nav-rail";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { CardSkeleton } from "@/components/feedback/card-skeleton";
@@ -252,14 +253,17 @@ export default function ReviewPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen bg-surface-0">
-        <div className="w-80 border-r border-surface-1 p-4">
-          <CardSkeleton />
-        </div>
-        <div className="flex-1 p-6">
-          <CardSkeleton />
-        </div>
-        <div className="w-96 border-l border-surface-1 p-4">
-          <CardSkeleton />
+        <NavRail />
+        <div className="flex flex-1 gap-4 p-4">
+          <div className="w-80 shrink-0 rounded-lg border border-surface-1 p-4">
+            <CardSkeleton />
+          </div>
+          <div className="flex-1 rounded-lg border border-surface-1 p-6">
+            <CardSkeleton />
+          </div>
+          <div className="w-96 shrink-0 rounded-lg border border-surface-1 p-4">
+            <CardSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -268,12 +272,15 @@ export default function ReviewPage() {
   // Error state
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center bg-surface-0">
-        <ErrorState
-          title="Failed to load opportunities"
-          message={error}
-          onRetry={loadOpportunities}
-        />
+      <div className="flex h-screen bg-surface-0">
+        <NavRail />
+        <div className="flex flex-1 items-center justify-center">
+          <ErrorState
+            title="Failed to load opportunities"
+            message={error}
+            onRetry={loadOpportunities}
+          />
+        </div>
       </div>
     );
   }
@@ -281,48 +288,58 @@ export default function ReviewPage() {
   // Empty state
   if (opportunities.length === 0) {
     return (
-      <div className="flex h-screen items-center justify-center bg-surface-0">
-        <EmptyState
-          title="Queue Clear"
-          message="No opportunities to review. Check back later or adjust your queue mode."
-          action={{
-            label: "Refresh",
-            onClick: loadOpportunities,
-          }}
-        />
+      <div className="flex h-screen bg-surface-0">
+        <NavRail />
+        <div className="flex flex-1 items-center justify-center">
+          <EmptyState
+            title="Queue Clear"
+            message="No opportunities to review. Check back later or adjust your queue mode."
+            action={{
+              label: "Refresh",
+              onClick: loadOpportunities,
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-surface-0">
-      {/* Session Header */}
-      <SessionHeader
-        processed={sessionStats.processed}
-        total={sessionStats.total}
-        percentage={percentage}
-        averageTime={averageTime}
-        allTimeProcessed={sessionStats.processed}
-        onRefresh={loadOpportunities}
-      />
+    <div className="flex h-screen bg-surface-0">
+      {/* Left: Navigation Rail */}
+      <NavRail />
 
-      {/* Three-Zone Layout */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Queue Panel */}
-        <QueuePanel
-          opportunities={opportunities}
-          currentOpportunityId={currentId}
-          queueMode={queueMode}
-          onSelectOpportunity={setCurrentId}
-          onQueueModeChange={setQueueMode}
+      {/* Main Content */}
+      <div className="flex flex-col flex-1">
+        {/* Session Header */}
+        <SessionHeader
+          processed={sessionStats.processed}
+          total={sessionStats.total}
+          percentage={percentage}
+          averageTime={averageTime}
+          allTimeProcessed={sessionStats.processed}
           onRefresh={loadOpportunities}
-          className="w-80 shrink-0"
         />
 
+        {/* Three-Zone Layout */}
+        <div className="flex flex-1 overflow-hidden gap-4 p-4">
+        {/* Left: Queue Panel */}
+        <div className="w-80 shrink-0 rounded-lg border border-surface-1 overflow-hidden">
+          <QueuePanel
+            opportunities={opportunities}
+            currentOpportunityId={currentId}
+            queueMode={queueMode}
+            onSelectOpportunity={setCurrentId}
+            onQueueModeChange={setQueueMode}
+            onRefresh={loadOpportunities}
+            className="h-full"
+          />
+        </div>
+
         {/* Center: Now Card */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto rounded-lg border border-surface-1 p-6">
           {currentOpportunity ? (
-            <NowCard opportunity={currentOpportunity} />
+            <NowCard opportunity={currentOpportunity} className="border-0 shadow-none" />
           ) : (
             <EmptyState
               title="No Selection"
@@ -332,14 +349,17 @@ export default function ReviewPage() {
         </div>
 
         {/* Right: Action Panel */}
-        <ActionPanel
-          opportunity={currentOpportunity || null}
-          onAction={(action) => {
-            if (action === "email") handleSend();
-            else if (action === "skip") handleSkip();
-          }}
-          className="w-96 shrink-0 border-l border-surface-1"
-        />
+        <div className="w-96 shrink-0 rounded-lg border border-surface-1 overflow-hidden">
+          <ActionPanel
+            opportunity={currentOpportunity || null}
+            onAction={(action) => {
+              if (action === "email") handleSend();
+              else if (action === "skip") handleSkip();
+            }}
+            className="h-full border-0 shadow-none rounded-none"
+          />
+        </div>
+        </div>
       </div>
 
       {/* Dismiss Modal */}

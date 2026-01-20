@@ -19,7 +19,7 @@ interface NavItem {
 }
 
 const primaryNavItems: NavItem[] = [
-  { icon: Focus, label: "Focus", href: "/focus" },
+  { icon: Focus, label: "Review", href: "/review" },
   { icon: Shield, label: "Forces", href: "/forces" },
   { icon: LayoutDashboard, label: "Board", href: "/board" },
 ];
