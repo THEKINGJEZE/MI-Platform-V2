@@ -25,6 +25,10 @@
 
 ## ✅ Done This Session (20 Jan)
 
+### Global Config Fix
+- [x] Updated ~/.claude/CLAUDE.md to correct Airtable base (`appEEWaGtGUwOyOhm`)
+- [x] Updated table IDs to V2 schema (Forces, Contacts, Signals, Opportunities)
+
 ### SPEC-007b Implementation Started
 - [x] Stage 1 PARSE complete — 17 acceptance criteria extracted
 - [x] Guardrails identified: G-008 (webhookId)
