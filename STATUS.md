@@ -2,7 +2,13 @@
 
 **Updated**: 20 January 2025 (Night)
 **Phase**: 1c — Dashboard MVP
-**Status**: SPEC-009 implementation complete ✅
+**Status**: SPEC-009 implementation complete ✅ + V1 UI Chrome restored
+
+### Session Work (21 Jan)
+- ✅ V1 UI Chrome restored: card borders, NavRail sidebar, filter tabs
+- ✅ NavRail route updated /focus → /review
+- ✅ Segmented control styling for Hot/All filter
+- ✅ Verified via Playwright - 46 opportunities displaying correctly
 
 ### Session Work (20 Jan Night - Late)
 - ✅ SPEC-009 all 6 stages complete
