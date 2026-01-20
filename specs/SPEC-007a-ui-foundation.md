@@ -1,7 +1,7 @@
 # SPEC-007a: UI Foundation — Full Feature Dashboard
 
-**Status**: Future Phase (deferred)
-**Phase**: Post-Phase 1c
+**Status**: Active
+**Phase**: 1c Enhancement
 **Created**: 2025-01-19
 **Updated**: 2025-01-20
 **Depends on**: SPEC-007b (Dashboard MVP) — must be complete and validated first
@@ -13,24 +13,24 @@
 
 ---
 
-## Why This Is Deferred
+## Implementation Status
 
-This spec describes the full-featured dashboard with priority-based signal display, contact confidence indicators, and session persistence. It requires schema fields and Phase 1b infrastructure that don't exist in Phase 1.
+This spec enhances the MVP dashboard with priority-based signal display, contact confidence indicators, and session persistence.
 
-**Prerequisites before implementing this spec:**
+**Prerequisites:**
 
-1. **SPEC-007b complete** — MVP dashboard working in production
-2. **Phase 1b complete** — Competitor monitoring provides P1 signal differentiation
-3. **Schema expansion** — Add these fields to Opportunities:
-   - `priority_tier` (Single Select: P1, P2, P3)
-   - `priority_signals` (Long Text) — JSON array of detected patterns
-   - `response_window` (Single Select: Same Day, Within 48h, This Week)
-   - `contact_type` (Single Select: Problem Owner, Deputy, HR Fallback)
-4. **Contact enrichment** — Add to Contacts:
-   - `research_confidence` (Number 0-100)
-   - `confidence_sources` (Long Text)
+| Prerequisite | Status | Notes |
+|--------------|--------|-------|
+| SPEC-007b complete | ✅ Done | MVP deployed at dashboard.peelplatforms.co.uk |
+| Phase 1b complete | ✅ Done | Competitor monitoring live (WF9) |
+| Schema expansion | ⏳ Pending | 6 new fields (see Schema Prerequisites) |
+| Workflow updates | ⏳ Pending | WF3 + WF5 prompt changes (see Workflow Requirements) |
 
-**When to implement**: After Phase 1c MVP is validated with real Monday reviews AND Phase 1b competitor monitoring is live
+**Implementation order:**
+1. Add schema fields to Airtable (manual)
+2. Update WF3 classification to output priority data
+3. Update WF5 enrichment to output contact type
+4. Enhance dashboard UI components
 
 ---
 
@@ -563,15 +563,139 @@ src/
 | `research_confidence` | Number (0-100) | How confident are we in this contact? |
 | `confidence_sources` | Long Text | Where did we find them? |
 
-### Workflow Updates Required
+---
 
-**WF3 (Classification)** must set:
-- `priority_tier` based on signal patterns
-- `priority_signals` JSON with detected patterns
+## Workflow Requirements
 
-**WF5 (Enrichment)** must set:
-- `contact_type` based on contact research
-- `research_confidence` on Contact record
+These workflow changes are **prerequisites** for the UI enhancements. Without them, the dashboard has no data to display.
+
+### WF3: Classification Updates
+
+**Current state**: WF3 classifies signals as relevant/irrelevant and links to force.
+
+**Required changes**: Add priority tier calculation and signal pattern detection.
+
+#### Priority Tier Rules
+
+| Condition | Priority | Response Window |
+|-----------|----------|----------------|
+| Signal source is competitor (Red Snapper, Investigo, etc.) | P1 | Same Day |
+| Job text contains urgent language | P1 | Same Day |
+| Multiple signals for same force (volume) | P2 | Within 48h |
+| Senior/specialist role detected | P2 | Within 48h |
+| Standard direct posting | P3 | This Week |
+
+**Urgent language patterns** (case-insensitive):
+- "immediate start"
+- "ASAP"
+- "urgent"
+- "backlog"
+- "critical"
+- "as soon as possible"
+
+**Senior/specialist role patterns**:
+- Title contains: "Head of", "Director", "Chief", "Senior", "Lead"
+- Or role is specialist: "Investigator", "Analyst", "Forensic"
+
+#### AI Prompt Addition (WF3)
+
+Add to the classification prompt output schema:
+
+```json
+{
+  "priority_tier": "P1 | P2 | P3",
+  "priority_signals": [
+    {
+      "type": "competitor | urgent | volume | specialist | standard",
+      "description": "Human-readable explanation",
+      "source": "Optional: competitor name or signal source"
+    }
+  ],
+  "response_window": "Same Day | Within 48h | This Week"
+}
+```
+
+**Classification logic** (in order of precedence):
+1. If `signal.source` in competitors list → P1 + "competitor" pattern
+2. If urgent language detected → P1 + "urgent" pattern
+3. If opportunity has 2+ signals → P2 + "volume" pattern
+4. If senior/specialist title → P2 + "specialist" pattern
+5. Otherwise → P3 + "standard" pattern
+
+**Note**: A signal can have multiple patterns (e.g., competitor + urgent = still P1, but both patterns shown).
+
+### WF5: Enrichment Updates
+
+**Current state**: WF5 finds contacts and drafts messages.
+
+**Required changes**: Add contact type classification and confidence scoring.
+
+#### Contact Type Rules (Job Title Pattern Matching)
+
+This is Phase 1 implementation using title patterns. Future enhancement will use agentic research for more intelligent contact discovery.
+
+| Contact Type | Title Patterns | Department Match |
+|--------------|---------------|------------------|
+| **Problem Owner** | "Head of", "Director of", "Chief" | Crime, PSD, Professional Standards, Investigations |
+| **Problem Owner** | "Resourcing Manager", "Resourcing Lead" | Resourcing, HR (for volume hiring) |
+| **Deputy** | "Deputy", "Assistant Director" | Any operational |
+| **HR Fallback** | "HR", "Recruitment", "Talent", "People" | HR |
+
+**Classification logic**:
+```
+IF contact.department IN ['Crime', 'PSD', 'Professional Standards', 'Investigations']
+   AND contact.title MATCHES ['Head of', 'Director', 'Chief']
+   → contact_type = 'problem_owner'
+
+ELSE IF contact.department = 'Resourcing'
+   AND contact.seniority IN ['Director', 'Head', 'Manager']
+   → contact_type = 'problem_owner'
+
+ELSE IF contact.title MATCHES ['Deputy', 'Assistant Director']
+   → contact_type = 'deputy'
+
+ELSE IF contact.department = 'HR'
+   OR contact.title MATCHES ['HR', 'Recruitment', 'Talent', 'People']
+   → contact_type = 'hr_fallback'
+
+ELSE
+   → contact_type = 'hr_fallback'  // Default to fallback
+```
+
+#### Confidence Scoring
+
+| Source | Confidence |
+|--------|------------|
+| LinkedIn profile confirmed | +40 |
+| Force website staff directory | +30 |
+| Previous email reply | +50 |
+| Title matches problem owner pattern | +20 |
+| Generic HR contact | +10 |
+
+**Total capped at 100**. Store sources in `confidence_sources` as JSON array.
+
+#### AI Prompt Addition (WF5)
+
+Add to the enrichment prompt output schema:
+
+```json
+{
+  "contact_type": "problem_owner | deputy | hr_fallback",
+  "research_confidence": 0-100,
+  "confidence_sources": ["LinkedIn", "Force website"]
+}
+```
+
+### Future Enhancement: Agentic Contact Research
+
+> **Deferred to future phase**: The job title pattern matching above is a Phase 1 implementation. A future enhancement will implement agentic workflows that:
+> - Search LinkedIn for the force + role combination
+> - Check force website staff directories
+> - Cross-reference HubSpot for existing contacts
+> - Validate email addresses
+> - Build confidence scores from multiple sources
+>
+> This will be specified in a separate SPEC when we're ready to build it.
 
 ---
 
@@ -617,22 +741,33 @@ src/
 
 ## Build Sequence
 
-1. **Port tokens.css** — Design tokens
-2. **Port globals.css utilities** — Utility classes
-3. **Port stores** — session-store.ts, ui-store.ts
-4. **Port providers.tsx** — ToastProvider
-5. **Port feedback components** — toast, empty-state, error-state
-6. **Port UI components** — badge (updated variants), button, skeleton
-7. **Implement SessionHeader**
-8. **Implement QueuePanel** — with priority sorting
-9. **Implement NowCard** — with context capsule
-10. **Implement SignalPatternCards** — NEW component
-11. **Implement ContactCard** — with confidence indicator
-12. **Implement ComposerDock**
-13. **Implement DismissModal**
-14. **Implement ShortcutOverlay**
-15. **Wire keyboard navigation**
-16. **Integration test**
+### Phase A: Prerequisites (Schema + Workflows)
+
+1. **Add schema fields** (manual in Airtable)
+   - Opportunities: `priority_tier`, `priority_signals`, `response_window`, `contact_type`
+   - Contacts: `research_confidence`, `confidence_sources`
+2. **Update WF3 classification** — Add priority tier and signal pattern output
+3. **Update WF5 enrichment** — Add contact type and confidence output
+4. **Run test signals** — Verify new fields are populated
+
+### Phase B: Dashboard UI Enhancements
+
+5. **Port tokens.css** — Design tokens
+6. **Port globals.css utilities** — Utility classes
+7. **Port stores** — session-store.ts, ui-store.ts
+8. **Port providers.tsx** — ToastProvider
+9. **Port feedback components** — toast, empty-state, error-state
+10. **Port UI components** — badge (updated variants), button, skeleton
+11. **Implement SessionHeader**
+12. **Implement QueuePanel** — with priority sorting
+13. **Implement NowCard** — with context capsule
+14. **Implement SignalPatternCards** — NEW component
+15. **Implement ContactCard** — with confidence indicator
+16. **Implement ComposerDock**
+17. **Implement DismissModal**
+18. **Implement ShortcutOverlay**
+19. **Wire keyboard navigation**
+20. **Integration test**
 
 ---
 
@@ -640,9 +775,10 @@ src/
 
 | Dependency | Status | Notes |
 |------------|--------|-------|
-| SPEC-007b (MVP Dashboard) | Required | Must be validated first |
-| Phase 1b (Competitor Monitoring) | Required | Provides P1 differentiation |
-| Schema expansion | Required | Priority fields needed |
+| SPEC-007b (MVP Dashboard) | ✅ Complete | Deployed at dashboard.peelplatforms.co.uk |
+| Phase 1b (Competitor Monitoring) | ✅ Complete | WF9 live, Bright Data connected |
+| Schema expansion | ⏳ Pending | 6 fields to add (see Build Sequence Phase A) |
+| Workflow updates | ⏳ Pending | WF3 + WF5 (see Workflow Requirements) |
 | V1 Codebase | Reference | Source for porting |
 
 ---
@@ -685,6 +821,10 @@ src/
 | 2025-01-20 | Added priority tier model | Per Sales Strategy Lead Prioritisation |
 | 2025-01-20 | Added contact confidence | Per Sales Strategy Contact Strategy |
 | 2025-01-20 | Replaced DualTrackScores with SignalPatternCards | Strategy alignment |
+| 2025-01-20 | **Status: Active** | Prerequisites met (SPEC-007b + Phase 1b complete) |
+| 2025-01-20 | Added Workflow Requirements section | Explicit WF3/WF5 prompt changes for Claude Code |
+| 2025-01-20 | Added response window rules | P1→Same Day, P2→48h, P3→Week |
+| 2025-01-20 | Added contact type classification | Job title patterns (agentic research deferred) |
 
 ---
 

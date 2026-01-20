@@ -1,204 +1,236 @@
-# Context Brief: Phase 1b — Competitor Monitoring
+# Context Brief: SPEC-007a (Full UI Foundation)
 
 Generated: 20 January 2025
-For: Claude Chat spec drafting
+For: Claude Chat spec refinement/review
 
 ---
 
 ## Current State
 
-**Phase**: 1c — Dashboard MVP ✅ DEPLOYED
-**Goal**: Dashboard deployed and tested; timing validation pending Monday
-**Blockers**: None — Phase 1 and 1c are functionally complete
-
-**Phase 1b Status**: Not yet started — depends on Phase 1 completion
+**Phase**: 1c — Dashboard MVP
+**Goal**: Validate ≤15 min timing criterion via manual test
+**Blockers**: None
+**Dashboard Status**: Deployed at https://dashboard.peelplatforms.co.uk/review (pending timing validation)
 
 ---
 
-## Acceptance Criteria (from ROADMAP.md)
+## SPEC-007a Overview
 
-```markdown
-### Phase 1b: Competitor Monitoring
-**Goal**: Detect when competitors post jobs for police forces, trigger interception
+SPEC-007a already exists at `specs/SPEC-007a-ui-foundation.md`. This is a **692-line spec** that defines enhancements to the MVP dashboard.
 
-**Acceptance Criteria**:
-- [ ] Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care)
-- [ ] Competitor signals classified and attributed to correct force
-- [ ] Hot lead flagging working (competitor signal = higher priority)
-- [ ] Alert on hot leads (Slack or email)
-- [ ] Interception message template in use
+**Status**: ⏸️ Deferred (per Spec Index in ROADMAP.md)
+**Trigger**: Phase 1c MVP validated + Phase 1b complete + schema expanded
 
-**Dependencies**: Phase 1 complete
-**Skills used**: `competitive-analysis`, `intelligence-source-grading`
-**Duration**: ~2 weeks
-```
+**Key Features Defined**:
+- Priority tier display (P1/P2/P3 based on signal patterns)
+- Signal pattern cards (replacing removed dual-track scoring)
+- Contact confidence indicators
+- Response window display
+- Enhanced badge system
+- Session persistence (localStorage)
+
+---
+
+## What SPEC-007a Requires (Prerequisites)
+
+From ROADMAP.md "Future Features" and the spec itself:
+
+| Prerequisite | Status | Notes |
+|--------------|--------|-------|
+| SPEC-007b complete | ✅ Deployed | Pending timing validation |
+| Phase 1b complete | ✅ Complete | Competitor monitoring live |
+| Schema expansion | ❌ Not done | 4 fields on Opportunities, 2 on Contacts |
+
+### Schema Additions Required
+
+**Opportunities table** (per ROADMAP.md Schema Evolution):
+- `priority_tier` (Single Select: P1, P2, P3)
+- `priority_signals` (Long Text) — JSON array of detected patterns
+- `response_window` (Single Select: Same Day, Within 48h, This Week)
+- `contact_type` (Single Select: Problem Owner, Deputy, HR Fallback)
+
+**Contacts table**:
+- `research_confidence` (Number 0-100)
+- `confidence_sources` (Long Text)
+
+### Workflow Updates Required
+
+- **WF3 (Classification)** must set:
+  - `priority_tier` based on signal patterns
+  - `priority_signals` JSON with detected patterns
+- **WF5 (Enrichment)** must set:
+  - `contact_type` based on contact research
+  - `research_confidence` on Contact record
+
+---
+
+## Acceptance Criteria (from SPEC-007a)
+
+| # | Criterion |
+|---|-----------|
+| 1 | Design tokens imported |
+| 2 | Three-zone layout renders |
+| 3 | Progress header shows session stats |
+| 4 | Queue shows priority indicators (P1 🔴 / P2 🟠 / P3 🟡) |
+| 5 | Queue sorted by priority |
+| 6 | Now Card displays context capsule (Why/Next/When/Source) |
+| 7 | Signal pattern cards show |
+| 8 | Contact card shows confidence (Problem Owner vs HR Fallback) |
+| 9 | J/K navigation works |
+| 10 | E/S/D actions work |
+| 11 | Z undo works |
+| 12 | Undo toast shows countdown |
+| 13 | ? shows shortcut overlay |
+| 14 | Dismiss modal shows reasons |
+| 15 | Empty state shows |
+| 16 | Error state shows |
 
 ---
 
 ## Existing Assets
 
-### Reference Data (source of truth)
+### Skills (reference for design patterns)
+- `skills/uk-police-design-system/SKILL.md` — Design tokens, dark mode, semantic colours
+- `skills/action-oriented-ux/SKILL.md` — Three-Zone Model, 2-minute lead loop
+- `skills/adhd-interface-design/SKILL.md` — Progress feedback, undo patterns, focus mode
+- `skills/b2b-visualisation/SKILL.md` — Score displays, badges, sparklines
 
-| File | Purpose |
-|------|---------|
-| `reference-data/competitors.json` | 7 competitors with URLs, tiers, service areas |
-| `reference-data/uk-police-forces.json` | 48 forces with metadata |
-| `reference-data/capability-areas.json` | 14 capability areas for classification |
+### Reference Data
+- `reference-data/uk-police-forces.json` — 48 forces with metadata
+- `reference-data/competitors.json` — 7 competitor definitions (for P1 signal detection)
+- `reference-data/capability-areas.json` — 14 capability areas
 
-**Competitor Details** (from `competitors.json`):
-- **Tier 1 (Direct)**: Red Snapper, Investigo
-- **Tier 2 (Generalist)**: Hays, Adecco, Reed
-- **Tier 3 (Niche)**: Service Care, Matrix SCM
+### Patterns
+- `patterns/force-matching.js` — UK police force name matching (G-005)
+- `patterns/indeed-keywords.json` — Indeed search keywords
+- `patterns/job-portal-filters.js` — Filter false positives (G-010)
 
-**Key URLs**:
-- Red Snapper: `rsg.ltd/jobs/`
-- Investigo: `weareinvestigo.com/jobs`
-- Reed: `reed.co.uk/jobs`
-- Adecco: `adecco.co.uk/jobs`
-- Service Care: `servicecare.org.uk/jobs`
+### Prompts
+- `prompts/job-classification.md` — Signal classification prompt (needs priority_tier output)
+- `prompts/opportunity-enrichment.md` — Enrichment prompt (needs contact_type output)
+- `prompts/competitor-interception.md` — Competitor signal handling
 
-### Patterns (reuse these, don't recreate)
+### Existing Specs (dependencies)
+- `specs/SPEC-007b-dashboard-mvp.md` — MVP foundation (✅ Deployed)
+- `specs/SPEC-001-airtable-schema.md` — Base schema
+- `specs/SPEC-003-signal-classification.md` — Classification workflow (needs update)
+- `specs/SPEC-004-opportunity-creator.md` — Opportunity creation
+- `specs/SPEC-005-opportunity-enricher.md` — Enrichment workflow (needs update)
 
-| File | Purpose | Notes |
-|------|---------|-------|
-| `patterns/force-matching.js` | UK police force name matching | 47 patterns, G-005 compliant |
-| `patterns/job-portal-filters.js` | Filter job portal false positives | G-010 compliant |
-| `patterns/indeed-keywords.json` | Indeed search keywords | Can extend for competitors |
-
-### Prompts (can extend or reference)
-
-| File | Purpose | Notes |
-|------|---------|-------|
-| `prompts/job-classification.md` | Claude prompt for classifying job signals | Extend for competitor source |
-| `prompts/opportunity-enrichment.md` | Enrichment prompt | Interception angle needed |
-
-### Skills (reference for design)
-
-| Skill | Purpose | Status |
-|-------|---------|--------|
-| `competitive-analysis` | Best-in-class dashboard patterns | Ready for 1b |
-| `intelligence-source-grading` | Admiralty Code, signal confidence | Ready for 1b |
+### Dashboard Codebase (exists)
+- Live at: `https://dashboard.peelplatforms.co.uk/review`
+- Built with: Next.js 14, Tailwind, Zustand, SWR
 
 ---
 
 ## Applicable Guardrails
 
-| ID | Rule | Relevance to Phase 1b |
-|----|------|----------------------|
-| G-001 | Dumb Scrapers + Smart Agents | Competitor jobs → Raw_Archive → AI → Signals |
-| G-003 | Bright Data Over Firecrawl | Required for competitor sites (anti-bot) |
-| G-005 | Fuzzy JS Matching Before AI | Reuse `force-matching.js` for competitor job attribution |
-| G-009 | Strict Date Filtering | 24h window prevents duplicate competitor signals |
-| G-011 | Upsert Only (No Loop Delete) | Prevent data loss during sync |
-| G-013 | Competitor Signals Get P1 Priority | **Critical**: Auto-flag as highest priority |
+| ID | Rule | Relevance to SPEC-007a |
+|----|------|------------------------|
+| G-002 | Command Queue for Email Actions | Email actions go through queue, not direct |
+| G-011 | Upsert Only | Status updates must use upsert patterns |
+| G-013 | Competitor Signals Get P1 Priority | P1 tier auto-assigned for competitor signals |
+| G-014 | Contact the Problem Owner | Contact type indicator shows fallback warning |
+| G-015 | Message Structure | Drafts follow Hook → Bridge → Value → CTA |
 
----
-
-## Strategy Document References
-
-The following sections from `docs/STRATEGY.md` are relevant:
-
-| Section | Content |
-|---------|---------|
-| **5.2 Competitor Job Boards** | Source list, scraping frequency (4 hours), intelligence value |
-| **8. Competitor Interception Strategy** | Full interception workflow, messaging rules, tracking metrics |
-
-### Key Strategy Points
-
-**From Section 5.2**:
-- Scrape every 4 hours (time-sensitive for interception)
-- Intelligence: which forces use which competitors, live needs, interception opportunity
-
-**From Section 8**:
-- Same-day response target
-- Never mention competitor or how you knew
-- Track: Interception Rate >15%, Win Rate >5%, Time to Response <24h
-
-**Message Framing Rule**:
-> Never mention the competitor or how you know about the need.
->
-> ✅ "I understand you're looking at investigator capacity..."
-> ❌ "I saw Red Snapper is recruiting for you..."
+**UI-Specific Guardrails** (from specs):
+- G-012: UI must support keyboard-only operation ✓
+- G-013: Progress feedback required for queue processing ✓
+- G-014: Single-focus display (one opportunity at a time) ✓
 
 ---
 
 ## Recent Decisions
 
-| Decision | Date | Impact on Phase 1b |
-|----------|------|-------------------|
-| A2: Airtable as Primary Database | Jan 2025 | Competitor signals go to Signals table |
-| A3: Self-Hosted n8n | Jan 2025 | Competitor scrapers as n8n workflows |
-| G-013: Competitor Signals Get P1 | Jan 2025 | Auto-prioritisation required |
-| P1c-01: MVP Before Full UI | 19 Jan | Dashboard already exists for hot leads |
-
----
-
-## Schema Impact
-
-**Signals table already supports competitor signals** (from STRATEGY.md Section 6):
-- `type`: Single Select includes `competitor_job`
-- `source`: Single Select includes `red_snapper`, `investigo`, `reed`, `adecco`, `service_care`
-- `competitor_source`: Single Select for which competitor
-
-**Opportunities table already supports interception**:
-- `is_competitor_intercept`: Checkbox
-- `competitor_detected`: Single Select
-- `outreach_angle`: Single Select includes `competitor_intercept`
-
-**Verify**: Check if these fields exist in current Airtable schema or need adding.
-
----
-
-## Workflow Architecture (Expected)
-
-```
-┌────────────────────────────────────────────────────────────────────┐
-│  WF8: Competitor Trigger                                            │
-│  Schedule: Every 4 hours during business hours                     │
-│  Triggers: Bright Data collector for each competitor site          │
-└─────────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  WF9: Competitor Receiver                                           │
-│  Webhook: /competitor-jobs-receiver                                 │
-│  Steps:                                                             │
-│  1. Receive Bright Data payload                                     │
-│  2. Deduplicate (G-009)                                            │
-│  3. Archive to Raw table (G-001)                                   │
-│  4. Run force-matching.js (G-005)                                  │
-│  5. Send unmatched to AI classification                            │
-│  6. Create Signals (type=competitor_job, source=competitor name)   │
-│  7. Flag as P1 priority (G-013)                                    │
-│  8. Send Slack/email alert if hot lead                             │
-└─────────────────────────────────────────────────────────────────────┘
-```
+| Decision | Date | Impact on SPEC-007a |
+|----------|------|---------------------|
+| **A8**: Three-Zone Dashboard Layout | 19 Jan | Confirms layout pattern |
+| **P1c-01**: MVP Before Full UI | 19 Jan | SPEC-007a explicitly deferred until MVP validated |
+| **P1c-02**: Skills Are Reference | 19 Jan | Skills inform design but don't mandate features |
+| **P1c-03**: Schema Evolution Documented | 19 Jan | SPEC-007a fields listed in ROADMAP.md |
 
 ---
 
 ## Strategy Alignment Check
 
-**Potential alignment issues to verify**:
+Before implementing SPEC-007a, verify alignment with:
 
-1. **Scraping frequency**: Strategy says 4 hours. Confirm with James if this is still desired or if daily is acceptable.
+### SALES-STRATEGY.md Key Principles
 
-2. **Alert channel**: Strategy mentions "Slack or email". Clarify which James prefers.
+| Principle | SPEC-007a Implementation |
+|-----------|-------------------------|
+| "Job postings are warm leads, not classifications" | ✅ No MS/AG scoring — priority tiers only |
+| "Contact the problem owner" | ✅ Contact type indicator with HR fallback warning |
+| "Competitor signals = confirmed opportunity" | ✅ P1 priority, prominent pattern display |
+| "Hook → Bridge → Value → CTA structure" | ✅ Drafts follow this (via WF5) |
 
-3. **Interception message**: Strategy has a template in Section 8. Confirm if this should be the default or if SALES-STRATEGY.md templates take precedence.
+### Recent Change (20 Jan)
+The spec was updated to **remove dual-track scoring** and replace it with:
+- Priority tier model (P1/P2/P3)
+- Signal pattern cards
+- Response window indicators
 
-4. **Matrix SCM**: Listed in `competitors.json` but described as "neutral vendor platform - not a direct competitor". Clarify if it should be monitored.
+This aligns with SALES-STRATEGY.md which says:
+> "We are not trying to decide 'is this Agency or Managed Services?'"
+
+---
+
+## What's Already Built vs What SPEC-007a Adds
+
+### Already in SPEC-007b (✅ Deployed)
+- Three-zone layout
+- Keyboard navigation (J/K/E/S/D/Z)
+- Progress header
+- Basic priority badge (High/Medium/Low)
+- Why Now + Signals summary
+- Basic contact display
+- Toast with undo
+- Empty/Error states
+
+### SPEC-007a Additions
+- Priority tier display (P1 🔴 / P2 🟠 / P3 🟡)
+- Priority-based queue sorting
+- Signal pattern cards (why this priority)
+- Response window indicator (Same Day / 48h / This Week)
+- Contact type badge (Problem Owner vs HR Fallback)
+- Contact confidence indicator
+- Enhanced badge system
+- Session persistence (localStorage for stats)
 
 ---
 
 ## Notes for Claude Chat
 
-- Reference assets by path (e.g., `patterns/force-matching.js`)
-- New prompts go in `prompts/`
-- New patterns go in `patterns/`
-- Spec output should go in `specs/SPEC-1b-competitor-monitoring.md`
-- Keep spec under 200 lines
-- Reuse existing job classification prompt — extend, don't recreate
-- Ensure interception message respects G-012 (Value Proposition First)
-- Dashboard already exists (SPEC-007b) — spec should focus on data pipeline
+**If reviewing/refining SPEC-007a:**
 
-**Key question for spec**: Does the Airtable schema already have the competitor-specific fields, or do they need to be added?
+1. **The spec exists** — at `specs/SPEC-007a-ui-foundation.md` (692 lines)
+2. **Dual-track scoring removed** — already done on 20 Jan, aligned with Sales Strategy
+3. **Prerequisites not met** — schema expansion not done, MVP not validated
+4. **May need minor updates** for:
+   - Ensuring classification prompt changes are spec'd for WF3
+   - Ensuring enrichment prompt changes are spec'd for WF5
+   - Verifying badge variants match what MVP already has
+
+**Reference assets by path:**
+- Design tokens: `skills/uk-police-design-system/SKILL.md`
+- Three-Zone Model: `skills/action-oriented-ux/SKILL.md`
+- Priority model: `docs/SALES-STRATEGY.md` (Lead Prioritisation section)
+
+**When implementation is triggered:**
+1. First: Validate MVP timing criterion (≤15 min for 5 opps)
+2. Then: Expand schema (6 new fields)
+3. Then: Update WF3/WF5 to populate new fields
+4. Then: Enhance dashboard components
+
+---
+
+## Open Questions for Clarification
+
+1. **Timing**: When should SPEC-007a implementation begin? After MVP timing test passes?
+2. **Workflow updates**: Should the spec include explicit updates to SPEC-003 and SPEC-005 prompts?
+3. **Session persistence**: localStorage for stats only, or full session state?
+4. **Deployment**: VPS (current) or Vercel (spec mentions)?
+
+---
+
+*Generated by /prep-spec command for Claude Chat spec work*
