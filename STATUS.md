@@ -1,310 +1,102 @@
 # MI Platform — Session Status
 
-**Updated**: 20 January 2025
-**Phase**: 1c — Dashboard MVP ✅ DEPLOYED
-**Session Goal**: ~~Deploy dashboard and test timing criterion~~ **COMPLETE**
+**Updated**: 20 January 2025 (12:10)
+**Phase**: 1c — Dashboard MVP
+**Status**: Deployed, pending timing validation
+
+### Session Work (20 Jan PM)
+- ✅ Audited competitor signal pipeline (WF9 is self-contained)
+- ✅ Fixed status inconsistency: competitor signals now `status: "relevant"` (was "new")
+- ✅ Deleted duplicate "MI: Send Outreach" workflow (`M5d8dnDehvOBq65s`)
+- ✅ Tested with real Bright Data exports — 10+ competitor signals created correctly
 
 ---
 
-## 🎯 Immediate Next Action
+## Current State
 
-> **Dashboard MVP is LIVE** — https://dashboard.peelplatforms.co.uk/review
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 1: Core Pipeline | 95% | WF1-6 built, bugs fixed, pending 1-week burn-in |
+| Phase 1b: Competitors | 100% | WF9 live, Bright Data connected |
+| Phase 1c: Dashboard | 95% | Deployed, pending ≤15 min timing test |
+
+**Live URL**: https://dashboard.peelplatforms.co.uk/review
+
+---
+
+## Next Action
+
+> **Manual timing test** — James to review 5 opportunities Monday morning
 >
-> All stages complete. Deployed and tested.
-> - ✅ `npm run build` — TypeScript passes
-> - ✅ Deployed to VPS (PM2 + Traefik)
-> - ✅ SSL certificate active
-> - ✅ 32 opportunities loading from Airtable
-> - ✅ Keyboard navigation tested (J/K/?/Esc)
-> - ✅ Filter tabs tested (Ready/Sent/All)
-> - ⏳ Manual timing test (criterion #17) — James to test Monday morning
-
-**Blockers**: None
-
-**Next step**: Use dashboard Monday morning, validate ≤15 min for 5 opps
-
-**Implementation tracker**: `specs/IMPL-007b.md`
+> Success = ≤15 minutes total review time (ANCHOR.md criterion)
 
 ---
 
-## ✅ Done This Session (20 Jan)
+## Active Workflows
 
-### SPEC-1b Competitor Monitoring — Workflows Built ✅
-- [x] Stage 1 PARSE — Extracted acceptance criteria from ROADMAP.md
-- [x] Stage 2 AUDIT — Verified schema, explored archived workflow
-- [x] Stage 3 PLAN — 21 tasks across 5 phases
-- [x] Stage 4 BUILD — All phases complete:
-  - Phase A: Created `prompts/competitor-interception.md`
-  - Phase B: Built WF9 (MI: Competitor Receiver) — 21 nodes, ACTIVE
-  - Phase C: Built WF8 (MI: Competitor Trigger) — 8 nodes, INACTIVE (blocked)
-  - Phase D: Testing PASSED — Signal + Opportunity creation verified
-  - Phase E: WF9 activated, WF8 blocked on Bright Data collectors
-- [x] Stage 5 VERIFY — 3/5 acceptance criteria pass, 1 blocked, 1 deferred
-- [x] Stage 6 DOCUMENT — ROADMAP.md and this file updated
+| Workflow | ID | Status |
+|----------|-----|--------|
+| WF1: Jobs Trigger | — | Active |
+| WF2: Jobs Receiver | — | Active |
+| WF3: Jobs Classifier | — | Active |
+| WF4: Opportunity Creator | — | Active |
+| WF5: Opportunity Enricher | — | Active |
+| WF6: Send Outreach | `AeEDcJ5FD2YGCSV1` | Active |
+| WF9: Competitor Receiver | `VLbSZp5cGp1OUQZy` | Active |
 
-**Workflows Created**:
-- WF9: `VLbSZp5cGp1OUQZy` — MI: Competitor Receiver (ACTIVE)
-- WF8: `rt3K4H5NAco5VeI0` — MI: Competitor Trigger (INACTIVE - needs Bright Data)
-
-**Blocker**: WF8 requires Bright Data collector configuration (external task)
-
-**Implementation tracker**: `specs/IMPL-1b-competitor-monitoring.md`
-
-### VPS Deployment Complete
-- [x] Created `dashboard/ecosystem.config.js` — PM2 process manager config
-- [x] Created `dashboard/deploy.sh` — VPS deployment script
-- [x] Created `dashboard/nginx.conf.example` — Reference config (VPS uses Traefik)
-- [x] Deployed to VPS at `72.61.202.117`
-- [x] Configured Traefik dynamic routing at `/docker/n8n/dynamic/dashboard.yml`
-- [x] SSL certificate provisioned via Let's Encrypt
-- [x] Tested keyboard navigation (J/K/?/Esc) — all working
-- [x] Tested filter tabs (Ready/Sent/All) — all working
-- [x] 32 opportunities loading from Airtable
-
-### SPEC-007a Updated — Sales Strategy Alignment
-- [x] Removed dual-track scoring (ms_score, ag_score, primary_track)
-- [x] Aligned with SALES-STRATEGY.md Lead Prioritisation Model
-- [x] Added Priority Tier display (P1/P2/P3)
-- [x] Added SignalPatternCards component (replaces DualTrackScores)
-- [x] Added Contact Confidence indicator (Problem Owner vs HR Fallback)
-- [x] Updated schema prerequisites
-- [x] Added Sales Strategy Alignment Checklist
-
-### Global Config Fix
-- [x] Updated ~/.claude/CLAUDE.md to correct Airtable base (`appEEWaGtGUwOyOhm`)
-- [x] Updated table IDs to V2 schema (Forces, Contacts, Signals, Opportunities)
-
-### SPEC-007b Implementation — Stages 1-4 Complete
-- [x] Stage 1 PARSE complete — 17 acceptance criteria extracted
-- [x] Guardrails identified: G-008 (webhookId)
-- [x] Dependencies verified: SPEC-001, SPEC-005 complete
-- [x] ANCHOR.md alignment confirmed (see below)
-- [x] Implementation tracker created: `specs/IMPL-007b.md`
-- [x] Stage 2 AUDIT complete — schema compatible, existing dashboard found
-  - Correct Airtable base: `appEEWaGtGUwOyOhm` (not the HubSpot one)
-  - Schema fields exist with different names (will map in code)
-  - Existing dashboard has queue view — needs Three-Zone refactor
-- [x] Stage 3 PLAN complete — 22 tasks across 7 phases
-- [x] **Stage 4 BUILD complete** — All 22 tasks implemented:
-
-**Files Created (18 new):**
-- `dashboard/styles/tokens.css` — Design tokens
-- `dashboard/lib/stores/review-store.ts` — Zustand state management
-- `dashboard/components/review/review-layout.tsx` — Three-Zone wrapper
-- `dashboard/components/review/queue-panel.tsx` — Queue Panel
-- `dashboard/components/review/now-card.tsx` — Now Card
-- `dashboard/components/review/composer-dock.tsx` — Composer Dock
-- `dashboard/components/review/session-header.tsx` — Progress header
-- `dashboard/components/review/dismiss-modal.tsx` — Dismiss with reasons
-- `dashboard/components/review/shortcut-overlay.tsx` — Keyboard help
-- `dashboard/components/feedback/toast.tsx` — Toast with undo
-- `dashboard/components/feedback/empty-state.tsx` — Empty state
-- `dashboard/components/feedback/error-state.tsx` — Error state
-- `dashboard/components/feedback/loading-skeleton.tsx` — Loading skeleton
-- `dashboard/lib/hooks/use-keyboard-nav.ts` — Keyboard navigation
-- `dashboard/app/review/page.tsx` — Review page
-
-**Files Modified (4):**
-- `dashboard/.env.local` — API keys configured
-- `dashboard/package.json` — Added zustand, swr, @radix-ui/react-dialog
-- `dashboard/app/globals.css` — Import tokens.css
-- `dashboard/app/page.tsx` — Redirect to /review
-
-**ANCHOR.md Alignment Check**:
-| Mission Element | SPEC-007b Serves It? |
-|-----------------|---------------------|
-| 3-5 leads Monday | ✅ Dashboard displays opportunities |
-| ≤15 min review | ✅ Criterion #17 requires this |
-| ADHD-first | ✅ Keyboard nav, single-focus, progress feedback |
-| Human confirms | ✅ AI drafts, James reviews/sends |
+**Archived**: WF8 (`rt3K4H5NAco5VeI0`) — Bright Data handles scheduling
+**Deleted**: Duplicate "MI: Send Outreach" (`M5d8dnDehvOBq65s`) — superseded by `AeEDcJ5FD2YGCSV1`
 
 ---
 
-## ✅ Done Previous Session (19 Jan)
+## Bright Data Collectors
 
-### Bug Status Update
-- [x] Investigated WF2/WF4 bugs — discovered already fixed on 18 Jan
-- [x] Verified fixes in workflow JSON files (returnAll=true, ARRAYJOIN formula)
-- [x] Updated STATUS.md to reflect current state
+| Competitor | Collector ID | Status |
+|------------|-------------|--------|
+| Investigo | `c_mkeaif24wc2xinpo6` | Live |
+| Red Snapper | `c_mke54t691ndre24s37` | Live |
 
-### Documentation Audit
-- [x] Ran /doc-audit comprehensive alignment check
-- [x] Generated docs/AUDIT-REPORT.md with 40 issues (11 high, 17 medium, 12 low)
-- [x] Fixed 7 spec headers to match ROADMAP status
-- [x] Fixed SPEC-004 wrong table ID (tbl3qHi21UzKqMXWo → tblJgZuI3LM2Az5id)
-- [x] Updated ROADMAP SPEC-005 status (Next → Built)
-- [x] Fixed 5 broken file references (specs/README.md, dashboard-v1-review.md, consistency-checker.md, SPEC-001, SPEC-002)
-
-**Key audit findings ✅ RESOLVED:**
-1. ~~7 spec headers misaligned~~ → Fixed
-2. ~~SPEC-004 wrong table ID~~ → Fixed
-3. ~~SPEC-005 status conflict~~ → Fixed (ROADMAP updated to Built)
-4. SPEC-005 missing sales guardrails G-012 through G-015 (medium priority — deferred)
-5. Global ~/.claude/CLAUDE.md references different Airtable base (acceptable — different project)
-
-**Mission alignment check**: No drift from ANCHOR.md mission detected. All issues are documentation hygiene, not mission deviation. The platform still targets 3-5 leads, ≤15 min review, ADHD-first design.
-
-### Strategy Document Integration
-- [x] Integrated strategy docs from Claude Chat Project Knowledge to filesystem
-- [x] Cleaned Section 11 duplicate content (removed old vertical scroll remnants)
-- [x] Added Sales Strategy reference to Section 7
-- [x] Added guardrail references (G-012 through G-015) to workflow 4.1 in Section 10
-- [x] Added supplementary docs reference to Section 12
-- [x] Updated CHAT-INSTRUCTIONS.md with filesystem locations
-- [x] Updated DEPENDENCY-MAP.md with strategy doc change impact rules
-- [x] Deleted strategy-section-11-update.md (content merged)
-
-### Spec Restructuring
-- [x] Created SPEC-007b: Dashboard MVP (simplified Three-Zone layout)
-- [x] Updated SPEC-007a to "Future Phase" with prerequisites
-- [x] Updated SPEC-008 to "Future Phase" with prerequisites
-- [x] Created skills/README.md with usage guide
-- [x] Updated ROADMAP.md with schema evolution path
-- [x] Updated ROADMAP.md with dashboard evolution path
-- [x] Added future features section to ROADMAP.md
-
-### Skills Migration (Previous Session)
-- [x] Migrated 13 skills from V1 to `skills/` folder
-- [x] Updated CLAUDE.md with skills table
-
-### Developer Tooling
-- [x] Created `/doc-audit` slash command — multi-agent documentation alignment audit
-- [x] Created 5 audit subagents (reference-integrity, single-source-truth, roadmap-alignment, schema-alignment, guardrail-compliance)
-- [x] Updated CLAUDE.md and CLAUDE-CODE-CAPABILITIES.md with new command
-
-### Dashboard Build (Previous Session)
-- [x] Built Next.js 14 dashboard (SPEC-007)
-- [x] Note: Dashboard exists but spec has been restructured
+Webhook: `https://n8n.srv1190997.hstgr.cloud/webhook/competitor-receiver`
 
 ---
 
-## 📋 Spec Status
+## Spec Status
 
-| Spec | Status | Notes |
-|------|--------|-------|
-| SPEC-001: Airtable Schema | ✅ Complete | 4 tables created |
-| SPEC-002: Jobs Ingestion | ✅ Built | WF1-WF2, dedup fixed 18 Jan |
-| SPEC-003: Signal Classification | ✅ Built | WF3 working |
-| SPEC-004: Opportunity Creator | ✅ Built | WF4 consolidation fixed 18 Jan |
-| SPEC-005: Opportunity Enricher | ✅ Built | WF5 working |
-| SPEC-006: Monday Review | 🔀 Absorbed | Into SPEC-007b |
-| SPEC-007: React Dashboard | 🔀 Replaced | By SPEC-007b |
-| **SPEC-007a: Full UI** | ⏸️ Deferred | Aligned with Sales Strategy (P1/P2/P3 priority model) |
-| **SPEC-007b: Dashboard MVP** | ✅ Deployed | Live at dashboard.peelplatforms.co.uk |
-| **SPEC-008: Morning Brief** | ⏸️ Deferred | Needs infrastructure |
-| **SPEC-1b: Competitor Monitoring** | ✅ Built | WF8/WF9 built; WF8 blocked on Bright Data |
+| Spec | Status |
+|------|--------|
+| SPEC-001: Airtable Schema | Complete |
+| SPEC-002: Jobs Ingestion | Built |
+| SPEC-003: Signal Classification | Built |
+| SPEC-004: Opportunity Creator | Built |
+| SPEC-005: Opportunity Enricher | Built |
+| SPEC-007b: Dashboard MVP | Deployed |
+| SPEC-1b: Competitor Monitoring | Complete |
+| SPEC-007a: Full UI | Deferred |
+| SPEC-008: Morning Brief | Deferred |
 
 ---
 
-## 🔄 In Progress
+## Blockers
 
-### Phase 1 Completion
-1. [x] Fix WF2 deduplication bug (Fixed 18 Jan)
-2. [x] Fix WF4 consolidation bug (Fixed 18 Jan)
-3. [x] Tests 1-6 passing (Verified 18 Jan)
-4. [ ] Complete Test 7 burn-in (1 week monitoring)
-5. [ ] Phase 1 sign-off
-
-### Phase 1c Dashboard MVP
-1. [x] Schema fields compatible (mapped in code: subject_line, outreach_draft, sent_at, skipped_reason)
-2. [x] Dashboard built to SPEC-007b (18 new files)
-3. [x] npm install complete
-4. [x] npm run build passed (TypeScript verified)
-5. [x] **Deployed to VPS** — https://dashboard.peelplatforms.co.uk/review
-6. [ ] Test timing (≤15 min for 5 opps) — Monday morning test
+None.
 
 ---
 
-## 📊 Phase Progress
+## Schema Status
 
-```
-Phase 1: [█████████░] 95% — Core Jobs Pipeline
+**4 tables**: Forces (48), Signals, Opportunities, Contacts
 
-  ✅ Airtable schema (4 tables, 48 forces)
-  ✅ WF1: Jobs Trigger
-  ✅ WF2: Jobs Receiver (dedup fixed 18 Jan)
-  ✅ WF3: Jobs Classifier
-  ✅ WF4: Opportunity Creator (fixed 18 Jan)
-  ✅ WF5: Opportunity Enricher
-  ✅ WF6: Send Outreach
-  ✅ Tests 1-6 passing
-
-  Remaining:
-  □ Test 7 burn-in (1 week monitoring)
-  □ Phase 1 sign-off
-
-Phase 1c: [██████████] 95% — Dashboard MVP ✅ DEPLOYED
-
-  ✅ SPEC-007b written
-  ✅ Stage 4 BUILD complete (22 tasks, 18 new files)
-  ✅ Three-Zone layout implemented
-  ✅ Keyboard navigation (J/K/E/S/D/Z)
-  ✅ Undo with 30s countdown
-  ✅ Progress header with session stats
-  ✅ npm install complete
-  ✅ TypeScript verification passed
-  ✅ DEPLOYED to VPS (PM2 + Traefik + SSL)
-  ✅ 32 opportunities loading
-  □ Timing validated (≤15 min for 5 opps) — Monday test
-
-Future (Deferred):
-  ⏸️ SPEC-007a: Full UI (needs Phase 1b + schema expansion)
-  ⏸️ SPEC-008: Morning Brief (needs infrastructure)
-```
+Dashboard field mapping (SPEC-007b → Airtable):
+- `draft_subject` → `subject_line`
+- `draft_body` → `outreach_draft`
+- `actioned_at` → `sent_at`
+- `skip_reason` → `skipped_reason`
 
 ---
 
-## 🏗️ Schema Status
+## Session History
 
-**Current (4 tables)**:
-- Forces: 48 records ✅
-- Signals: Active ✅
-- Opportunities: Active ✅
-- Contacts: Ready ✅
-
-**Phase 1c schema compatibility** (Stage 2 AUDIT finding):
-
-| SPEC-007b Field | Actual Airtable Field | Status |
-|-----------------|----------------------|--------|
-| draft_subject | subject_line | ✅ Mapped in code |
-| draft_body | outreach_draft | ✅ Mapped in code |
-| actioned_at | sent_at | ✅ Mapped in code |
-| skip_reason | skipped_reason | ✅ Mapped in code |
-
-No schema changes needed — fields exist with slightly different names. Code maps them in `mapOpportunityToReview()` function.
-
----
-
-## 💡 Decisions Made This Session
-
-| Decision | Rationale |
-|----------|-----------|
-| Created SPEC-007b (Dashboard MVP) | SPEC-007a requires schema expansion V2 doesn't have |
-| Deferred SPEC-007a | Dual-track scoring needs Phase 1b + schema fields |
-| Deferred SPEC-008 | Morning Brief needs overnight tracking infrastructure |
-| Created skills/README.md | Skills are reference, not requirements |
-| Updated ROADMAP with evolution paths | Future features documented, won't be forgotten |
-
-**Log in DECISIONS.md**: Yes, after this session.
-
----
-
-## ⚠️ Blockers
-
-None — SPEC-007b verified and ready for deployment.
-
-See `specs/PHASE-1-E2E-TEST.md` for test results (Tests 1-6 passing).
-
----
-
-## 🚨 Mission Reminder
-
-*From [ANCHOR.md](ANCHOR.md):*
-- 3-5 ready-to-send leads every Monday
-- ≤15 min review time  
-- Reduce James's cognitive load
-
-**Today's simplification serves the mission**: Build what works with current schema, defer complexity that requires infrastructure we don't have.
+See `docs/archive/status-2025-01.md` for January work details.
 
 ---
 

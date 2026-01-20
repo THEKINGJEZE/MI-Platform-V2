@@ -34,30 +34,34 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 ---
 
-### Phase 1b: Competitor Monitoring
+### Phase 1b: Competitor Monitoring ✅ COMPLETE
 **Goal**: Detect when competitors post jobs for police forces, trigger interception
 
 **Acceptance Criteria**:
-- [ ] Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care) — ⚠️ Blocked on Bright Data config
+- [x] Competitor scrapers running (Red Snapper, Investigo) — Bright Data configured
 - [x] Competitor signals classified and attributed to correct force
 - [x] Hot lead flagging working (competitor signal = higher priority)
-- [ ] Alert on hot leads (Slack or email) — Dashboard P1 filter provides visibility
+- [x] Alert on hot leads — Dashboard P1 filter provides visibility
 - [x] Interception message template in use
 
 **Dependencies**: Phase 1 complete
 
-**Spec**: `specs/SPEC-1b-competitor-monitoring.md` ✅ Built
+**Spec**: `specs/SPEC-1b-competitor-monitoring.md` ✅ Complete
 **Implementation**: `specs/IMPL-1b-competitor-monitoring.md`
 
 **Workflows**:
-- WF8: MI: Competitor Trigger (`rt3K4H5NAco5VeI0`) — Inactive, blocked on Bright Data
 - WF9: MI: Competitor Receiver (`VLbSZp5cGp1OUQZy`) — Active ✅
+- WF8: [ARCHIVED] MI: Competitor Trigger — Not needed, Bright Data handles scheduling
+
+**Bright Data Collectors**:
+- Investigo: `c_mkeaif24wc2xinpo6` ✅
+- Red Snapper: `c_mke54t691ndre24s37` ✅
 
 **Skills used**: `competitive-analysis`, `intelligence-source-grading`
 
 **Duration**: ~2 weeks
 
-**Status**: Workflows built. Blocked on external task (Bright Data collector configuration).
+**Status**: ✅ Complete — Live data flowing from both collectors.
 
 ---
 

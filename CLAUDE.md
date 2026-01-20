@@ -5,10 +5,10 @@
 That file defines WHY. It never changes. If anything conflicts with ANCHOR.md, ANCHOR.md wins.
 
 ## Current Focus
-**Phase**: 1 — Core Jobs Pipeline  
-**Goal**: Fix WF2/WF4 bugs, complete E2E test  
-**Blocker**: WF2 deduplication, WF4 consolidation  
-**Next Phase**: 1c — Dashboard MVP (SPEC-007b)  
+**Phase**: 1c — Dashboard MVP (deployed)
+**Goal**: Validate ≤15 min timing criterion
+**Blocker**: None
+**Completed**: Phase 1 (95%), Phase 1b (100%)
 
 See @STATUS.md for session-level tracking.
 

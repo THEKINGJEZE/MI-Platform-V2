@@ -1,164 +1,204 @@
-# Context Brief: React Dashboard (Phase 1c)
+# Context Brief: Phase 1b — Competitor Monitoring
 
-Generated: 19 January 2025
+Generated: 20 January 2025
 For: Claude Chat spec drafting
 
 ---
 
 ## Current State
 
-**Phase**: 1 — Core Jobs Pipeline (99% COMPLETE)
-**Goal**: Production burn-in monitoring
-**Blockers**: None — waiting on burn-in to complete (ends 25 Jan)
+**Phase**: 1c — Dashboard MVP ✅ DEPLOYED
+**Goal**: Dashboard deployed and tested; timing validation pending Monday
+**Blockers**: None — Phase 1 and 1c are functionally complete
+
+**Phase 1b Status**: Not yet started — depends on Phase 1 completion
 
 ---
 
 ## Acceptance Criteria (from ROADMAP.md)
 
-Phase 1c: React Dashboard
+```markdown
+### Phase 1b: Competitor Monitoring
+**Goal**: Detect when competitors post jobs for police forces, trigger interception
 
-- [ ] Next.js 14 app deployed on Vercel
-- [ ] Queue view with Hot Leads section (top) and Ready to Send section
-- [ ] Opportunity cards show: Force, Why Now, Contact, Message, Actions
-- [ ] Message editing inline with save
-- [ ] Send Email button triggers WF6 webhook
-- [ ] LinkedIn button copies message + opens compose URL
-- [ ] Skip button with optional reason
-- [ ] Pipeline view (Kanban by status)
-- [ ] Signals view (raw feed for debugging)
-- [ ] Forces view (reference directory)
-- [ ] Tabs: Queue, Pipeline, Signals, Forces
-- [ ] Dark-first design with badge system (per V1 review)
-- [ ] React Query or SWR for data fetching (not manual fetch)
-- [ ] Full review of 5 opportunities takes ≤15 minutes
+**Acceptance Criteria**:
+- [ ] Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care)
+- [ ] Competitor signals classified and attributed to correct force
+- [ ] Hot lead flagging working (competitor signal = higher priority)
+- [ ] Alert on hot leads (Slack or email)
+- [ ] Interception message template in use
 
-**Dependencies**: Phase 1 complete (burn-in ends 25 Jan)
+**Dependencies**: Phase 1 complete
+**Skills used**: `competitive-analysis`, `intelligence-source-grading`
+**Duration**: ~2 weeks
+```
 
 ---
 
 ## Existing Assets
 
+### Reference Data (source of truth)
+
+| File | Purpose |
+|------|---------|
+| `reference-data/competitors.json` | 7 competitors with URLs, tiers, service areas |
+| `reference-data/uk-police-forces.json` | 48 forces with metadata |
+| `reference-data/capability-areas.json` | 14 capability areas for classification |
+
+**Competitor Details** (from `competitors.json`):
+- **Tier 1 (Direct)**: Red Snapper, Investigo
+- **Tier 2 (Generalist)**: Hays, Adecco, Reed
+- **Tier 3 (Niche)**: Service Care, Matrix SCM
+
+**Key URLs**:
+- Red Snapper: `rsg.ltd/jobs/`
+- Investigo: `weareinvestigo.com/jobs`
+- Reed: `reed.co.uk/jobs`
+- Adecco: `adecco.co.uk/jobs`
+- Service Care: `servicecare.org.uk/jobs`
+
 ### Patterns (reuse these, don't recreate)
-- `patterns/force-matching.js` — UK police force name fuzzy matching (47 patterns)
-- `patterns/indeed-keywords.json` — Indeed search keywords configuration
-- `patterns/job-portal-filters.js` — URL regex to filter job portal false positives
+
+| File | Purpose | Notes |
+|------|---------|-------|
+| `patterns/force-matching.js` | UK police force name matching | 47 patterns, G-005 compliant |
+| `patterns/job-portal-filters.js` | Filter job portal false positives | G-010 compliant |
+| `patterns/indeed-keywords.json` | Indeed search keywords | Can extend for competitors |
 
 ### Prompts (can extend or reference)
-- `prompts/job-classification.md` — Claude prompt for classifying job signals
-- `prompts/email-triage.md` — Claude prompt for email classification
-- `prompts/opportunity-enrichment.md` — Claude prompt for enriching opportunities
 
-### Reference Data (source of truth)
-- `reference-data/uk-police-forces.json` — 48 UK police forces with metadata
-- `reference-data/competitors.json` — 7 competitor definitions
-- `reference-data/capability-areas.json` — 14 capability areas for classification
+| File | Purpose | Notes |
+|------|---------|-------|
+| `prompts/job-classification.md` | Claude prompt for classifying job signals | Extend for competitor source |
+| `prompts/opportunity-enrichment.md` | Enrichment prompt | Interception angle needed |
 
-### Skills & Rules
-- `.claude/skills/force-matching/SKILL.md` — Force identification skill (enforces G-005)
-- `.claude/rules/airtable.md` — Airtable API patterns and rate limits
-- `.claude/rules/n8n.md` — n8n workflow structure requirements
+### Skills (reference for design)
 
-### Completed Specs (reference for data model)
-- `specs/SPEC-001-airtable-schema.md` — Airtable table definitions
-- `specs/SPEC-002-jobs-ingestion.md` — Jobs ingestion workflow
-- `specs/SPEC-003-signal-classification.md` — Signal classification workflow
-- `specs/SPEC-004-opportunity-creator.md` — Opportunity creation logic
-- `specs/SPEC-005-opportunity-enricher.md` — Opportunity enrichment workflow
-- `specs/SPEC-006-monday-review.md` — Monday review (Airtable Interface version)
-
-### V1 Dashboard Review (critical reference)
-- `docs/archive/dashboard-v1-review.md` — What to keep vs avoid from V1
+| Skill | Purpose | Status |
+|-------|---------|--------|
+| `competitive-analysis` | Best-in-class dashboard patterns | Ready for 1b |
+| `intelligence-source-grading` | Admiralty Code, signal confidence | Ready for 1b |
 
 ---
 
 ## Applicable Guardrails
 
-| ID | Rule | Relevance |
-|----|------|-----------|
-| G-002 | Command Queue for Email Actions | Email sends must go through webhook (WF6), not direct API calls |
-| G-008 | Always Include webhookId | Any webhook triggers to n8n must include webhookId |
-| G-011 | Upsert Only (No Loop Delete) | Mutations to Airtable must use upsert, not delete+create |
+| ID | Rule | Relevance to Phase 1b |
+|----|------|----------------------|
+| G-001 | Dumb Scrapers + Smart Agents | Competitor jobs → Raw_Archive → AI → Signals |
+| G-003 | Bright Data Over Firecrawl | Required for competitor sites (anti-bot) |
+| G-005 | Fuzzy JS Matching Before AI | Reuse `force-matching.js` for competitor job attribution |
+| G-009 | Strict Date Filtering | 24h window prevents duplicate competitor signals |
+| G-011 | Upsert Only (No Loop Delete) | Prevent data loss during sync |
+| G-013 | Competitor Signals Get P1 Priority | **Critical**: Auto-flag as highest priority |
+
+---
+
+## Strategy Document References
+
+The following sections from `docs/STRATEGY.md` are relevant:
+
+| Section | Content |
+|---------|---------|
+| **5.2 Competitor Job Boards** | Source list, scraping frequency (4 hours), intelligence value |
+| **8. Competitor Interception Strategy** | Full interception workflow, messaging rules, tracking metrics |
+
+### Key Strategy Points
+
+**From Section 5.2**:
+- Scrape every 4 hours (time-sensitive for interception)
+- Intelligence: which forces use which competitors, live needs, interception opportunity
+
+**From Section 8**:
+- Same-day response target
+- Never mention competitor or how you knew
+- Track: Interception Rate >15%, Win Rate >5%, Time to Response <24h
+
+**Message Framing Rule**:
+> Never mention the competitor or how you know about the need.
+>
+> ✅ "I understand you're looking at investigator capacity..."
+> ❌ "I saw Red Snapper is recruiting for you..."
 
 ---
 
 ## Recent Decisions
 
-| Decision | Date | Impact |
-|----------|------|--------|
-| P1-01: Airtable Interface for Phase 1 | Jan 2025 | SPEC-006 uses Airtable Interface; React dashboard deferred to Phase 1c |
-| P1-02: React Dashboard as Phase 1c | 19 Jan 2025 | Dashboard designated SPEC-007, parallel to Phase 1b (competitors) |
-| A2: Airtable as Primary Database | Jan 2025 | Dashboard reads/writes to Airtable via API |
-| A3: Self-Hosted n8n | Jan 2025 | Webhooks trigger n8n workflows for actions |
+| Decision | Date | Impact on Phase 1b |
+|----------|------|-------------------|
+| A2: Airtable as Primary Database | Jan 2025 | Competitor signals go to Signals table |
+| A3: Self-Hosted n8n | Jan 2025 | Competitor scrapers as n8n workflows |
+| G-013: Competitor Signals Get P1 | Jan 2025 | Auto-prioritisation required |
+| P1c-01: MVP Before Full UI | 19 Jan | Dashboard already exists for hot leads |
+
+---
+
+## Schema Impact
+
+**Signals table already supports competitor signals** (from STRATEGY.md Section 6):
+- `type`: Single Select includes `competitor_job`
+- `source`: Single Select includes `red_snapper`, `investigo`, `reed`, `adecco`, `service_care`
+- `competitor_source`: Single Select for which competitor
+
+**Opportunities table already supports interception**:
+- `is_competitor_intercept`: Checkbox
+- `competitor_detected`: Single Select
+- `outreach_angle`: Single Select includes `competitor_intercept`
+
+**Verify**: Check if these fields exist in current Airtable schema or need adding.
+
+---
+
+## Workflow Architecture (Expected)
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  WF8: Competitor Trigger                                            │
+│  Schedule: Every 4 hours during business hours                     │
+│  Triggers: Bright Data collector for each competitor site          │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  WF9: Competitor Receiver                                           │
+│  Webhook: /competitor-jobs-receiver                                 │
+│  Steps:                                                             │
+│  1. Receive Bright Data payload                                     │
+│  2. Deduplicate (G-009)                                            │
+│  3. Archive to Raw table (G-001)                                   │
+│  4. Run force-matching.js (G-005)                                  │
+│  5. Send unmatched to AI classification                            │
+│  6. Create Signals (type=competitor_job, source=competitor name)   │
+│  7. Flag as P1 priority (G-013)                                    │
+│  8. Send Slack/email alert if hot lead                             │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Strategy Alignment Check
 
-Before drafting, Claude Chat must verify:
-- **Section 11**: Dashboard Design specification (primary reference)
-- **Section 13**: Technology Stack (Next.js 14, Vercel deployment)
-- Does the planned approach match the strategy specification?
+**Potential alignment issues to verify**:
 
-**Key strategy requirements from Section 11**:
-1. Queue view with Hot Leads section (competitor interceptions) at top
-2. Ready to Send section below Hot Leads
-3. Opportunity cards with: Why Now, Contact, Message, Actions
-4. Single-focus flow: review → tweak → send → next
-5. Tabs: Queue, Pipeline, Signals, Forces (Email/Tenders in later phases)
-6. Dark-first design optimized for quick visual scanning
+1. **Scraping frequency**: Strategy says 4 hours. Confirm with James if this is still desired or if daily is acceptable.
 
-**Critical warning from V1 review**:
-> DO NOT port the V1 three-zone layout (Queue/Now/Actions). Build the dashboard exactly as specified in the strategy document.
+2. **Alert channel**: Strategy mentions "Slack or email". Clarify which James prefers.
 
----
+3. **Interception message**: Strategy has a template in Section 8. Confirm if this should be the default or if SALES-STRATEGY.md templates take precedence.
 
-## V1 Technical Patterns to Keep
-
-From `docs/archive/dashboard-v1-review.md`:
-
-**Keep**:
-- Badge system (30+ semantic variants for status, priority, source, action)
-- Zustand for client state
-- Dark-first CSS variable theming
-- Skeleton loading states
-- Undo buffer (30-second expiry with toast)
-
-**Fix in V2**:
-- Use React Query or SWR properly (V1 abandoned it, used manual fetch)
-- Implement cache invalidation after mutations
-- Add pagination from day one (V1 had none)
-- Remove webhook fallback complexity (use n8n webhook only)
-
----
-
-## Airtable Tables the Dashboard Will Read/Write
-
-| Table | Usage |
-|-------|-------|
-| Opportunities | Main data source for Queue/Pipeline views |
-| Signals (Indeed Intel Clean) | Raw signals for debugging view |
-| Forces | Reference data for Forces view |
-| Contacts | Contact lookup for opportunity cards |
-
-API patterns: See `.claude/rules/airtable.md`
-
----
-
-## Workflow Integration
-
-| Action | Trigger | Workflow |
-|--------|---------|----------|
-| Send Email | Button click → webhook | WF6: Send Outreach (AeEDcJ5FD2YGCSV1) |
-| Update Opportunity | Direct Airtable API | N/A |
-| Skip Opportunity | Direct Airtable API (status update) | N/A |
+4. **Matrix SCM**: Listed in `competitors.json` but described as "neutral vendor platform - not a direct competitor". Clarify if it should be monitored.
 
 ---
 
 ## Notes for Claude Chat
 
 - Reference assets by path (e.g., `patterns/force-matching.js`)
-- Spec output should go in `specs/SPEC-007-react-dashboard.md`
+- New prompts go in `prompts/`
+- New patterns go in `patterns/`
+- Spec output should go in `specs/SPEC-1b-competitor-monitoring.md`
 - Keep spec under 200 lines
-- Strategy Section 11 is the PRIMARY design reference — V1 review is for technical patterns only
-- Phase 1c can start after Phase 1 burn-in completes (25 Jan)
-- Dashboard replaces Airtable Interface from SPEC-006 (which remains as fallback)
+- Reuse existing job classification prompt — extend, don't recreate
+- Ensure interception message respects G-012 (Value Proposition First)
+- Dashboard already exists (SPEC-007b) — spec should focus on data pipeline
+
+**Key question for spec**: Does the Airtable schema already have the competitor-specific fields, or do they need to be added?
