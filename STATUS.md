@@ -8,16 +8,16 @@
 
 ## 🎯 Immediate Next Action
 
-> **Implement SPEC-007b Dashboard MVP** — Stage 2 AUDIT
+> **Implement SPEC-007b Dashboard MVP** — Stage 4 BUILD
 >
-> Stage 1 PARSE complete. Now auditing preconditions before build.
-> 1. Verify Airtable schema fields exist (or create them)
-> 2. Check n8n connectivity for webhook API
-> 3. Audit existing dashboard structure at `dashboard/`
+> Stages 1-3 complete. Ready to build.
+> - 22 tasks across 7 phases
+> - Adapting existing dashboard (not rebuilding)
+> - First task: Copy AIRTABLE_API_KEY to dashboard/.env.local
 
-**Blockers**: None
+**Blockers**: None (API key will be configured in Task 1)
 
-**Next step**: Stage 2 AUDIT — verify dependencies before proceeding to PLAN
+**Next step**: Stage 4 BUILD — execute task list from IMPL-007b.md
 
 **Implementation tracker**: `specs/IMPL-007b.md`
 
@@ -40,6 +40,7 @@
   - Schema fields exist with different names (will map in code)
   - Existing dashboard has queue view — needs Three-Zone refactor
   - Blocker: AIRTABLE_API_KEY needs configuration
+- [x] Stage 3 PLAN complete — 22 tasks across 7 phases (~4 hrs estimated)
 
 **ANCHOR.md Alignment Check**:
 | Mission Element | SPEC-007b Serves It? |
