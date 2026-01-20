@@ -31,6 +31,11 @@
 - [x] Dependencies verified: SPEC-001, SPEC-005 complete
 - [x] ANCHOR.md alignment confirmed (see below)
 - [x] Implementation tracker created: `specs/IMPL-007b.md`
+- [x] Stage 2 AUDIT complete — schema compatible, existing dashboard found
+  - Correct Airtable base: `appEEWaGtGUwOyOhm` (not the HubSpot one)
+  - Schema fields exist with different names (will map in code)
+  - Existing dashboard has queue view — needs Three-Zone refactor
+  - Blocker: AIRTABLE_API_KEY needs configuration
 
 **ANCHOR.md Alignment Check**:
 | Mission Element | SPEC-007b Serves It? |
