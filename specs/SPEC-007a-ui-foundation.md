@@ -1,95 +1,102 @@
 # SPEC-007a: UI Foundation — Full Feature Dashboard
 
-**Status**: Future Phase (deferred)  
-**Phase**: Post-Phase 1c  
-**Created**: 2025-01-19  
-**Updated**: 2025-01-19  
-**Depends on**: SPEC-007b (Dashboard MVP) — must be complete and validated first  
-**Prerequisites**: Schema expansion (see below), scoring model validation  
-**Source**: V1 Dashboard codebase (`/Users/jamesjeram/Documents/MI-Platform/dashboard-react`)  
-**Decision**: A8 (Three-Zone Dashboard Layout + Morning Brief)  
+**Status**: Future Phase (deferred)
+**Phase**: Post-Phase 1c
+**Created**: 2025-01-19
+**Updated**: 2025-01-20
+**Depends on**: SPEC-007b (Dashboard MVP) — must be complete and validated first
+**Prerequisites**: Schema expansion (see below), Phase 1b competitor monitoring
+**Source**: V1 Dashboard codebase (`/Users/jamesjeram/Documents/MI-Platform/dashboard-react`)
+**Decision**: A8 (Three-Zone Dashboard Layout + Morning Brief)
 **Skills**: `action-oriented-ux`, `adhd-interface-design`, `uk-police-design-system`, `b2b-visualisation`
+**Aligned with**: SALES-STRATEGY.md (Lead Prioritisation Model, Contact Strategy)
 
 ---
 
 ## Why This Is Deferred
 
-This spec describes the full-featured dashboard with dual-track scoring, score breakdowns, and session persistence. It requires schema fields and scoring logic that don't exist in Phase 1.
+This spec describes the full-featured dashboard with priority-based signal display, contact confidence indicators, and session persistence. It requires schema fields and Phase 1b infrastructure that don't exist in Phase 1.
 
 **Prerequisites before implementing this spec:**
 
 1. **SPEC-007b complete** — MVP dashboard working in production
-2. **Schema expansion** — Add these fields to Opportunities:
-   - `ms_score` (Number 0-100) — Managed Services score
-   - `ag_score` (Number 0-100) — Agency score  
-   - `primary_track` (Single Select: MS, AG)
-   - `signal_score`, `fit_score`, `relationship_score`, `timing_score` (Numbers)
-3. **Contact enrichment** — Add to Contacts:
+2. **Phase 1b complete** — Competitor monitoring provides P1 signal differentiation
+3. **Schema expansion** — Add these fields to Opportunities:
+   - `priority_tier` (Single Select: P1, P2, P3)
+   - `priority_signals` (Long Text) — JSON array of detected patterns
+   - `response_window` (Single Select: Same Day, Within 48h, This Week)
+   - `contact_type` (Single Select: Problem Owner, Deputy, HR Fallback)
+4. **Contact enrichment** — Add to Contacts:
    - `research_confidence` (Number 0-100)
    - `confidence_sources` (Long Text)
-4. **Scoring workflow** — WF5 enhanced to calculate dual-track scores
-5. **Phase 1b complete** — Competitor monitoring provides differentiated signals
 
-**When to implement**: After Phase 1c MVP is validated with real Monday reviews
+**When to implement**: After Phase 1c MVP is validated with real Monday reviews AND Phase 1b competitor monitoring is live
+
+---
+
+## Strategic Alignment
+
+This spec implements the Lead Prioritisation Model from SALES-STRATEGY.md.
+
+### Core Philosophy (from Sales Strategy)
+
+> "Job Postings Are Warm Leads, Not Classifications. We are not trying to decide 'is this Agency or Managed Services?' We are identifying a force with an active need and an opportunity to make contact."
+
+**What this means for the UI:**
+- ❌ No dual-track scoring (MS vs AG)
+- ❌ No "primary track" indicator
+- ✅ Priority tiers based on signal patterns
+- ✅ Response urgency display
+- ✅ Contact type indicator (Problem Owner vs Fallback)
+
+### Priority Tier Model
+
+| Priority | Signal Pattern | Response Window | Visual |
+|----------|---------------|-----------------|--------|
+| 🔴 **P1 — Hot** | Competitor posting | Same day | Red badge, urgent styling |
+| 🔴 **P1 — Hot** | Urgent language ("immediate start", "ASAP", "backlog") | Same day | Red badge, urgent styling |
+| 🟠 **P2 — Warm** | Volume indicators (multiple roles) | Within 48 hours | Amber badge |
+| 🟠 **P2 — Warm** | Specialist/senior role | Within 48 hours | Amber badge |
+| 🟡 **P3 — Standard** | Standard direct posting | This week | Yellow badge |
 
 ---
 
 ## Overview
 
-Port V1's proven Focus Mode design system and layout to V2, replacing the current single-card UI with the three-zone layout optimised for ADHD workflows.
+Port V1's proven Focus Mode design system and layout to V2, enhanced with priority-based signal display aligned to the Sales Strategy.
 
-**Why this matters**: V1's Focus Mode was designed specifically for the Monday morning review experience — progress tracking, keyboard navigation, visual isolation, and reduced cognitive load. V2 currently lacks these ADHD-critical patterns.
+**Why this matters**: V1's Focus Mode was designed specifically for the Monday morning review experience — progress tracking, keyboard navigation, visual isolation, and reduced cognitive load. This spec adds the priority intelligence layer that helps James act on the right signals first.
 
-**Scope**: Design system foundation + Monday Review page layout + feedback systems. Does not include data fetching logic (covered by SPEC-007) or Morning Brief rituals (see SPEC-008).
-
----
-
-## Design System Alignment
-
-This spec implements patterns from the following skills (see Decision A8):
-
-| Skill | Pattern Implemented |
-|-------|--------------------|
-| `action-oriented-ux` | Three-Zone Model (Queue \| Context \| Action), 2-Minute Lead Loop, Review-First Composition, Non-Blocking Feedback |
-| `adhd-interface-design` | Context Capsule (What/Why/Next/When/Source), Visual Isolation, Undo as Safety Net, Progress Feedback |
-| `uk-police-design-system` | Design Tokens, Technical Luxury aesthetic, Dark Mode Primary, Badge System, ADHD-Specific Features (Pin, Quick Capture, Focus Mode) |
-| `b2b-visualisation` | 2-Second Comprehension Rule, Score Explainability, Progressive Disclosure |
-
-The strategy document Section 11 originally specified a vertical-scroll layout. Per Decision A8, that design was theoretical — these skills represent the tested, production patterns from V1.
+**Scope**: Design system foundation + Monday Review page layout + priority display + feedback systems. Does not include data fetching logic (covered by SPEC-007b) or Morning Brief rituals (see SPEC-008).
 
 ---
 
 ## Architecture
-
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  [Progress] Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42      [Refresh]       │
-├────────────┬──────────────────────────────────────┬─────────────────────────┤
-│            │                                      │                         │
-│  QUEUE     │           NOW CARD                   │    COMPOSER DOCK        │
-│  PANEL     │           (Context)                  │    (Actions)            │
-│  (280px)   │           (flexible)                 │    (320px)              │
-│            │                                      │                         │
-│  Filter:   │  ┌────────────────────────────┐     │  Subject: ...           │
-│  [Ready]   │  │ Force Name           Score │     │                         │
-│  [Sent]    │  │ Capability                 │     │  Message body...        │
-│  [All]     │  │                            │     │                         │
-│            │  │ Why:    Context capsule    │     │  ─────────────────────  │
-│  ─────────│  │ Next:   Recommended action │     │                         │
-│  > Item 1  │  │ When:   Timing indicator   │     │  [Send Email]           │
-│    Item 2  │  │ Source: Signal summary     │     │                         │
-│    Item 3  │  │                            │     │  [Skip] [Dismiss]       │
-│    ...     │  │ [Score breakdown grid]     │     │                         │
-│            │  └────────────────────────────┘     │                         │
-├────────────┴──────────────────────────────────────┴─────────────────────────┤
+├────────────┬──────────────────────────────────────────┬─────────────────────┤
+│            │                                          │                     │
+│  QUEUE     │           NOW CARD                       │    COMPOSER DOCK    │
+│  PANEL     │           (Context)                      │    (Actions)        │
+│  (280px)   │           (flexible)                     │    (320px)          │
+│            │                                          │                     │
+│  Filter:   │  ┌────────────────────────────────┐     │  Subject: ...       │
+│  [Ready]   │  │ Force Name              [P1 🔴] │     │                     │
+│  [Sent]    │  │ ─────────────────────────────── │     │  Message body...    │
+│  [All]     │  │                                 │     │                     │
+│            │  │ Why:   Competitor posting       │     │  ───────────────    │
+│  ─────────│  │        detected (Red Snapper)   │     │                     │
+│  > Kent 🔴 │  │ Next:  Email problem owner      │     │  [Send Email]       │
+│    Durham  │  │ When:  ⚡ Same day              │     │                     │
+│    Essex   │  │ Source: 2 signals (1 competitor)│     │  [Skip] [Dismiss]   │
+│    ...     │  │                                 │     │                     │
+│            │  │ [Signal Pattern Cards]          │     │                     │
+│            │  │ [Contact Card + Confidence]     │     │                     │
+│            │  └────────────────────────────────┘     │                     │
+├────────────┴──────────────────────────────────────────┴─────────────────────┤
 │  [J/K] navigate  •  [E] Send  •  [S] Skip  •  [D] Dismiss  •  [?] Shortcuts │
 └─────────────────────────────────────────────────────────────────────────────┘
-
-                              ┌─────────────────────────┐
-                              │  ✓ Actioned: Kent Police │  ← Toast with
-                              │  Press Z to undo (28s)   │    countdown bar
-                              │  ████████████░░░░░░░░░░  │
-                              └─────────────────────────┘
 ```
 
 ---
@@ -111,20 +118,19 @@ Port V1's `styles/tokens.css` as the single source of truth for all visual value
 | `--text-muted` | 220 10% 50% | Labels, hints, disabled |
 | `--color-action` | 217 91% 60% | Primary buttons, links |
 | `--color-success` | 160 84% 39% | Positive states, sent |
-| `--color-warning` | 38 92% 50% | Attention needed |
-| `--color-danger` | 0 100% 71% | Priority, urgent, errors |
-| `--color-info` | 239 84% 67% | Informational |
+| `--color-warning` | 38 92% 50% | P2 priority, attention |
+| `--color-danger` | 0 100% 71% | P1 priority, urgent |
+| `--color-info` | 239 84% 67% | P3 priority, informational |
 
 ### Typography
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--font-sans` | Inter | Body text |
-| `--font-mono` | IBM Plex Mono | Scores, counts, data |
+| `--font-mono` | IBM Plex Mono | Counts, data |
 | `--type-body` | 16px | Default text |
 | `--type-body-sm` | 14px | Secondary text |
 | `--type-caption` | 12px | Labels, hints |
-| `--type-metric-lg` | 40px | Hero scores |
 
 ### Spacing
 
@@ -192,14 +198,9 @@ interface Toast {
 }
 ```
 
-**Key methods**:
-- `setFocusMode(enabled)` — toggle focus mode
-- `addToast(toast)` — add with auto-remove timer
-- `removeToast(id)` — manual dismiss
-
 ---
 
-## Components to Port
+## Components
 
 ### 1. SessionHeader
 
@@ -207,15 +208,15 @@ interface Toast {
 
 **Display**:
 ```
-Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42
+Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42    [Refresh]
 ```
 
 **Props**:
-- `processed`: number — opportunities reviewed this session
-- `total`: number — total in current queue
-- `percentage`: number — calculated progress
-- `averageTime`: number — seconds per opportunity
-- `onRefresh`: () => void — reload data
+- `processed`: number
+- `total`: number
+- `percentage`: number
+- `averageTime`: number
+- `onRefresh`: () => void
 
 **Behaviour**:
 - Progress bar colour shifts: <50% muted → 50-75% warning → 75-99% action → 100% success
@@ -227,79 +228,162 @@ Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42
 
 ### 2. QueuePanel
 
-**Purpose**: Left navigation showing opportunity list
+**Purpose**: Left navigation showing opportunity list with priority indicators
 
 **Props**:
-- `opportunities`: Opportunity[] — filtered list
-- `currentId`: string | null — highlighted item
-- `filter`: "ready" | "sent" | "all" — queue filter
+- `opportunities`: Opportunity[]
+- `currentId`: string | null
+- `filter`: "ready" | "sent" | "all"
 - `onSelect`: (id: string) => void
 - `onFilterChange`: (filter) => void
 
 **Display per item**:
 - Force name (truncated)
 - Signal count badge
-- Priority indicator (colour-coded left border)
-- Score (mono font, right-aligned)
+- **Priority indicator** (P1 🔴 / P2 🟠 / P3 🟡)
+- Left border colour matches priority
+
+**Sort order**: P1 first, then P2, then P3 (within each tier, by recency)
 
 **Keyboard**: J/K navigation updates `currentId`
 
-**Source file**: `components/focus-mode/queue-panel.tsx`
+**Source file**: `components/monday-review/queue-panel.tsx`
 
 ---
 
-### 3. NowCard
+### 3. NowCard (Priority-Based)
 
-**Purpose**: Central context display for current opportunity
+**Purpose**: Central context display with priority intelligence
 
 **Sections**:
 
 1. **Header**
    - Force name (24px, primary)
-   - Score (40px, mono, right-aligned)
-   - Priority badge
+   - Priority badge (P1/P2/P3 with colour)
+   - Response window indicator
 
 2. **Context Capsule** (icon + label + content rows)
 
    | Label | Icon | Content |
    |-------|------|---------|
-   | Why | 💡 | `context_summary` field |
+   | Why | 💡 | Signal pattern explanation (from `priority_signals`) |
    | Next | → | Recommended channel + action |
-   | When | ⏱️ | Timing indicator from score |
-   | Source | 🏢 | Signal count + types |
+   | When | ⏱️ | Response window (Same Day / Within 48h / This Week) |
+   | Source | 🏢 | Signal count + types breakdown |
 
-3. **Dual Track Scores** (MS vs AG comparison)
-   - Side-by-side progress bars
-   - Primary track indicator
-   - Delta display if significant (15+ points)
+3. **Signal Pattern Cards** (replaces dual-track scores)
 
-4. **Score Breakdown** (4-column grid)
-   - Signal score
-   - Fit score
-   - Relationship score
-   - Timing score
+   Visual cards showing which patterns triggered this priority:
 
-5. **Contact Card** (if available)
-   - Suggested contact name
+   | Pattern | Display |
+   |---------|---------|
+   | Competitor posting | 🔴 "Red Snapper posting detected" |
+   | Urgent language | 🔴 "Immediate start required" |
+   | Volume indicator | 🟠 "Multiple roles (×3)" |
+   | Specialist role | 🟠 "Senior hire: Head of Investigations" |
+   | Standard signal | 🟡 "Direct job posting" |
+
+4. **Contact Card** (with confidence indicator)
+   - Contact name + title
    - Email (clickable)
-   - Confidence indicator (verified/enriched/unverified dot)
+   - **Contact type badge**:
+     - ✓ "Problem Owner" (green) — we found the right person
+     - ○ "HR Fallback" (amber) — interim contact, flag for research
+   - Confidence sources (if available)
 
-**Source files**: 
-- `components/focus-mode/now-card.tsx`
-- `components/focus-mode/dual-track-scores.tsx`
-- `components/focus-mode/contact-card.tsx`
+**Source files**:
+- `components/monday-review/now-card.tsx`
+- `components/monday-review/signal-patterns.tsx`
+- `components/monday-review/contact-card.tsx`
 
 ---
 
-### 4. ActionPanel (Composer Dock)
+### 4. SignalPatternCards (NEW — replaces DualTrackScores)
+
+**Purpose**: Show which signal patterns triggered the priority tier
+
+**Props**:
+```typescript
+interface SignalPatternCardsProps {
+  priorityTier: "P1" | "P2" | "P3";
+  patterns: SignalPattern[];
+}
+
+interface SignalPattern {
+  type: "competitor" | "urgent" | "volume" | "specialist" | "standard";
+  description: string;
+  source?: string; // e.g., "Red Snapper", "Indeed"
+}
+```
+
+**Display**:
+```
+┌─────────────────────────────────────┐
+│ 🔴 Competitor posting               │
+│    Red Snapper — PIP2 Investigator  │
+├─────────────────────────────────────┤
+│ 🔴 Urgent language                  │
+│    "Immediate start", "backlog"     │
+└─────────────────────────────────────┘
+```
+
+**Behaviour**:
+- Shows all patterns that contributed to priority
+- Colour-coded to match priority tier
+- Helps James understand *why* this is flagged
+
+---
+
+### 5. ContactCard (Enhanced)
+
+**Purpose**: Display contact with confidence indicator
+
+**Props**:
+```typescript
+interface ContactCardProps {
+  contact: {
+    name: string;
+    title: string;
+    email: string;
+    contactType: "problem_owner" | "deputy" | "hr_fallback";
+    confidence: number; // 0-100
+    confidenceSources?: string[];
+  } | null;
+}
+```
+
+**Display**:
+```
+┌─────────────────────────────────────┐
+│ Jane Smith                          │
+│ Head of Crime                       │
+│ jane.smith@kent.police.uk      📧   │
+│                                     │
+│ ✓ Problem Owner                     │
+│   via LinkedIn, Force website       │
+└─────────────────────────────────────┘
+```
+
+**Contact Type Badges**:
+| Type | Badge | Colour | Meaning |
+|------|-------|--------|---------|
+| `problem_owner` | ✓ Problem Owner | Green | Correct target per Sales Strategy |
+| `deputy` | ○ Deputy | Blue | Second-best option |
+| `hr_fallback` | ⚠ HR Fallback | Amber | Interim — flag for research |
+
+**When HR Fallback**: Show subtle prompt "Consider researching problem owner"
+
+---
+
+### 6. ComposerDock (ActionPanel)
 
 **Purpose**: Right panel with draft message and action buttons
 
 **Sections**:
 
 1. **Draft Display**
-   - Subject line (if present)
-   - Message body (scrollable, max-height)
+   - Subject line
+   - Message body (scrollable)
    - Character count
    - Copy button
 
@@ -308,22 +392,22 @@ Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42
 
 3. **Secondary Actions**
    - `[Skip]` — move to next without action
-   - `[Dismiss]` — mark as not relevant (opens DismissModal)
+   - `[Dismiss]` — mark as not relevant
 
 4. **Keyboard Hints**
-   ```
+```
    [E] Send • [S] Skip • [D] Dismiss
-   ```
+```
 
-**Source file**: `components/focus-mode/action-panel.tsx`
+**Source file**: `components/monday-review/composer-dock.tsx`
 
 ---
 
-### 5. DismissModal
+### 7. DismissModal
 
 **Purpose**: Structured dismiss reasons with feedback propagation
 
-**Reasons**:
+**Reasons** (from SPEC-007b):
 - "Not police sector" — *propagates to AI filter*
 - "Wrong force"
 - "Not our service area"
@@ -331,16 +415,11 @@ Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42
 - "Duplicate"
 - "Other"
 
-**Behaviour**:
-- Shows warning when reason propagates ("trains AI filter")
-- Calls dismiss API with reason
-- Advances to next opportunity
-
-**Source file**: `components/focus-mode/dismiss-modal.tsx`
+**Source file**: `components/monday-review/dismiss-modal.tsx`
 
 ---
 
-### 6. Toast System
+### 8. Toast System
 
 **Purpose**: Feedback notifications with undo support
 
@@ -353,127 +432,61 @@ Today: 3 of 12 ████░░░░░░ 25% • Avg: 1:42
 | `info` | 5s | Blue, info icon |
 | `undo` | 30s | Blue, countdown progress bar, undo action |
 
-**Undo Toast Special Features**:
-- Animated progress bar showing time remaining
-- "Undo" button or press `Z` to revert
-- Auto-removes from undo stack on expiry
-
-**Implementation**:
-- `ToastProvider` wraps app
-- `ToastContainer` renders in bottom-right
-- `useToast()` hook for adding/removing
-
 **Source file**: `components/feedback/toast.tsx`
 
 ---
 
-### 7. Empty State
+### 9. Empty State
 
 **Purpose**: Friendly feedback when queue is empty
-
-**Props**:
-- `icon`: LucideIcon
-- `title`: string
-- `description`: string
-- `primaryAction`: { label, onClick, icon? }
-- `secondaryAction`: { label, onClick }
 
 **Source file**: `components/feedback/empty-state.tsx`
 
 ---
 
-### 8. Error State
+### 10. Error State
 
 **Purpose**: Error display with retry and support escalation
-
-**Props**:
-- `message`: string
-- `details?`: string (shown in mono, for technical errors)
-- `onRetry`: () => void
-- `retryCount`: number — shows support link after 3+ retries
 
 **Source file**: `components/feedback/error-state.tsx`
 
 ---
 
-### 9. Skeleton Loaders
+### 11. Skeleton Loaders
 
-**Purpose**: Shape-matched loading states to prevent layout jank
-
-**Components**:
-- `FocusPageSkeleton` — matches three-zone layout
-- `Skeleton` — base shimmer component
-
-**Behaviour**:
-- Subtle shimmer animation (not spinner)
-- Matches exact component shapes
-- Respects `prefers-reduced-motion`
+**Purpose**: Shape-matched loading states
 
 **Source file**: `components/feedback/page-skeletons.tsx`
 
 ---
 
-### 10. Shortcut Overlay
+### 12. Shortcut Overlay
 
 **Purpose**: Shows all keyboard shortcuts when user presses `?`
-
-**Shortcut Groups**:
-- **Navigation**: J/K, Enter, Escape
-- **Actions**: E (Send), S (Skip), D (Dismiss), Z (Undo)
-- **Global**: ⌘K (Command palette), ? (This overlay)
 
 **Source file**: `components/overlays/shortcut-overlay.tsx`
 
 ---
 
-### 11. Badge System
+### 13. Badge System
 
-Port V1's semantic badge variants:
+Port V1's semantic badge variants, updated for priority model:
 
 | Variant | Background | Text | Usage |
 |---------|------------|------|-------|
-| `priority` | danger-muted | danger | High priority items |
-| `high` | warning-muted | warning | High score |
-| `medium` | info-muted | info | Medium score |
-| `low` | surface-1 | muted | Low score |
+| `p1` | danger-muted | danger | P1 Hot priority |
+| `p2` | warning-muted | warning | P2 Warm priority |
+| `p3` | info-muted | info | P3 Standard priority |
 | `ready` | success-muted | success | Ready to send |
 | `sent` | action-muted | action | Already actioned |
-| `managed` | action-muted | action | MS track |
-| `agency` | info-muted | info | AG track |
-| `job_signal` | success-muted | success | Hiring activity |
+| `problem-owner` | success-muted | success | Contact type |
+| `hr-fallback` | warning-muted | warning | Contact type |
+| `competitor` | danger-muted | danger | Signal pattern |
+| `urgent` | danger-muted | danger | Signal pattern |
+| `volume` | warning-muted | warning | Signal pattern |
+| `specialist` | warning-muted | warning | Signal pattern |
 
 **Source file**: `components/ui/badge.tsx`
-
----
-
-## Global Styles
-
-Port V1's `app/globals.css` utility classes:
-
-```css
-/* Surface utilities */
-.bg-canvas { background-color: hsl(var(--bg-canvas)); }
-.bg-surface-0 { background-color: hsl(var(--bg-surface-0)); }
-.bg-surface-1 { background-color: hsl(var(--bg-surface-1)); }
-.bg-surface-2 { background-color: hsl(var(--bg-surface-2)); }
-
-/* Text utilities */
-.text-primary { color: hsl(var(--text-primary)); }
-.text-secondary { color: hsl(var(--text-secondary)); }
-.text-muted { color: hsl(var(--text-muted)); }
-
-/* Semantic text */
-.text-action { color: hsl(var(--color-action)); }
-.text-success { color: hsl(var(--color-success)); }
-.text-warning { color: hsl(var(--color-warning)); }
-.text-danger { color: hsl(var(--color-danger)); }
-
-/* Muted backgrounds (for badges) */
-.bg-action-muted { background-color: hsl(var(--color-action) / 0.15); }
-.bg-success-muted { background-color: hsl(var(--color-success) / 0.15); }
-.bg-warning-muted { background-color: hsl(var(--color-warning) / 0.15); }
-.bg-danger-muted { background-color: hsl(var(--color-danger) / 0.15); }
-```
 
 ---
 
@@ -489,80 +502,76 @@ Port V1's `app/globals.css` utility classes:
 | `Z` | Undo | Reverts last action (if within 30s) |
 | `?` | Show shortcuts | Opens shortcut overlay |
 
-Implementation: Single `useEffect` with `keydown` listener, guard against input focus.
-
 ---
 
 ## File Structure
-
 ```
 src/
 ├── styles/
-│   └── tokens.css              # Design tokens (port from V1)
+│   └── tokens.css              # Design tokens
 ├── lib/
 │   ├── stores/
 │   │   ├── session-store.ts    # Progress + undo state
 │   │   └── ui-store.ts         # UI state + toasts
 │   └── utils.ts                # cn() helper
 ├── app/
-│   ├── globals.css             # Utility classes (port from V1)
+│   ├── globals.css             # Utility classes
 │   ├── layout.tsx              # Providers wrapper
-│   └── page.tsx                # Monday Review (three-zone layout)
+│   └── page.tsx                # Monday Review
 ├── components/
 │   ├── providers.tsx           # ToastProvider wrapper
 │   ├── ui/
 │   │   ├── badge.tsx           # Semantic badge system
-│   │   ├── button.tsx          # Button variants
-│   │   ├── card.tsx            # Card component
-│   │   └── skeleton.tsx        # Base skeleton component
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   └── skeleton.tsx
 │   ├── feedback/
-│   │   ├── toast.tsx           # Toast system + container
-│   │   ├── empty-state.tsx     # Empty queue state
-│   │   ├── error-state.tsx     # Error with retry
-│   │   └── page-skeletons.tsx  # Loading states
+│   │   ├── toast.tsx
+│   │   ├── empty-state.tsx
+│   │   ├── error-state.tsx
+│   │   └── page-skeletons.tsx
 │   ├── overlays/
-│   │   └── shortcut-overlay.tsx # Keyboard shortcuts help
+│   │   └── shortcut-overlay.tsx
 │   └── monday-review/
-│       ├── session-header.tsx  # Progress bar
-│       ├── queue-panel.tsx     # Left navigation
-│       ├── now-card.tsx        # Centre context
-│       ├── dual-track-scores.tsx # MS vs AG display
-│       ├── contact-card.tsx    # Contact with confidence
-│       ├── action-panel.tsx    # Right composer
-│       ├── dismiss-modal.tsx   # Dismiss reasons
-│       └── keyboard-hints.tsx  # Footer hints
+│       ├── session-header.tsx
+│       ├── queue-panel.tsx
+│       ├── now-card.tsx
+│       ├── signal-patterns.tsx  # NEW
+│       ├── contact-card.tsx     # ENHANCED
+│       ├── composer-dock.tsx
+│       ├── dismiss-modal.tsx
+│       └── keyboard-hints.tsx
 ```
 
 ---
 
-## V1 Source Files Reference
+## Schema Prerequisites
 
-Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
+### Opportunities Table Additions
 
-| V1 File | V2 Destination | Notes |
-|---------|----------------|-------|
-| `styles/tokens.css` | `src/styles/tokens.css` | Copy wholesale |
-| `app/globals.css` | `src/app/globals.css` | Merge with existing |
-| `lib/utils.ts` | `src/lib/utils.ts` | cn() helper |
-| `lib/stores/session-store.ts` | `src/lib/stores/` | Adapt types |
-| `lib/stores/ui-store.ts` | `src/lib/stores/` | Simplify for MVP |
-| `components/providers.tsx` | `src/components/` | ToastProvider |
-| `app/focus/page.tsx` | `src/app/page.tsx` | Adapt to V2 data model |
-| `components/focus-mode/session-header.tsx` | `src/components/monday-review/` | Simplify props |
-| `components/focus-mode/queue-panel.tsx` | `src/components/monday-review/` | Adapt to V2 types |
-| `components/focus-mode/now-card.tsx` | `src/components/monday-review/` | Adapt to V2 types |
-| `components/focus-mode/dual-track-scores.tsx` | `src/components/monday-review/` | Keep as-is |
-| `components/focus-mode/contact-card.tsx` | `src/components/monday-review/` | Keep as-is |
-| `components/focus-mode/action-panel.tsx` | `src/components/monday-review/` | Simplify for MVP |
-| `components/focus-mode/dismiss-modal.tsx` | `src/components/monday-review/` | Keep as-is |
-| `components/feedback/toast.tsx` | `src/components/feedback/` | Keep as-is |
-| `components/feedback/empty-state.tsx` | `src/components/feedback/` | Keep as-is |
-| `components/feedback/error-state.tsx` | `src/components/feedback/` | Keep as-is |
-| `components/feedback/page-skeletons.tsx` | `src/components/feedback/` | Adapt to V2 layout |
-| `components/overlays/shortcut-overlay.tsx` | `src/components/overlays/` | Update shortcuts list |
-| `components/ui/badge.tsx` | `src/components/ui/` | Port semantic variants |
-| `components/ui/button.tsx` | `src/components/ui/` | Port variants |
-| `components/ui/skeleton.tsx` | `src/components/ui/` | Keep as-is |
+| Field | Type | Purpose |
+|-------|------|---------|
+| `priority_tier` | Single Select | P1, P2, P3 |
+| `priority_signals` | Long Text | JSON array of detected patterns |
+| `response_window` | Single Select | Same Day, Within 48h, This Week |
+| `contact_type` | Single Select | Problem Owner, Deputy, HR Fallback |
+
+### Contacts Table Additions
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `research_confidence` | Number (0-100) | How confident are we in this contact? |
+| `confidence_sources` | Long Text | Where did we find them? |
+
+### Workflow Updates Required
+
+**WF3 (Classification)** must set:
+- `priority_tier` based on signal patterns
+- `priority_signals` JSON with detected patterns
+
+**WF5 (Enrichment)** must set:
+- `contact_type` based on contact research
+- `research_confidence` on Contact record
 
 ---
 
@@ -570,22 +579,22 @@ Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
 
 | # | Criterion | Verification |
 |---|-----------|--------------|
-| 1 | Design tokens imported and functional | Colours render correctly across all components |
+| 1 | Design tokens imported | Colours render correctly |
 | 2 | Three-zone layout renders | Queue left, Now Card centre, Actions right |
 | 3 | Progress header shows session stats | "Today: X of Y" with progress bar |
-| 4 | Queue panel shows opportunities | List with current item highlighted |
-| 5 | Now Card displays context capsule | Why/Next/When/Source rows visible |
-| 6 | Dual track scores display | MS vs AG with primary indicator |
-| 7 | Action panel shows draft message | Subject + body + Send button |
-| 8 | J/K navigation works | Keyboard moves through queue |
-| 9 | E/S/D actions work | Triggers appropriate handlers |
-| 10 | Z undo works | Reverts last action within 30s |
-| 11 | Undo toast shows countdown | Progress bar animates down |
-| 12 | ? shows shortcut overlay | Modal with all shortcuts |
-| 13 | Dismiss modal shows reasons | Propagation warning for "Not police sector" |
-| 14 | Empty state shows when queue empty | Friendly message + refresh button |
-| 15 | Error state shows on API failure | Retry button, support link after 3 failures |
-| 16 | Skeleton shows while loading | Three-zone shape maintained |
+| 4 | Queue shows priority indicators | P1 🔴 / P2 🟠 / P3 🟡 badges |
+| 5 | Queue sorted by priority | P1 first, then P2, then P3 |
+| 6 | Now Card displays context capsule | Why/Next/When/Source rows |
+| 7 | Signal pattern cards show | Competitor, urgent, volume, etc. |
+| 8 | Contact card shows confidence | Problem Owner vs HR Fallback badge |
+| 9 | J/K navigation works | Keyboard moves through queue |
+| 10 | E/S/D actions work | Triggers appropriate handlers |
+| 11 | Z undo works | Reverts last action within 30s |
+| 12 | Undo toast shows countdown | Progress bar animates down |
+| 13 | ? shows shortcut overlay | Modal with all shortcuts |
+| 14 | Dismiss modal shows reasons | Propagation warning works |
+| 15 | Empty state shows | When queue empty |
+| 16 | Error state shows | On API failure |
 
 ---
 
@@ -593,39 +602,37 @@ Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
 
 | # | Test Case | Expected Result |
 |---|-----------|-----------------|
-| 1 | Load page with 5 opportunities | Queue shows 5 items, first selected, Now Card populated |
-| 2 | Press J three times | Selection moves to 4th item, Now Card updates |
-| 3 | Press E on opportunity | Mail client opens, toast shows with countdown, progress updates |
-| 4 | Press Z within 30s of action | Action reverted, opportunity restored |
-| 5 | Wait 31s after action, press Z | "Nothing to undo" toast |
-| 6 | Press D on opportunity | Dismiss modal opens with reasons |
-| 7 | Select "Not police sector" dismiss | Warning about AI training shown |
-| 8 | Process 3 of 5 opportunities | Progress shows "3 of 5" with 60% bar |
-| 9 | Press ? key | Shortcut overlay appears with all shortcuts |
-| 10 | Trigger API error | Error state with retry button |
-| 11 | Retry 3+ times | Support link appears |
-| 12 | Load page (slow connection) | Skeleton matches final layout |
+| 1 | Load page with mixed P1/P2/P3 | Queue sorted P1 first, badges visible |
+| 2 | Select P1 opportunity | Now Card shows "Same day" response window |
+| 3 | View competitor signal | Pattern card shows "Red Snapper posting detected" |
+| 4 | View HR Fallback contact | Amber badge, "Consider researching" prompt |
+| 5 | Press J three times | Selection moves, Now Card updates |
+| 6 | Press E | Mail client opens, toast shows, progress updates |
+| 7 | Press Z within 30s | Action reverted |
+| 8 | Press D | Dismiss modal opens |
+| 9 | Process 3 of 5 | Progress shows "3 of 5" with 60% bar |
+| 10 | Press ? | Shortcut overlay appears |
 
 ---
 
 ## Build Sequence
 
-1. **Port tokens.css** — Copy V1's design tokens to V2
-2. **Port globals.css utilities** — Add utility classes
-3. **Port lib/utils.ts** — cn() helper
-4. **Port stores** — session-store.ts, ui-store.ts
-5. **Port providers.tsx** — ToastProvider wrapper
-6. **Port feedback components** — toast, empty-state, error-state, skeletons
-7. **Port UI components** — badge, button, skeleton
-8. **Create component shells** — monday-review folder structure
-9. **Implement SessionHeader** — Progress display
-10. **Implement QueuePanel** — List with selection
-11. **Implement NowCard** — Context capsule + dual track + contact
-12. **Implement ActionPanel** — Draft display and buttons
-13. **Implement DismissModal** — Reasons with propagation
-14. **Implement ShortcutOverlay** — Help modal
-15. **Wire keyboard navigation** — J/K/E/S/D/Z/? handlers
-16. **Integration test** — Full flow verification
+1. **Port tokens.css** — Design tokens
+2. **Port globals.css utilities** — Utility classes
+3. **Port stores** — session-store.ts, ui-store.ts
+4. **Port providers.tsx** — ToastProvider
+5. **Port feedback components** — toast, empty-state, error-state
+6. **Port UI components** — badge (updated variants), button, skeleton
+7. **Implement SessionHeader**
+8. **Implement QueuePanel** — with priority sorting
+9. **Implement NowCard** — with context capsule
+10. **Implement SignalPatternCards** — NEW component
+11. **Implement ContactCard** — with confidence indicator
+12. **Implement ComposerDock**
+13. **Implement DismissModal**
+14. **Implement ShortcutOverlay**
+15. **Wire keyboard navigation**
+16. **Integration test**
 
 ---
 
@@ -633,10 +640,10 @@ Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
 
 | Dependency | Status | Notes |
 |------------|--------|-------|
-| SPEC-007 (React Dashboard) | ✅ Implemented | Data fetching already done |
-| SPEC-001 (Airtable Schema) | ✅ Complete | Data model defined |
-| V1 Codebase | ✅ Reviewed | Source for porting |
-| Zustand | Required | State management (same as V1) |
+| SPEC-007b (MVP Dashboard) | Required | Must be validated first |
+| Phase 1b (Competitor Monitoring) | Required | Provides P1 differentiation |
+| Schema expansion | Required | Priority fields needed |
+| V1 Codebase | Reference | Source for porting |
 
 ---
 
@@ -644,8 +651,6 @@ Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
 
 - Command palette (⌘K) — future enhancement
 - Pin tray — future enhancement
-- Force context sidebar — future enhancement
-- Follow-up mode — Phase 2
 - Mobile responsive — future enhancement
 - Morning Brief rituals — see SPEC-008
 
@@ -659,13 +664,28 @@ Files to port from `/Users/jamesjeram/Documents/MI-Platform/dashboard-react`:
 
 ---
 
-## Handoff Notes
+## Sales Strategy Alignment Checklist
 
-This spec can be implemented by:
+| Strategy Principle | Implementation |
+|-------------------|----------------|
+| "Job postings are warm leads, not classifications" | ✅ No MS/AG scoring — priority tiers only |
+| "Contact the problem owner" | ✅ Contact type indicator with fallback warning |
+| "Competitor signals = confirmed opportunity" | ✅ P1 priority, prominent pattern display |
+| "We present our full capability" | ✅ No service pre-classification |
+| "Hook → Bridge → Value → CTA structure" | ✅ Drafts follow this (via WF5) |
 
-1. Copying V1 source files from the paths listed above
-2. Adapting TypeScript types to match V2's `Opportunity` interface (from SPEC-007)
-3. Connecting to V2's existing data fetching hooks
-4. Testing the keyboard navigation and action handlers
+---
 
-The V1 code is production-tested and well-documented with JSDoc comments.
+## Revision History
+
+| Date | Change | Reason |
+|------|--------|--------|
+| 2025-01-19 | Initial draft | Created from V1 patterns |
+| 2025-01-20 | Removed dual-track scoring | Aligned with SALES-STRATEGY.md |
+| 2025-01-20 | Added priority tier model | Per Sales Strategy Lead Prioritisation |
+| 2025-01-20 | Added contact confidence | Per Sales Strategy Contact Strategy |
+| 2025-01-20 | Replaced DualTrackScores with SignalPatternCards | Strategy alignment |
+
+---
+
+*This spec implements the UI layer for the Lead Prioritisation Model defined in SALES-STRATEGY.md. Technical implementation of priority classification is in SPEC-003 (Classification).*

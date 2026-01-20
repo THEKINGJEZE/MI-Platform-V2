@@ -40,6 +40,15 @@
 - [x] Tested filter tabs (Ready/Sent/All) — all working
 - [x] 32 opportunities loading from Airtable
 
+### SPEC-007a Updated — Sales Strategy Alignment
+- [x] Removed dual-track scoring (ms_score, ag_score, primary_track)
+- [x] Aligned with SALES-STRATEGY.md Lead Prioritisation Model
+- [x] Added Priority Tier display (P1/P2/P3)
+- [x] Added SignalPatternCards component (replaces DualTrackScores)
+- [x] Added Contact Confidence indicator (Problem Owner vs HR Fallback)
+- [x] Updated schema prerequisites
+- [x] Added Sales Strategy Alignment Checklist
+
 ### Global Config Fix
 - [x] Updated ~/.claude/CLAUDE.md to correct Airtable base (`appEEWaGtGUwOyOhm`)
 - [x] Updated table IDs to V2 schema (Forces, Contacts, Signals, Opportunities)
@@ -159,7 +168,7 @@
 | SPEC-005: Opportunity Enricher | ✅ Built | WF5 working |
 | SPEC-006: Monday Review | 🔀 Absorbed | Into SPEC-007b |
 | SPEC-007: React Dashboard | 🔀 Replaced | By SPEC-007b |
-| **SPEC-007a: Full UI** | ⏸️ Deferred | Needs scoring model |
+| **SPEC-007a: Full UI** | ⏸️ Deferred | Aligned with Sales Strategy (P1/P2/P3 priority model) |
 | **SPEC-007b: Dashboard MVP** | ✅ Ready | Simplified spec |
 | **SPEC-008: Morning Brief** | ⏸️ Deferred | Needs infrastructure |
 
@@ -217,7 +226,7 @@ Phase 1c: [██████████] 95% — Dashboard MVP ✅ DEPLOYED
   □ Timing validated (≤15 min for 5 opps) — Monday test
 
 Future (Deferred):
-  ⏸️ SPEC-007a: Full UI (needs scoring)
+  ⏸️ SPEC-007a: Full UI (needs Phase 1b + schema expansion)
   ⏸️ SPEC-008: Morning Brief (needs infrastructure)
 ```
 
