@@ -22,6 +22,9 @@ export function useKeyboardNav(options: UseKeyboardNavOptions = {}) {
     selectPrevious,
     markAsSent,
     markAsSkipped,
+    markAsWon,
+    markAsLost,
+    markAsDormant,
     openDismissModal,
     closeDismissModal,
     undo,
@@ -97,6 +100,21 @@ export function useKeyboardNav(options: UseKeyboardNavOptions = {}) {
           if (opportunity) {
             e.preventDefault();
             openDismissModal();
+          }
+          break;
+
+        // V1 parity: W/L shortcuts for Won/Lost outcomes
+        case 'w':
+          if (opportunity) {
+            e.preventDefault();
+            handleWon(opportunity.id);
+          }
+          break;
+
+        case 'l':
+          if (opportunity) {
+            e.preventDefault();
+            handleLost(opportunity.id);
           }
           break;
 
@@ -185,6 +203,45 @@ export function useKeyboardNav(options: UseKeyboardNavOptions = {}) {
     addToast({
       type: 'undo',
       title: `Skipped: ${opp.force?.name || opp.name}`,
+      description: 'Press Z to undo',
+      duration: 30000,
+      onUndo: () => {
+        useReviewStore.getState().undo();
+      },
+    });
+  }
+
+  // V1 parity: Won/Lost handlers
+  function handleWon(opportunityId: string) {
+    const opp = useReviewStore.getState().opportunities.find(
+      (o) => o.id === opportunityId
+    );
+    if (!opp) return;
+
+    markAsWon(opportunityId);
+
+    addToast({
+      type: 'success',
+      title: `Won: ${opp.force?.name || opp.name}`,
+      description: 'Press Z to undo',
+      duration: 30000,
+      onUndo: () => {
+        useReviewStore.getState().undo();
+      },
+    });
+  }
+
+  function handleLost(opportunityId: string) {
+    const opp = useReviewStore.getState().opportunities.find(
+      (o) => o.id === opportunityId
+    );
+    if (!opp) return;
+
+    markAsLost(opportunityId);
+
+    addToast({
+      type: 'undo',
+      title: `Lost: ${opp.force?.name || opp.name}`,
       description: 'Press Z to undo',
       duration: 30000,
       onUndo: () => {

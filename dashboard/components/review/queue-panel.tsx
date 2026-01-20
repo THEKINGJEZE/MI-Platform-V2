@@ -17,6 +17,7 @@ import {
   type ReviewOpportunity,
 } from '@/lib/stores/review-store';
 import { PriorityTierBadge } from '@/components/mi-badge';
+import { ChevronRight } from 'lucide-react';
 
 // SPEC-007a: Priority tier order for sorting (P1 = highest priority)
 const PRIORITY_ORDER: Record<string, number> = {
@@ -127,23 +128,29 @@ function QueueItem({ opportunity, isSelected, onClick }: QueueItemProps) {
       <button
         onClick={onClick}
         className={cn(
-          'w-full border-l-3 px-4 py-3 text-left transition-colors',
-          'hover:bg-surface-1',
-          isSelected && 'bg-surface-1',
-          priorityColor
+          'w-full border-l-2 px-4 py-3 text-left transition-colors',
+          'hover:bg-surface-1/50',
+          // V1 style: blue-tinted active state with action border
+          isSelected ? 'bg-action/10 border-l-action' : 'border-l-transparent',
+          !isSelected && priorityColor
         )}
-        style={{ borderLeftWidth: '3px' }}
       >
-        {/* Force Name */}
+        {/* Force Name — V1 style with chevron indicator */}
         <div className="flex items-start justify-between gap-2">
-          <span
-            className={cn(
-              'truncate font-medium',
-              isSelected ? 'text-primary' : 'text-secondary'
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* V1: Chevron indicator before active item */}
+            {isSelected && (
+              <ChevronRight className="h-3 w-3 text-action flex-shrink-0" />
             )}
-          >
-            {opportunity.force?.name || opportunity.name}
-          </span>
+            <span
+              className={cn(
+                'truncate font-medium',
+                isSelected ? 'text-primary' : 'text-secondary'
+              )}
+            >
+              {opportunity.force?.name || opportunity.name}
+            </span>
+          </div>
           {opportunity.isCompetitorIntercept && (
             <span className="flex-shrink-0 rounded bg-danger-muted px-1.5 py-0.5 text-xs font-medium text-danger">
               HOT
@@ -151,9 +158,12 @@ function QueueItem({ opportunity, isSelected, onClick }: QueueItemProps) {
           )}
         </div>
 
-        {/* Signal Summary */}
-        <div className="mt-1 flex items-center gap-2 text-xs text-muted">
-          <span>{opportunity.signalCount} signals</span>
+        {/* Signal Summary — indented to align with name when chevron present */}
+        <div className={cn(
+          'mt-1 flex items-center gap-2 text-xs text-muted',
+          isSelected && 'pl-5'
+        )}>
+          <span>{opportunity.signalCount} signal{opportunity.signalCount !== 1 && 's'}</span>
           {opportunity.signalTypes && (
             <>
               <span className="text-subtle">•</span>
@@ -162,8 +172,11 @@ function QueueItem({ opportunity, isSelected, onClick }: QueueItemProps) {
           )}
         </div>
 
-        {/* Status Badge + Priority Tier */}
-        <div className="mt-2 flex items-center gap-2">
+        {/* Status Badge + Priority Tier — indented when selected */}
+        <div className={cn(
+          'mt-2 flex items-center gap-2',
+          isSelected && 'pl-5'
+        )}>
           <StatusBadge status={opportunity.status} />
           {/* SPEC-007a: Show P1/P2/P3 tier badge with icon */}
           <PriorityTierBadge tier={normalizePriorityToTier(opportunity.priority)} />

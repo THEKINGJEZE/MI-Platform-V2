@@ -16,6 +16,8 @@ const SHORTCUTS = [
   { key: 'E', description: 'Send email' },
   { key: 'S', description: 'Skip' },
   { key: 'D', description: 'Dismiss' },
+  { key: 'W', description: 'Mark as Won' },
+  { key: 'L', description: 'Mark as Lost' },
   { key: 'Z', description: 'Undo (within 30s)' },
   { key: '?', description: 'Show this help' },
   { key: 'Esc', description: 'Close modal/overlay' },

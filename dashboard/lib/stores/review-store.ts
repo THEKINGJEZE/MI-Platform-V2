@@ -111,6 +111,9 @@ interface ReviewState {
   markAsSent: (id: string) => void;
   markAsSkipped: (id: string, reason?: string) => void;
   markAsDismissed: (id: string, reason: string) => void;
+  markAsWon: (id: string) => void;
+  markAsLost: (id: string) => void;
+  markAsDormant: (id: string) => void;
   undo: () => boolean;
   commitAction: (id: string) => void;
 
@@ -301,6 +304,93 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
         processed: stats.processed + 1,
       },
       isDismissModalOpen: false,
+    });
+
+    get().selectNext();
+  },
+
+  markAsWon: (id) => {
+    const { opportunities, stats } = get();
+    const opp = opportunities.find((o) => o.id === id);
+    if (!opp) return;
+
+    const previousStatus = opp.status;
+    const actionTime = Date.now();
+
+    set({
+      opportunities: opportunities.map((o) =>
+        o.id === id ? { ...o, status: 'Won' } : o
+      ),
+      undoStack: [
+        {
+          opportunityId: id,
+          previousStatus,
+          expiresAt: actionTime + UNDO_WINDOW_MS,
+        },
+      ],
+      lastActionTime: actionTime,
+      stats: {
+        ...stats,
+        processed: stats.processed + 1,
+      },
+    });
+
+    get().selectNext();
+  },
+
+  markAsLost: (id) => {
+    const { opportunities, stats } = get();
+    const opp = opportunities.find((o) => o.id === id);
+    if (!opp) return;
+
+    const previousStatus = opp.status;
+    const actionTime = Date.now();
+
+    set({
+      opportunities: opportunities.map((o) =>
+        o.id === id ? { ...o, status: 'Lost' } : o
+      ),
+      undoStack: [
+        {
+          opportunityId: id,
+          previousStatus,
+          expiresAt: actionTime + UNDO_WINDOW_MS,
+        },
+      ],
+      lastActionTime: actionTime,
+      stats: {
+        ...stats,
+        processed: stats.processed + 1,
+      },
+    });
+
+    get().selectNext();
+  },
+
+  markAsDormant: (id) => {
+    const { opportunities, stats } = get();
+    const opp = opportunities.find((o) => o.id === id);
+    if (!opp) return;
+
+    const previousStatus = opp.status;
+    const actionTime = Date.now();
+
+    set({
+      opportunities: opportunities.map((o) =>
+        o.id === id ? { ...o, status: 'Dormant' } : o
+      ),
+      undoStack: [
+        {
+          opportunityId: id,
+          previousStatus,
+          expiresAt: actionTime + UNDO_WINDOW_MS,
+        },
+      ],
+      lastActionTime: actionTime,
+      stats: {
+        ...stats,
+        processed: stats.processed + 1,
+      },
     });
 
     get().selectNext();
