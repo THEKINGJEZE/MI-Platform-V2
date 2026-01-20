@@ -78,3 +78,49 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ========== FOCUS MODE (from V1) ========== */
+/* ADHD-optimized: dims non-focused elements to reduce distraction */
+
+.focus-mode-active [data-dimmable]:not([data-focused]) {
+  opacity: 0.4;
+  filter: grayscale(0.3);
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-out),
+              filter var(--duration-normal) var(--ease-out);
+}
+
+.focus-mode-active [data-focused] {
+  position: relative;
+  z-index: 10;
+}
+
+/* Restore on hover for quick peek */
+.focus-mode-active [data-dimmable]:not([data-focused]):hover {
+  opacity: 0.7;
+  filter: grayscale(0.1);
+}
+
+/* ========== SELECTION HIGHLIGHT ========== */
+/* Visual feedback for keyboard navigation */
+
+[data-selected="true"] {
+  background-color: var(--bg-surface-1);
+  outline: 2px solid var(--color-action);
+  outline-offset: -2px;
+}
+
+/* ========== CONFIDENCE INDICATORS ========== */
+/* Semantic colors for contact confidence levels */
+
+.confidence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.confidence-high { background-color: hsl(var(--color-success)); }
+.confidence-medium { background-color: hsl(var(--color-action)); }
+.confidence-low { background-color: hsl(var(--color-warning)); }
+.confidence-none { background-color: hsl(var(--color-danger)); }

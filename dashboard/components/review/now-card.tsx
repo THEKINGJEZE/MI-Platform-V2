@@ -131,6 +131,35 @@ function normalizePriorityToTier(priority: string): string {
   return 'P3';
 }
 
+// From V1: Confidence dot with semantic colors and tooltip
+function ConfidenceDot({ confidence }: { confidence: number }) {
+  // Map confidence percentage to level
+  const level = confidence >= 70 ? 'high' : confidence >= 40 ? 'medium' : confidence > 0 ? 'low' : 'none';
+
+  // Semantic colors matching V1
+  const colorClasses: Record<string, string> = {
+    high: 'bg-[hsl(160_84%_39%)]',     // Success green
+    medium: 'bg-[hsl(217_91%_60%)]',   // Action blue
+    low: 'bg-[hsl(38_92%_50%)]',       // Warning orange
+    none: 'bg-[hsl(0_100%_71%)]',      // Danger red
+  };
+
+  // Tooltip descriptions
+  const descriptions: Record<string, string> = {
+    high: 'High confidence — contact verified from multiple sources',
+    medium: 'Medium confidence — contact found but not fully verified',
+    low: 'Low confidence — best guess based on limited data',
+    none: 'No confidence — contact needs research',
+  };
+
+  return (
+    <div
+      className={cn('h-2.5 w-2.5 rounded-full flex-shrink-0', colorClasses[level])}
+      title={descriptions[level]}
+    />
+  );
+}
+
 // SPEC-007a: Context Capsule — Quick summary of Why/Next/When/Source
 function ContextCapsule({ opportunity }: { opportunity: ReviewOpportunity }) {
   const hasContent = opportunity.whyNow ||
@@ -314,9 +343,11 @@ function ContactSection({
               )}
             </div>
 
-            {/* SPEC-007a: Confidence indicator */}
+            {/* SPEC-007a: Confidence indicator with semantic dot (from V1) */}
             {contact.researchConfidence !== undefined && (
               <div className="flex items-center gap-2">
+                {/* Confidence dot with semantic color */}
+                <ConfidenceDot confidence={contact.researchConfidence} />
                 <div className="flex-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted">Research Confidence</span>
