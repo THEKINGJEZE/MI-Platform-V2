@@ -29,7 +29,6 @@ import {
   TrendingUp,
   User,
   Mail,
-  Phone,
   Linkedin,
   CheckCircle,
   Target,

@@ -24,7 +24,6 @@ export function useKeyboardNav(options: UseKeyboardNavOptions = {}) {
     markAsSkipped,
     markAsWon,
     markAsLost,
-    markAsDormant,
     openDismissModal,
     closeDismissModal,
     undo,

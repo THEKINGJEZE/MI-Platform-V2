@@ -14,7 +14,6 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   useReviewStore,
@@ -39,7 +38,6 @@ export function ComposerDock() {
   const opportunity = useCurrentOpportunity();
   const {
     markAsSent,
-    markAsSkipped,
     markAsWon,
     markAsLost,
     markAsDormant,
