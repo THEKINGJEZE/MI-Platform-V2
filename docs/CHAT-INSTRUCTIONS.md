@@ -236,8 +236,7 @@ Specs follow a progressive enhancement pattern:
 
 | Spec | Status | Purpose |
 |------|--------|----------|
-| SPEC-007b | Active | Dashboard MVP (current schema) |
-| SPEC-007a | Deferred | Full UI (needs scoring model) |
+| SPEC-009 | Active | Dashboard V1 Migration (current schema) |
 | SPEC-008 | Deferred | Morning Brief (needs infrastructure) |
 
 **When creating new specs**: Check ROADMAP.md for the current spec index and ensure the spec fits the phase it's assigned to. Don't build infrastructure for future phases.

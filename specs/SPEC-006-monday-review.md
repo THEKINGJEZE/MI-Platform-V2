@@ -1,6 +1,6 @@
 # SPEC-006: Monday Review Experience
 
-**Status**: Absorbed into SPEC-007b  
+**Status**: Absorbed into SPEC-009  
 **Phase**: 1 — Core Jobs Pipeline  
 **Source of Truth**: `peel-solutions-mi-platform-strategy.md` Section 11 (Dashboard Design), Section 16 (Operational Procedures)
 

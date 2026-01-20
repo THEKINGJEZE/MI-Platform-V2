@@ -59,9 +59,10 @@ Examples:
 | [SPEC-003-signal-classification.md](SPEC-003-signal-classification.md) | 1 | ✅ Complete |
 | [SPEC-004-opportunity-creator.md](SPEC-004-opportunity-creator.md) | 1 | ✅ Complete |
 | [SPEC-005-opportunity-enricher.md](SPEC-005-opportunity-enricher.md) | 1 | ✅ Complete |
-| [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | ✅ Complete |
-| [SPEC-007b-dashboard-mvp.md](SPEC-007b-dashboard-mvp.md) | 1c | ✅ Complete |
-| [SPEC-1b-competitor-monitoring.md](SPEC-1b-competitor-monitoring.md) | 1b | 📝 Draft |
+| [SPEC-006-monday-review.md](SPEC-006-monday-review.md) | 1 | 🔀 Absorbed into SPEC-009 |
+| [SPEC-008-morning-brief.md](SPEC-008-morning-brief.md) | Future | ⏸️ Deferred |
+| [SPEC-009-dashboard-v1-migration.md](SPEC-009-dashboard-v1-migration.md) | 1c | ✅ Ready |
+| [SPEC-1b-competitor-monitoring.md](SPEC-1b-competitor-monitoring.md) | 1b | ✅ Complete |
 
 ## Archived Specs
 

@@ -57,7 +57,7 @@
 | `patterns/force-matching.js` | ✅ Exists | 47 patterns |
 | `prompts/job-classification.md` | ✅ Exists | Extend for competitor context |
 | Bright Data credentials | ⚠️ Verify | Must check in n8n |
-| Dashboard P1 filter | ✅ Exists | SPEC-007b supports |
+| Dashboard P1 filter | ✅ Exists | SPEC-009 supports |
 | Existing workflow exploration | ❌ Pending | Stage 0 required |
 | Airtable schema fields | ⚠️ Verify | Must audit in Stage 2 |
 
@@ -147,7 +147,7 @@
 | n8n API | ✅ Connected | v2.29.5, management tools enabled |
 | Airtable schema | ✅ Verified | All required fields exist |
 | Bright Data credentials | ⚠️ Assumed | Existing workflow used them — verify at build time |
-| Dashboard P1 filter | ✅ SPEC-007b | Supports `priority_tier=hot` |
+| Dashboard P1 filter | ✅ SPEC-009 | Supports `priority_tier=hot` |
 
 ### Competitors to Scrape
 
@@ -365,7 +365,7 @@ Bright Data Trigger → Log Response → (loop) → Summary
 | 1 | Competitor scrapers running (Red Snapper, Investigo, Reed, Adecco, Service Care) | ⚠️ Partial | WF8 built but blocked on Bright Data collector config |
 | 2 | Competitor signals classified and attributed to correct force | ✅ Pass | Test: Signal `recLdDRtVZ9b907f5` linked to Lancashire Constabulary |
 | 3 | Hot lead flagging working (competitor signal = higher priority) | ✅ Pass | Test: Opportunity `recU4YhaO1VeyThw1` has priority_tier=hot |
-| 4 | Alert on hot leads (Slack or email) | ⏸️ Deferred | Dashboard P1 filter surfaces hot leads (SPEC-007b); push alerts not in scope |
+| 4 | Alert on hot leads (Slack or email) | ⏸️ Deferred | Dashboard P1 filter surfaces hot leads (SPEC-009); push alerts not in scope |
 | 5 | Interception message template in use | ✅ Pass | `prompts/competitor-interception.md` used; Hook-Bridge-Value-CTA verified |
 
 ### Verification Summary
@@ -378,8 +378,8 @@ Bright Data Trigger → Log Response → (loop) → Summary
 
 The ROADMAP.md acceptance criterion specifies "Alert on hot leads (Slack or email)". However:
 - SPEC-1b-competitor-monitoring.md does not include push alerting
-- The spec relies on Dashboard P1 filter (SPEC-007b) to surface hot leads
-- SPEC-007b is already deployed at https://dashboard.peelplatforms.co.uk/review
+- The spec relies on Dashboard P1 filter (SPEC-009) to surface hot leads
+- Dashboard is deployed at https://dashboard.peelplatforms.co.uk/review
 
 **Recommendation**: Mark criterion 4 as satisfied by dashboard visibility, OR add a simple Slack/email notification to WF9 if push alerts are required.
 

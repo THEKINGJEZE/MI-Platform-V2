@@ -4,7 +4,7 @@
 **Phase**: Post-Phase 1c (after dashboard MVP validated)  
 **Created**: 2025-01-19  
 **Updated**: 2025-01-19  
-**Depends on**: SPEC-007b (Dashboard MVP) — must be working first  
+**Depends on**: SPEC-009 (Dashboard V1 Migration) — must be working first  
 **Prerequisites**: Overnight signal tracking, follow-up dates, scoring for energy-based selection  
 **Source**: V1 Dashboard codebase (`/Users/jamesjeram/Documents/MI-Platform/dashboard-react/components/rituals`)  
 **Decision**: A8 (Three-Zone Dashboard Layout + Morning Brief)  
@@ -24,14 +24,14 @@ The Morning Brief requires data infrastructure that doesn't exist in Phase 1:
 
 **Prerequisites before implementing this spec:**
 
-1. **SPEC-007b complete** — MVP dashboard working and used for real Monday reviews
+1. **SPEC-009 complete** — Dashboard V1 migration working and used for real Monday reviews
 2. **Schema additions** — Add to Opportunities:
    - `next_follow_up_date` (Date)
    - `snoozed_until` (DateTime)
    - `last_session_id` (Text) — for overnight detection
 3. **Session table** (optional) — Or use localStorage with sync
 4. **Sufficient signal volume** — Morning Brief needs overnight activity to be meaningful
-5. **SPEC-007a partial** — At minimum, scoring for energy-based selection
+5. **Scoring model** — At minimum, for energy-based selection
 
 **When to implement**: After 4+ weeks of using MVP dashboard, when morning ritual becomes valuable
 
@@ -471,9 +471,8 @@ src/
 
 | Dependency | Status | Notes |
 |------------|--------|-------|
-| SPEC-007a (UI Foundation) | Required | Design tokens, badges, buttons |
-| SPEC-007 (React Dashboard) | Required | Opportunity type, API patterns |
-| Session Store | Required | From SPEC-007a |
+| SPEC-009 (Dashboard V1 Migration) | Required | Design tokens, badges, buttons, API patterns |
+| Session Store | Required | To be added as enhancement |
 
 ---
 
@@ -515,6 +514,6 @@ The V1 ritual components are well-tested and documented. Main adaptation needed:
 
 1. Replace V1's `Lead` type with V2's `Opportunity` type
 2. Connect to V2's API patterns (n8n webhooks)
-3. Ensure session store integration matches SPEC-007a
+3. Ensure session store integration matches SPEC-009 patterns
 
 The "Rule of Three" pattern is borrowed from productivity methodology and works well for ADHD — it's small enough to remember, large enough to feel accomplished.

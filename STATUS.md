@@ -2,12 +2,12 @@
 
 **Updated**: 20 January 2025 (Evening)
 **Phase**: 1c — Dashboard MVP
-**Status**: V1 visual refinements applied
+**Status**: SPEC-009 ready for implementation
 
 ### Session Work (20 Jan Evening)
-- ✅ V1 → V2 visual audit complete (`docs/V1-V2-VISUAL-COMPARISON.md`)
-- ✅ Priority 1 refinements: animation tokens, density modes, focus dimming CSS
-- ✅ Priority 2 refinements: HMICFRS/Admiralty/Track badges, confidence dots
+- ✅ V1 code copied to `dashboard/`
+- ✅ SPEC-009 (Dashboard V1 Migration) created and ready
+- ✅ SPEC-007/007a/007b superseded and cleaned up
 
 ---
 
@@ -25,9 +25,9 @@
 
 ## Next Action
 
-> **Deploy dashboard to production** — V1 visual refinements ready
+> **Implement SPEC-009** — Migrate V1 dashboard to V2 backend
 >
-> New features: Animation tokens, density modes, focus dimming, HMICFRS/Admiralty badges, confidence dots
+> Key tasks: Strip unsupported features, rewrite data layer for V2 schema, verify build and local testing
 
 ---
 
@@ -47,9 +47,8 @@ See ROADMAP.md for workflow details.
 | SPEC-003: Signal Classification | Built |
 | SPEC-004: Opportunity Creator | Built |
 | SPEC-005: Opportunity Enricher | Built |
-| SPEC-007b: Dashboard MVP | Deployed |
+| SPEC-009: Dashboard V1 Migration | Ready for implementation |
 | SPEC-1b: Competitor Monitoring | Complete |
-| SPEC-007a: Full UI | ✅ Complete — pending deploy |
 | SPEC-008: Morning Brief | Deferred |
 
 ---

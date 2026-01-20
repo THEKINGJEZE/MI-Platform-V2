@@ -258,7 +258,7 @@ From ROADMAP.md Phase 1b:
 | `patterns/force-matching.js` | ✅ Exists | 47 patterns |
 | `prompts/job-classification.md` | ✅ Exists | Extend for competitor context |
 | Bright Data credentials | ⚠️ Verify | Must be configured |
-| Dashboard P1 filter | ✅ Exists | SPEC-007b supports |
+| Dashboard P1 filter | ✅ Exists | SPEC-009 supports |
 | Existing workflow exploration | ❌ Pending | Stage 0 |
 
 ---
@@ -319,7 +319,7 @@ No divergence. Proceed with build.
 These are handled elsewhere:
 - Indeed job ingestion (SPEC-002)
 - Signal classification logic (SPEC-003)
-- Dashboard display of competitor signals (SPEC-007b already supports)
+- Dashboard display of competitor signals (SPEC-009 supports)
 - Email-based alerts (Slack only for MVP)
 
 ---

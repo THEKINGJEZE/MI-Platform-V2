@@ -52,7 +52,7 @@ Do not add schema fields to support deferred skill patterns:
 ❌ "Let me add ms_score and ag_score for dual-track scoring"
    → This is from lead-scoring-methodology (deferred)
 
-✅ "Adding draft_subject as specified in SPEC-007b"
+✅ "Adding draft_subject as specified in SPEC-009"
    → This is in the current spec
 ```
 
@@ -61,9 +61,9 @@ Do not add schema fields to support deferred skill patterns:
 If a spec simplifies or omits a skill pattern, follow the spec:
 ```
 ❌ "The action-oriented-ux skill says to show score breakdowns"
-   → But SPEC-007b explicitly defers this
+   → But SPEC-009 explicitly defers this
 
-✅ "SPEC-007b says simple priority badge only"
+✅ "SPEC-009 says simple priority badge only"
    → Follow the spec, not the full skill
 ```
 
@@ -105,9 +105,9 @@ implement it now or stick to the MVP spec?"
 
 ```
 ❌ "While I'm here, let me add research_confidence to Contacts"
-   → This is from SPEC-007a (deferred)
+   → This is a future enhancement (deferred)
 
-✅ "Adding only the 4 fields specified in SPEC-007b"
+✅ "Adding only the 4 fields specified in SPEC-009"
    → draft_subject, draft_body, actioned_at, skip_reason
 ```
 

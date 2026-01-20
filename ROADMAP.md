@@ -83,7 +83,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1 complete (WF4, WF5 populating data)
 
-**Spec**: `specs/SPEC-007b-dashboard-mvp.md` ✅
+**Spec**: `specs/SPEC-009-dashboard-v1-migration.md` ✅
 
 **Skills used**: `uk-police-design-system`, `action-oriented-ux`, `adhd-interface-design`
 
@@ -95,7 +95,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Duration**: ~2 weeks
 
-**Note**: This replaces the original SPEC-007 with a simplified MVP. Full features (SPEC-007a) come later.
+**Note**: V1 dashboard code migration approach per Decision A9. Supersedes SPEC-007/007a/007b.
 
 ---
 
@@ -201,12 +201,8 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 Phase 1: Core Jobs Pipeline
     │
     ├──→ Phase 1b: Competitor Monitoring
-    │         │
-    │         └──→ Dashboard Enhancement: Dual-Track Scoring (SPEC-007a partial)
     │
-    ├──→ Phase 1c: Dashboard MVP (SPEC-007b)
-    │         │
-    │         ├──→ Dashboard Enhancement: Full UI (SPEC-007a)
+    ├──→ Phase 1c: Dashboard V1 Migration (SPEC-009)
     │         │
     │         └──→ Dashboard Enhancement: Morning Brief (SPEC-008)
     │
@@ -241,7 +237,7 @@ The Airtable schema grows incrementally to support features:
 - `actioned_at` (DateTime)
 - `skip_reason` (Single Select: Not police sector, Wrong force, Not our service area, Already contacted, Duplicate, Other)
 
-### Future: Dashboard Enhancement (SPEC-007a)
+### Future: Dashboard Enhancement (Post-SPEC-009)
 
 **Add to Opportunities** (when implementing dual-track scoring):
 - `ms_score` (Number 0-100) — Managed Services score
@@ -276,7 +272,8 @@ The Airtable schema grows incrementally to support features:
 
 The dashboard grows in capability over time:
 
-### MVP (Phase 1c) — SPEC-007b
+### MVP (Phase 1c) — SPEC-009
+- V1 codebase migrated to V2 backend
 - Three-zone layout ✓
 - Keyboard navigation ✓
 - Progress feedback ✓
@@ -285,8 +282,8 @@ The dashboard grows in capability over time:
 - Why Now + Signals context
 - Basic contact display
 
-### Enhancement 1 (Post-1b) — SPEC-007a Partial
-*Triggered by: Competitor monitoring creating differentiated signals*
+### Enhancement 1 (Post-MVP)
+*Triggered by: MVP validated + sufficient real usage*
 
 - Dual-track scoring display (MS vs AG)
 - Score breakdown grid
@@ -316,9 +313,9 @@ These features are fully specified but intentionally deferred:
 
 | Feature | Spec | Trigger to Implement |
 |---------|------|---------------------|
-| Dual-track scoring UI | SPEC-007a | Phase 1b complete + schema expanded |
-| Score breakdown grid | SPEC-007a | Scoring model validated |
-| Contact confidence | SPEC-007a | Contact research workflow exists |
+| Dual-track scoring UI | Future (post-SPEC-009) | Schema expanded + scoring validated |
+| Score breakdown grid | Future (post-SPEC-009) | Scoring model validated |
+| Contact confidence | Future (post-SPEC-009) | Contact research workflow exists |
 | Morning Brief ritual | SPEC-008 | 4+ weeks using MVP + sufficient signal volume |
 | Overnight summaries | SPEC-008 | Session persistence implemented |
 | Energy-based selection | SPEC-008 | Scoring model supports difficulty levels |
@@ -366,12 +363,10 @@ A phase is complete when:
 | SPEC-003: Signal Classification | 1 | ✅ Built |
 | SPEC-004: Opportunity Creator | 1 | 🔄 In Progress |
 | SPEC-005: Opportunity Enricher | 1 | ✅ Built |
-| SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-007b |
-| SPEC-007: React Dashboard | 1c | 🔀 Replaced by SPEC-007b |
-| SPEC-007a: Full UI Foundation | Future | ⏸️ Deferred |
-| SPEC-007b: Dashboard MVP | 1c | ✅ Built |
+| SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-009 |
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
-| SPEC-1b: Competitor Monitoring | 1b | ✅ Built (blocked on Bright Data) |
+| SPEC-009: Dashboard V1 Migration | 1c | ✅ Ready for implementation |
+| SPEC-1b: Competitor Monitoring | 1b | ✅ Complete |
 
 ---
 

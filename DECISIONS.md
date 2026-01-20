@@ -83,6 +83,19 @@ Track decisions that **actively affect current work**. Not a historical record â
 - Strategy document Section 11 to be updated to match skills  
 **Skills referenced**: `action-oriented-ux`, `adhd-interface-design`, `uk-police-design-system`, `notification-system`, `b2b-visualisation`
 
+#### A9: V1 Dashboard Code Migration
+**Date**: 20 January 2025  
+**Decision**: Replace V2 dashboard code with V1's proven codebase, then rewire data layer for V2 schema  
+**Context**: Claude Code struggled to match V1's UI quality when building from scratch. V1 has 30+ polished components, rich type system, clean separation between UI and data layers.  
+**Approach**:
+- Copy V1's `dashboard-react/` into V2's `dashboard/`
+- Strip features V2 doesn't support yet (contracts, follow-ups, dual-track scoring, email actions)
+- Rewrite `lib/airtable.ts` to fetch from V2's 4-table schema
+- Simplify type definitions where V2 is simpler
+**Why**: Reverse-engineering working code to fit a new backend is more tractable than recreating quality from scratch. UI components don't care where data comes from â€” they render typed objects.  
+**Supersedes**: P1c-01 (dashboard MVP approach) â€” now migrating proven code instead of building minimal version
+**Spec**: SPEC-009 â€” Created, ready for implementation
+
 ---
 
 ### Tier 2 â€” Phase-Level (Current Phase Only)
@@ -104,6 +117,7 @@ Track decisions that **actively affect current work**. Not a historical record â
 
 #### P1c-01: Dashboard MVP (SPEC-007b) Before Full UI (SPEC-007a)
 **Date**: 19 January 2025
+**Status**: Superseded by A9 (V1 migration approach)
 **Decision**: Create simplified dashboard spec (SPEC-007b) that works with current 4-table schema. Defer full UI features (SPEC-007a) until schema supports them.
 **Context**: V1 skills describe dual-track scoring, score breakdowns, contact confidence â€” features requiring schema fields that don't exist. Building the full UI would require premature schema expansion.
 **Resolution**:
@@ -112,6 +126,7 @@ Track decisions that **actively affect current work**. Not a historical record â
 - SPEC-008: Deferred until dashboard validated + overnight tracking exists
 **Why**: Avoids V1's mistake (complexity creep). Build what works now, enhance later.
 **Specs affected**: SPEC-007a (deferred), SPEC-007b (created), SPEC-008 (deferred)
+**Note**: This decision led to SPEC-007b, which has been superseded by SPEC-009 (V1 migration) per Decision A9.
 
 #### P1c-02: Skills Are Reference, Not Requirements
 **Date**: 19 January 2025

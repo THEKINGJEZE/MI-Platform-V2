@@ -75,8 +75,8 @@ Return ONLY valid JSON, no markdown wrapper:
   "findings": [
     {
       "severity": "🔴 high",
-      "title": "SPEC-007b references non-existent field 'priority_tier'",
-      "evidence": ["specs/SPEC-007b-dashboard-mvp.md:67", "SPEC-001 field list"],
+      "title": "SPEC-009 references non-existent field 'priority_tier'",
+      "evidence": ["specs/SPEC-009-dashboard-v1-migration.md:118", "SPEC-001 field list"],
       "recommendation": "Field should be 'priority' (Single Select)"
     }
   ],

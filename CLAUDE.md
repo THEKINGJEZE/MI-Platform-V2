@@ -43,7 +43,7 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 | Sales strategy | @docs/SALES-STRATEGY.md |
 | Skills usage guide | @skills/README.md |
 | Roadmap | @ROADMAP.md |
-| Current spec | @specs/SPEC-007b-dashboard-mvp.md (Phase 1c) |
+| Current spec | @specs/SPEC-009-dashboard-v1-migration.md (Phase 1c) |
 | Airtable patterns | @.claude/rules/airtable.md |
 | n8n patterns | @.claude/rules/n8n.md |
 | Skills usage rules | @.claude/rules/skills-usage.md |
