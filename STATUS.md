@@ -13,6 +13,7 @@
 - ✅ SPEC-007a schema fields added (6 fields: priority_tier, priority_signals, response_window, contact_type, research_confidence, confidence_sources)
 - ✅ SPEC-007a implementation started — Stage 1 PARSE complete (16 acceptance criteria extracted)
 - ✅ SPEC-007a Stage 2 AUDIT complete — all 6 schema fields verified, no blockers
+- ✅ SPEC-007a Stage 3 PLAN complete — 18-task build sequence across 6 phases
 
 ---
 
@@ -30,7 +31,7 @@
 
 ## Next Action
 
-> **SPEC-007a Stage 3: PLAN** — Create detailed build sequence
+> **SPEC-007a Stage 4: BUILD** — Execute the 18-task implementation plan
 >
 > See `specs/IMPL-007a.md` for implementation tracker
 
@@ -75,7 +76,7 @@ Webhook: `https://n8n.srv1190997.hstgr.cloud/webhook/competitor-receiver`
 | SPEC-005: Opportunity Enricher | Built |
 | SPEC-007b: Dashboard MVP | Deployed |
 | SPEC-1b: Competitor Monitoring | Complete |
-| SPEC-007a: Full UI | In Progress (Stage 3: PLAN) |
+| SPEC-007a: Full UI | In Progress (Stage 4: BUILD) |
 | SPEC-008: Morning Brief | Deferred |
 
 ---
