@@ -1,27 +1,48 @@
 # MI Platform — Session Status
 
-**Updated**: 19 January 2025
-**Phase**: 1 — Core Jobs Pipeline (95% — burn-in monitoring)
-**Session Goal**: Phase 1 completion — monitoring Test 7 burn-in
+**Updated**: 20 January 2025
+**Phase**: 1c — Dashboard MVP (implementing SPEC-007b)
+**Session Goal**: Complete SPEC-007b implementation
 
 ---
 
 ## 🎯 Immediate Next Action
 
-> **Complete Test 7 burn-in** — Final validation before Phase 1 sign-off
+> **Implement SPEC-007b Dashboard MVP** — Stage 2 AUDIT
 >
-> All bugs fixed. Tests 1-6 passing. Monitoring burn-in period (started 18 Jan).
-> 1. Monitor daily workflow execution (1 week)
-> 2. Verify no regressions in production
-> 3. Complete Phase 1 sign-off
+> Stage 1 PARSE complete. Now auditing preconditions before build.
+> 1. Verify Airtable schema fields exist (or create them)
+> 2. Check n8n connectivity for webhook API
+> 3. Audit existing dashboard structure at `dashboard/`
 
-**Blockers**: None — monitoring burn-in period
+**Blockers**: None
 
-**Next step**: Check workflow execution logs, verify Test 7 criteria met
+**Next step**: Stage 2 AUDIT — verify dependencies before proceeding to PLAN
+
+**Implementation tracker**: `specs/IMPL-007b.md`
 
 ---
 
-## ✅ Done This Session (19 Jan)
+## ✅ Done This Session (20 Jan)
+
+### SPEC-007b Implementation Started
+- [x] Stage 1 PARSE complete — 17 acceptance criteria extracted
+- [x] Guardrails identified: G-008 (webhookId)
+- [x] Dependencies verified: SPEC-001, SPEC-005 complete
+- [x] ANCHOR.md alignment confirmed (see below)
+- [x] Implementation tracker created: `specs/IMPL-007b.md`
+
+**ANCHOR.md Alignment Check**:
+| Mission Element | SPEC-007b Serves It? |
+|-----------------|---------------------|
+| 3-5 leads Monday | ✅ Dashboard displays opportunities |
+| ≤15 min review | ✅ Criterion #17 requires this |
+| ADHD-first | ✅ Keyboard nav, single-focus, progress feedback |
+| Human confirms | ✅ AI drafts, James reviews/sends |
+
+---
+
+## ✅ Done Previous Session (19 Jan)
 
 ### Bug Status Update
 - [x] Investigated WF2/WF4 bugs — discovered already fixed on 18 Jan
@@ -196,4 +217,4 @@ See `specs/PHASE-1-E2E-TEST.md` for test results (Tests 1-6 passing).
 
 ---
 
-*Last aligned with ANCHOR.md: 19 January 2025*
+*Last aligned with ANCHOR.md: 20 January 2025*
