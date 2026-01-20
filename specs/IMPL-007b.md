@@ -10,8 +10,8 @@
 
 | Stage | Name | Status | Completed |
 |-------|------|--------|-----------|
-| 1 | Parse | 🔄 | - |
-| 2 | Audit | ⬜ | - |
+| 1 | Parse | ✅ | 2025-01-20 |
+| 2 | Audit | 🔄 | - |
 | 3 | Plan | ⬜ | - |
 | 4 | Build | ⬜ | - |
 | 5 | Verify | ⬜ | - |
@@ -19,9 +19,9 @@
 
 ## Current State
 
-**Working on**: Stage 1 PARSE complete - awaiting gate approval
-**Blockers**: None
-**Next action**: Stage 2 AUDIT - verify Airtable schema fields exist, check n8n connectivity, confirm existing dashboard structure
+**Working on**: Stage 2 AUDIT complete - awaiting gate approval
+**Blockers**: AIRTABLE_API_KEY not configured in dashboard/.env.local
+**Next action**: Stage 3 PLAN - create detailed task list for adapting existing dashboard
 
 ## STATUS.md Context
 
@@ -117,7 +117,55 @@
 17. Integration testing — Full flow
 
 ### Stage 2: Audit
-*To be completed after Stage 1 gate*
+
+**Completed**: 2025-01-20
+
+**Key Findings:**
+
+1. **Two Airtable bases exist:**
+   - `appU3ktqJHk3eUmOS` — HubSpot-synced (global CLAUDE.md references this)
+   - `appEEWaGtGUwOyOhm` — MI Platform (dashboard uses this) ✅ CORRECT
+
+2. **Schema is compatible** — Fields exist with slightly different names:
+   | SPEC-007b | Actual Field | Status |
+   |-----------|--------------|--------|
+   | draft_subject | subject_line | ✅ |
+   | draft_body | outreach_draft | ✅ |
+   | actioned_at | sent_at | ✅ |
+   | skip_reason | skipped_reason | ✅ |
+
+3. **Existing dashboard structure:**
+   - `/` — Queue view (Monday queue) ✅
+   - `/signals` — Signals view ✅
+   - `/forces` — Forces view ✅
+   - `/pipeline` — Pipeline view ✅
+   - API routes: /api/opportunities, /api/signals, /api/forces, /api/send
+
+4. **n8n connectivity:** ✅ Health check passed
+
+5. **Missing configuration:**
+   - `AIRTABLE_API_KEY` empty in dashboard/.env.local
+   - n8n webhook URLs empty
+
+6. **Gap analysis vs SPEC-007b:**
+   - Missing: Three-zone layout (current is single-column cards)
+   - Missing: Keyboard navigation (J/K/E/S/D/Z)
+   - Missing: Progress header with session stats
+   - Missing: Undo with 30s countdown
+   - Missing: Toast system with undo
+   - Missing: Shortcut overlay (?)
+   - Has: Queue filtering, opportunity cards, send/skip actions
+
+**Blockers:**
+- ⚠️ `AIRTABLE_API_KEY` not set — dashboard won't work until configured
+- ⚠️ Field names differ from spec — code changes needed
+
+**Recommendation:** Adapt existing dashboard to SPEC-007b requirements rather than rebuild from scratch. Key changes:
+1. Refactor layout to Three-Zone Model
+2. Add keyboard navigation
+3. Add session stats header
+4. Add undo/toast system
+5. Map field names to actual schema
 
 ### Stage 3: Plan
 *To be completed after Stage 2 gate*
