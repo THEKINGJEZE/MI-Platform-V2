@@ -62,7 +62,7 @@ export default function ReviewPage() {
       }
 
       const data = await response.json();
-      const opps = data.opportunities || [];
+      const opps = data.data || [];
 
       // Filter by queue mode
       const filtered =
