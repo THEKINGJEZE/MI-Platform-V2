@@ -1,14 +1,16 @@
 # MI Platform — Session Status
 
-**Updated**: 20 January 2025 (Night)
+**Updated**: 21 January 2025
 **Phase**: 1c — Dashboard MVP
-**Status**: SPEC-009 implementation complete ✅ + V1 UI Chrome restored
+**Status**: ✅ DEPLOYED TO PRODUCTION
 
 ### Session Work (21 Jan)
 - ✅ V1 UI Chrome restored: card borders, NavRail sidebar, filter tabs
 - ✅ NavRail route updated /focus → /review
 - ✅ Segmented control styling for Hot/All filter
-- ✅ Verified via Playwright - 46 opportunities displaying correctly
+- ✅ Deployed to VPS via Docker Compose
+- ✅ Fixed Traefik network connectivity (connected to traefik-public)
+- ✅ Production verified: 46 opportunities loading correctly
 
 ### Session Work (20 Jan Night - Late)
 - ✅ SPEC-009 all 6 stages complete
@@ -42,7 +44,7 @@
 
 ## Next Action
 
-> **Deploy and test** — Deploy V2 dashboard to production, verify ≤15 min timing criterion
+> **Timing test** — Use dashboard for a Monday review, verify ≤15 min for 5 opportunities
 
 ---
 
