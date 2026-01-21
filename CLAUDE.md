@@ -5,10 +5,10 @@
 That file defines WHY. It never changes. If anything conflicts with ANCHOR.md, ANCHOR.md wins.
 
 ## Current Focus
-**Phase**: 1c — Dashboard MVP (deployed)
-**Goal**: Validate ≤15 min timing criterion
+**Phase**: 1d — Quality Improvement
+**Goal**: Fix pipeline quality issues, enable enforcement hooks
 **Blocker**: None
-**Completed**: Phase 1 (95%), Phase 1b (100%)
+**Completed**: Phase 1 (95%), Phase 1b (100%), Phase 1c (100%)
 
 See @STATUS.md for session-level tracking.
 
@@ -43,7 +43,7 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 | Sales strategy | @docs/SALES-STRATEGY.md |
 | Skills usage guide | @skills/README.md |
 | Roadmap | @ROADMAP.md |
-| Current spec | @specs/SPEC-009-dashboard-v1-migration.md (Phase 1c) |
+| Current spec | See STATUS.md — Phase 1d has no single spec |
 | Airtable patterns | @.claude/rules/airtable.md |
 | n8n patterns | @.claude/rules/n8n.md |
 | Skills usage rules | @.claude/rules/skills-usage.md |

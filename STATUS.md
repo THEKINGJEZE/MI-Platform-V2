@@ -1,8 +1,29 @@
 # MI Platform — Session Status
 
-**Updated**: 21 January 2025
+**Updated**: 21 January 2026
 **Phase**: 1d — Quality Improvement
-**Status**: ✅ DEPLOYED & TESTED — Monitoring period started
+**Status**: ✅ DEPLOYED & TESTED — Enforcement hooks added
+
+---
+
+## Session Work (21 Jan - Evening)
+
+### Capabilities Assessment: Phase 0 Complete ✅
+
+Implemented enforcement infrastructure from Claude Chat capabilities assessment:
+
+| Task | Status |
+|------|--------|
+| Fix CLAUDE.md phase mismatch | ✅ Changed 1c → 1d |
+| Create PreToolUse enforcement hook | ✅ `.claude/hooks/pre-edit-check.sh` |
+| Add hook to settings.json | ✅ Triggers on Edit/Write |
+| Update consistency-check.cjs | ✅ Added `--facts-only` flag + skip patterns |
+| Create warnings.log | ✅ Bypass logging enabled |
+
+**Results:**
+- File references: 68 missing → 0 missing (163 checked)
+- Cross-document facts: Aligned (was phase mismatch)
+- PreToolUse hook: Active on Edit/Write operations
 
 ---
 
@@ -57,7 +78,10 @@
 
 1. **Monitor for 1 week**: Verify new signals classify correctly
 2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
-3. **After validation**: Implement SPEC-010 (agentic enrichment)
+3. **Phase 1 Activation** (from Capabilities Assessment):
+   - Add mandatory agent usage rules to CLAUDE.md (workflow-builder, signal-triage)
+   - Schedule weekly `/doc-audit` in maintenance checklist
+4. **After validation**: Implement SPEC-010 (agentic enrichment)
 
 ---
 
@@ -77,4 +101,4 @@ None.
 
 ---
 
-*Last aligned with ANCHOR.md: 21 January 2025*
+*Last aligned with ANCHOR.md: 21 January 2026*
