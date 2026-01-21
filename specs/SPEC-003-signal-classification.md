@@ -275,6 +275,18 @@ From ROADMAP.md Phase 1:
 
 ---
 
+## 9. Guardrails Compliance
+
+| Guardrail | Applicable | Status |
+|-----------|------------|--------|
+| G-005: JS Before AI | Yes | ✅ Force pattern matching runs before OpenAI classification |
+| G-011: Upsert Only | Yes | ✅ Using Airtable batch update, not delete/create |
+| G-013: Competitor = P1 | Yes | ✅ Competitor signals flagged with `source` field for downstream P1 priority |
+
+**Note on G-013**: This spec classifies signals and identifies competitor sources. The P1 priority flagging happens in SPEC-004 (Opportunity Creator) based on the `source` field set here.
+
+---
+
 ## Files to Create/Update
 
 | File | Action |

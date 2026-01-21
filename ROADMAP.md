@@ -294,6 +294,23 @@ The Airtable schema grows incrementally to support features:
 - `actioned_at` (DateTime)
 - `skip_reason` (Single Select: Not police sector, Wrong force, Not our service area, Already contacted, Duplicate, Other)
 
+### Phase 1d Additions (Quality Improvement)
+
+**Add to Signals** (for classification quality):
+- `role_type` (Single Select) — `investigator`, `forensic`, `intelligence`, `disclosure`, `other`
+- `seniority` (Single Select) — `senior`, `mid`, `junior`, `unknown`
+- `ai_confidence` (Number 0-100) — Classification confidence score
+- `force_source` (Single Select) — `matched`, `inferred`, `manual`
+
+**Add to Signals** (for deduplication):
+- `first_seen` (DateTime) — First scrape timestamp
+- `last_seen` (DateTime) — Most recent scrape timestamp
+- `scrape_count` (Number) — Times seen in scrapes
+
+**Add to Opportunities**:
+- `why_now` (Long Text) — AI-generated context summary
+- `is_competitor_intercept` (Checkbox) — Competitor signal detected
+
 ### Future: Dashboard Enhancement (Post-SPEC-009)
 
 **Add to Opportunities** (when implementing dual-track scoring):

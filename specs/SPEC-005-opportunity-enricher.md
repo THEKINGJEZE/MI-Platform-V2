@@ -769,6 +769,10 @@ From ROADMAP.md Phase 1:
 | G-005: JS Before AI | No | ✅ N/A — done in WF3 |
 | G-007: No CLI Agents | Yes | ✅ Using n8n |
 | G-011: Upsert Only | Yes | ✅ Using PATCH updates |
+| G-012: Value Proposition First | Yes | ✅ Prompt instructs Peel's value prop, never "we have candidates" |
+| G-013: Competitor = P1 Priority | Yes | ✅ Inherited from WF4 — competitor signals already flagged P1 |
+| G-014: Contact Problem Owner | Yes | ✅ Contact research targets operational leaders, HR is fallback |
+| G-015: Hook→Bridge→Value→CTA | Yes | ✅ Message drafting prompt enforces four-part structure |
 
 ---
 

@@ -8,7 +8,7 @@
 
 ## Session Work (21 Jan - Evening)
 
-### Capabilities Assessment: Phase 0 through Phase 3 Complete ✅
+### Capabilities Assessment: All Phases Complete ✅
 
 **Phase 0 (Enforcement):**
 | Task | Status |
@@ -41,6 +41,14 @@
 | Run /doc-audit to generate fresh report | ✅ `docs/AUDIT-REPORT.md` updated |
 | Document audit in warnings.log | ✅ Tracking enabled |
 
+**Phase 4 (Documentation):**
+| Task | Status |
+|------|--------|
+| Add Phase 1d schema fields to SPEC-001 | ✅ role_type, seniority, ai_confidence, etc. |
+| Add Phase 1d section to ROADMAP Schema Evolution | ✅ Signal + Opportunity fields documented |
+| Add G-012, G-013, G-014, G-015 to SPEC-005 | ✅ Sales guardrails added |
+| Add G-013 + Guardrails section to SPEC-003 | ✅ Competitor priority documented |
+
 **Results:**
 - File references: 68 missing → 0 missing (164 checked)
 - Cross-document facts: Aligned + auto-sync enabled
@@ -48,6 +56,8 @@
 - Weekly maintenance: Checklist defined + Monday reminder active
 - Phase sync: Automatic via PostToolUse hook
 - Documentation audit: Fresh report generated, 50% issue reduction
+- Schema evolution: Phase 1d fields documented in SPEC-001 + ROADMAP
+- Guardrail compliance: All specs now reference applicable guardrails
 
 ---
 
@@ -102,8 +112,9 @@
 
 1. **Monitor for 1 week**: Verify new signals classify correctly
 2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
-3. **Phase 4 (Documentation)**: Address remaining audit action items (guardrail refs in specs)
-4. **After validation**: Implement SPEC-010 (agentic enrichment)
+3. **After validation**: Implement SPEC-010 (agentic enrichment)
+
+**Capabilities Assessment**: ✅ Complete (Phase 0-4) — infrastructure hardened, documentation aligned
 
 ---
 

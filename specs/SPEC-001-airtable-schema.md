@@ -56,6 +56,17 @@ Raw intelligence as it arrives from all sources.
 | `award_winner` | Text | Who won (awards) |
 | `contract_end_date` | Date | When contract ends (awards) |
 
+**Phase 1d Additions** (Quality Improvement):
+| Field | Type | Description |
+|-------|------|-------------|
+| `role_type` | Single Select | `investigator`, `forensic`, `intelligence`, `disclosure`, `other` |
+| `seniority` | Single Select | `senior`, `mid`, `junior`, `unknown` |
+| `ai_confidence` | Number (0-100) | Classification confidence score |
+| `force_source` | Single Select | `matched`, `inferred`, `manual` — how force was identified |
+| `first_seen` | DateTime | First scrape timestamp (for deduplication) |
+| `last_seen` | DateTime | Most recent scrape timestamp |
+| `scrape_count` | Number | Times seen in scrapes |
+
 **Note on G-001**: The strategy's `raw_data` field serves the same purpose as a separate archive table — full JSON preserved for debugging. The `status` field tracks processing state. This satisfies G-001's intent without a separate table.
 
 ---
