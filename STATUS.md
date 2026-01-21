@@ -8,10 +8,9 @@
 
 ## Session Work (21 Jan - Evening)
 
-### Capabilities Assessment: Phase 0 Complete ✅
+### Capabilities Assessment: Phase 0 + Phase 1 Complete ✅
 
-Implemented enforcement infrastructure from Claude Chat capabilities assessment:
-
+**Phase 0 (Enforcement):**
 | Task | Status |
 |------|--------|
 | Fix CLAUDE.md phase mismatch | ✅ Changed 1c → 1d |
@@ -20,10 +19,19 @@ Implemented enforcement infrastructure from Claude Chat capabilities assessment:
 | Update consistency-check.cjs | ✅ Added `--facts-only` flag + skip patterns |
 | Create warnings.log | ✅ Bypass logging enabled |
 
+**Phase 1 (Activation):**
+| Task | Status |
+|------|--------|
+| Add mandatory agent usage rules to CLAUDE.md | ✅ workflow-builder, signal-triage, alignment-checker |
+| Add weekly maintenance checklist | ✅ /doc-audit, /hygiene-check, /health-check |
+| Update session protocol with checkpointing | ✅ Checkpoint before risky edits |
+| Update CHAT-INSTRUCTIONS.md | ✅ Capabilities Gate section added |
+
 **Results:**
-- File references: 68 missing → 0 missing (163 checked)
-- Cross-document facts: Aligned (was phase mismatch)
-- PreToolUse hook: Active on Edit/Write operations
+- File references: 68 missing → 0 missing (164 checked)
+- Cross-document facts: Aligned
+- Agent usage: Mandatory protocols documented
+- Weekly maintenance: Checklist defined
 
 ---
 
@@ -78,9 +86,7 @@ Implemented enforcement infrastructure from Claude Chat capabilities assessment:
 
 1. **Monitor for 1 week**: Verify new signals classify correctly
 2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
-3. **Phase 1 Activation** (from Capabilities Assessment):
-   - Add mandatory agent usage rules to CLAUDE.md (workflow-builder, signal-triage)
-   - Schedule weekly `/doc-audit` in maintenance checklist
+3. **Phase 2 (Synchronization)**: Create script to sync phase across docs when STATUS.md changes
 4. **After validation**: Implement SPEC-010 (agentic enrichment)
 
 ---

@@ -106,6 +106,27 @@ When handing a task to Claude Code, provide:
 **STATUS update**: What to add to STATUS.md
 ```
 
+### Capabilities Gate (Required for Major Work)
+
+Before Claude Code starts major implementation, ensure these agents/commands are invoked:
+
+| Task Type | Required Agent/Command | Why |
+|-----------|----------------------|-----|
+| Any n8n workflow | `workflow-builder` agent | Enforces logging, error handling, naming standards |
+| Classification changes | `signal-triage` agent | UK police domain expertise |
+| Architectural decisions | `alignment-checker` agent | Mission drift detection |
+| Before risky edits | Checkpoint (note state for `/rewind`) | Rollback safety |
+
+**Include in handoff when relevant:**
+```markdown
+**Capabilities Gate**:
+- [ ] Use workflow-builder for workflow design
+- [ ] Use signal-triage for classification review
+- [ ] Run alignment-checker before starting
+```
+
+**Why this matters**: Claude Code has specialized agents for workflows, classification, and alignment — but they're not auto-invoked. Explicitly requesting them ensures domain expertise is applied.
+
 ### Spec Creation Protocol
 
 Before drafting a spec, Claude Chat needs context about what exists in the project.
@@ -216,6 +237,8 @@ If starting a new chat session about this project:
 | "Review this document..." | Analyse against ANCHOR.md mission |
 | "What's next?" | Reference STATUS.md and current phase |
 | "I'm stuck on..." | Think through options, recommend one |
+| "Create a workflow..." | Include Capabilities Gate: require workflow-builder agent |
+| "Improve classification..." | Include Capabilities Gate: require signal-triage agent |
 
 ---
 

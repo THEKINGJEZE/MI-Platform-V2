@@ -37,6 +37,30 @@ Before building any workflow, check @docs/GUARDRAILS.md. Key rules:
 - **G-008**: Always Include webhookId — required for n8n routes
 - **G-011**: Upsert Only (No Loop Delete) — prevent data loss
 
+## Mandatory Agent Usage
+
+These agents MUST be used for specific tasks — not optional.
+
+| Agent | MUST Use When | Why |
+|-------|---------------|-----|
+| `workflow-builder` | Creating or modifying ANY n8n workflow | Enforces logging, error handling, naming standards |
+| `signal-triage` | Creating/modifying classification prompts or logic | UK police domain expertise, reduces false positives |
+| `alignment-checker` | Before major architectural decisions | Catches mission drift early |
+
+**Invocation protocol:**
+```
+# Before creating a workflow
+Use workflow-builder agent to design: [workflow name]
+
+# Before modifying classification
+Use signal-triage agent to review: [classification change]
+
+# Before major changes
+Use alignment-checker to verify: [proposed change]
+```
+
+**Violation = rework.** Ad-hoc workflows or classification changes without agent review will likely need fixing later.
+
 ## Load On-Demand (Never Memorize)
 | Topic | Reference |
 |-------|-----------|
@@ -90,8 +114,9 @@ Design system and domain skills available in `/skills/`. Read `@skills/README.md
 
 ## Session Protocol
 1. **Start**: Hooks inject context. Read STATUS.md.
-2. **Work**: Use @references, not paste. /compact every 3-4 turns.
-3. **End**: Update STATUS.md. Define next action. git commit && git push.
+2. **Checkpoint**: Before risky edits (workflow changes, schema changes), note the state so `/rewind` is effective.
+3. **Work**: Use @references, not paste. /compact every 3-4 turns.
+4. **End**: Update STATUS.md. Define next action. git commit && git push.
 
 ## Git Commit Protocol
 After completing any task that modifies files:
@@ -135,6 +160,24 @@ When all specs in a phase are complete:
 3. Only after James confirms → mark the phase complete in ROADMAP.md
 
 **Why**: Code can verify "did we build what the spec said?" but only Chat can verify "does this phase actually serve the Monday morning experience per the strategy?"
+
+## Weekly Maintenance (Monday before review)
+
+Run these commands weekly to prevent drift:
+
+| Command | Purpose | Time |
+|---------|---------|------|
+| `/doc-audit` | Comprehensive documentation alignment check | 2 min |
+| `/hygiene-check` | Check document sizes, trigger cleanup | 30 sec |
+| `/health-check` | Verify all API connections | 30 sec |
+| `node scripts/consistency-check.cjs` | Verify file references valid | 30 sec |
+
+**Checklist:**
+- [ ] Run `/doc-audit` — review `docs/AUDIT-REPORT.md`
+- [ ] Run `/hygiene-check` — archive if docs exceed limits
+- [ ] Run `/health-check` — verify Airtable, n8n, HubSpot connected
+- [ ] Check `.claude/warnings.log` — review any enforcement bypasses
+- [ ] Clear completed items from STATUS.md
 
 ## Quick Commands
 | Command | Purpose |
