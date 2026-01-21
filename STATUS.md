@@ -27,11 +27,19 @@
 | Update session protocol with checkpointing | ✅ Checkpoint before risky edits |
 | Update CHAT-INSTRUCTIONS.md | ✅ Capabilities Gate section added |
 
+**Phase 2 (Synchronization):**
+| Task | Status |
+|------|--------|
+| Create sync-phase.cjs script | ✅ Syncs phase from STATUS.md to CLAUDE.md |
+| Add PostToolUse hook | ✅ Auto-runs after STATUS.md edits |
+| Add to weekly maintenance | ✅ Manual sync command available |
+
 **Results:**
 - File references: 68 missing → 0 missing (164 checked)
-- Cross-document facts: Aligned
+- Cross-document facts: Aligned + auto-sync enabled
 - Agent usage: Mandatory protocols documented
 - Weekly maintenance: Checklist defined
+- Phase sync: Automatic via PostToolUse hook
 
 ---
 
@@ -86,7 +94,7 @@
 
 1. **Monitor for 1 week**: Verify new signals classify correctly
 2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
-3. **Phase 2 (Synchronization)**: Create script to sync phase across docs when STATUS.md changes
+3. **Phase 3 (Scheduling)**: Embed audit cadence into workflow
 4. **After validation**: Implement SPEC-010 (agentic enrichment)
 
 ---

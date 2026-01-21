@@ -66,6 +66,17 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit.*STATUS\\.md|Write.*STATUS\\.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-status-edit.sh"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "*",

@@ -171,6 +171,7 @@ Run these commands weekly to prevent drift:
 | `/hygiene-check` | Check document sizes, trigger cleanup | 30 sec |
 | `/health-check` | Verify all API connections | 30 sec |
 | `node scripts/consistency-check.cjs` | Verify file references valid | 30 sec |
+| `node scripts/sync-phase.cjs` | Sync phase from STATUS.md to CLAUDE.md | 10 sec |
 
 **Checklist:**
 - [ ] Run `/doc-audit` — review `docs/AUDIT-REPORT.md`
