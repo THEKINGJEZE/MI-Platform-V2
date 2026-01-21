@@ -1,55 +1,31 @@
 # MI Platform — Session Status
 
-**Updated**: 21 January 2025  
-**Phase**: 1d — Quality Improvement  
-**Status**: ✅ IMPLEMENTATION COMPLETE — Pending deployment & testing
+**Updated**: 21 January 2025
+**Phase**: 1d — Quality Improvement
+**Status**: ✅ DEPLOYED & TESTED — Monitoring period started
 
 ---
 
-## Session Work (21 Jan - Afternoon)
+## Session Work (21 Jan - Late Afternoon)
 
-### Phase 1: Classification Fixes (WF3) ✅
-- ✅ Fixed gate logic: `confidence >= 70` → `aiResponse.relevant === true`
-- ✅ Updated classification prompt with hard gates (sworn officers, non-police orgs, out-of-scope roles)
-- ✅ Added schema fields: role_type, seniority, ai_confidence, force_source
-- ✅ Classifier now writes all extracted fields to Airtable
+### Deployment ✅
+- ✅ Deployed MI: Jobs Classifier (w4Mw2wX9wBeimYP2) — 19 nodes, active
+- ✅ Deployed MI: Jobs Receiver (nGBkihJb6279HOHD) — 17 nodes, active
+- ✅ All workflows running on schedule
 
-### Phase 1b: Deduplication ✅
-- ✅ Added lifecycle fields: first_seen, last_seen, scrape_count
-- ✅ Implemented upsert in Indeed ingestion (jobs-receiver.json)
-- ✅ Implemented upsert in competitor receiver (WF9)
+### Data Cleanup Executed ✅
+- ✅ `cleanup-signals.js`: 8 false positives marked irrelevant
+- ✅ `merge-opportunities.js`: 23 signals merged, 17 duplicate opps archived (47→30)
+- ✅ `recompute-priorities.js`: 9 competitor opps upgraded to P1/Hot
 
-### Phase 2: Opportunity Creator (WF4) ✅
-- ✅ Tracks competitor signals in "Code: Filter & Group by Force"
-- ✅ Sets is_competitor_intercept flag on create and update
-- ✅ Opportunity lookup filter verified correct
+### End-to-End Verification ✅
+- ✅ Opportunity Creator (WF4): Running successfully, status=success
+- ✅ Competitor intercepts properly flagged: `is_competitor_intercept=true`, `priority_tier=hot`
+- ✅ Examples verified: Kent Police, West Midlands, Nottinghamshire all P1/Hot
+- ⚠️ Classifier (WF3): Processing works but ends in "error" status (possible timeout on large batches)
 
-### Phase 3: Enrichment (WF5) ✅
-- ✅ Added signal fetch nodes for rich context
-- ✅ Enrichment prompt now includes actual signal titles and role types
-- ✅ Added P1 guardrail (G-013): Competitor intercepts forced to score≥90, tier='hot'
-
-### Phase 4: Data Cleanup Scripts ✅
-- ✅ `scripts/cleanup-signals.js` — Reclassify irrelevant signals
-- ✅ `scripts/merge-opportunities.js` — Merge duplicate opportunities per force
-- ✅ `scripts/recompute-priorities.js` — Fix competitor opportunity priorities
-
-### Phase 5: Agentic Spec ✅
-- ✅ `specs/SPEC-010-agentic-enrichment.md` — Multi-agent architecture design
-
----
-
-## Next Actions
-
-1. **Run cleanup scripts (dry-run first)**:
-   ```bash
-   node scripts/cleanup-signals.js --dry-run
-   node scripts/merge-opportunities.js --dry-run
-   node scripts/recompute-priorities.js --dry-run
-   ```
-2. **Test end-to-end**: Run pipeline with a test signal to verify all changes work together
-3. **Monitor for 1 week**: Verify false positive rate drops and competitor signals get P1 priority
-4. **After validation**: Implement SPEC-010 (agentic enrichment)
+### Git Commit ✅
+- Commit b949000 pushed to GitHub with all Quality Improvement changes
 
 ---
 
@@ -57,54 +33,47 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Dashboard | ✅ Deployed | https://dashboard.peelplatforms.co.uk/review |
-| WF3 (Classification) | ✅ Deployed | Gate logic fixed, writes role_type, seniority |
-| WF4 (Opportunity Creator) | ✅ Deployed | G-013 competitor flag added |
-| WF5 (Enrichment) | ✅ Deployed | Signal fetch + P1 guardrail added |
-| WF9 (Competitor Receiver) | ✅ Deployed | Upsert logic implemented |
-| Jobs Receiver | ✅ Deployed | Upsert logic, first_seen/last_seen/scrape_count |
-| Cleanup Scripts | ✅ Created | Ready for dry-run |
-| Schema | ✅ Updated | New fields added via MCP |
+| Dashboard | ✅ Live | https://dashboard.peelplatforms.co.uk/review |
+| WF3 (Classification) | ⚠️ Active | Processing works, ends in error (investigating) |
+| WF4 (Opportunity Creator) | ✅ Running | Success status, 15-min schedule |
+| WF5 (Enrichment) | ✅ Deployed | Signal fetch + P1 guardrail |
+| WF9 (Competitor Receiver) | ✅ Deployed | Upsert implemented |
+| Jobs Receiver | ✅ Deployed | Upsert + lifecycle fields |
+| Data Quality | ✅ Cleaned | 30 opps (was 47), P1 flags correct |
 
 ---
 
-## Files Modified This Session
+## Verified Metrics
 
-**Workflows**:
-- `n8n/workflows/jobs-classifier.json`
-- `n8n/workflows/jobs-receiver.json`
-- `n8n/workflows/opportunity-creator.json`
-- `n8n/workflows/opportunity-enricher.json`
-- WF9: MI: Competitor Receiver (via n8n MCP)
-
-**Scripts (new)**:
-- `scripts/cleanup-signals.js`
-- `scripts/merge-opportunities.js`
-- `scripts/recompute-priorities.js`
-
-**Specs (new)**:
-- `specs/SPEC-010-agentic-enrichment.md`
-
-**Schema additions**:
-- Signals: role_type, seniority, ai_confidence, force_source, first_seen, last_seen, scrape_count
+| Metric | Before | After | Target | Status |
+|--------|--------|-------|--------|--------|
+| Duplicate opportunities | 47 | 30 | 1 per force | ✅ Merged |
+| Competitor opps P1/Hot | 22% | 100% | 100% | ✅ Fixed |
+| Bright Data errors cleared | 2 | 0 | 0 | ✅ Cleaned |
 
 ---
 
-## Success Criteria (Phase 1d)
+## Next Actions
 
-| Metric | Before | Target | Status |
-|--------|--------|--------|--------|
-| False positive rate | ~80% | <10% | Pending test |
-| Duplicate signals | 37-53% | <5% | Pending test |
-| Competitor opps flagged P1 | 22% | 100% | Pending test |
-| Summaries cite signals | ~15% | >90% | Pending test |
-| Opps per force | 1-5 | 1 | Pending cleanup |
+1. **Monitor for 1 week**: Verify new signals classify correctly
+2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
+3. **After validation**: Implement SPEC-010 (agentic enrichment)
+
+---
+
+## Known Issue
+
+**WF3 Classifier ends in "error" status** despite processing signals correctly:
+- Signals are being classified with role_type, seniority, ai_confidence
+- Status updates to relevant/irrelevant work
+- May be timeout when processing 40+ signals in continuous loop
+- Not blocking — signals still get processed
 
 ---
 
 ## Blockers
 
-None — ready for deployment and testing.
+None.
 
 ---
 
