@@ -22,7 +22,7 @@
 - ✅ Opportunity Creator (WF4): Running successfully, status=success
 - ✅ Competitor intercepts properly flagged: `is_competitor_intercept=true`, `priority_tier=hot`
 - ✅ Examples verified: Kent Police, West Midlands, Nottinghamshire all P1/Hot
-- ⚠️ Classifier (WF3): Processing works but ends in "error" status (possible timeout on large batches)
+- ✅ Classifier (WF3): Error fixed — was sending invalid `force_source='existing'` to Airtable
 
 ### Git Commit ✅
 - Commit b949000 pushed to GitHub with all Quality Improvement changes
