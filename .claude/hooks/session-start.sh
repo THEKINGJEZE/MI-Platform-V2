@@ -37,6 +37,18 @@ if [ -f "DECISIONS.md" ]; then
 fi
 echo ""
 
+# Monday maintenance reminder
+DAY_OF_WEEK=$(date +%u)
+if [ "$DAY_OF_WEEK" -eq 1 ]; then
+    echo "📅 MONDAY MAINTENANCE REMINDER:"
+    echo "   Before reviewing leads, run:"
+    echo "   • /doc-audit — Generate fresh audit report"
+    echo "   • /hygiene-check — Check document sizes"
+    echo "   • /health-check — Verify API connections"
+    echo "   • Check .claude/warnings.log for bypasses"
+    echo ""
+fi
+
 # Consistency check
 echo "🔍 CONSISTENCY CHECK:"
 if [ -f "scripts/consistency-check.cjs" ]; then

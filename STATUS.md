@@ -8,7 +8,7 @@
 
 ## Session Work (21 Jan - Evening)
 
-### Capabilities Assessment: Phase 0 + Phase 1 Complete ✅
+### Capabilities Assessment: Phase 0 through Phase 3 Complete ✅
 
 **Phase 0 (Enforcement):**
 | Task | Status |
@@ -34,12 +34,20 @@
 | Add PostToolUse hook | ✅ Auto-runs after STATUS.md edits |
 | Add to weekly maintenance | ✅ Manual sync command available |
 
+**Phase 3 (Scheduling):**
+| Task | Status |
+|------|--------|
+| Add Monday maintenance reminder to session-start | ✅ Triggers on day_of_week=1 |
+| Run /doc-audit to generate fresh report | ✅ `docs/AUDIT-REPORT.md` updated |
+| Document audit in warnings.log | ✅ Tracking enabled |
+
 **Results:**
 - File references: 68 missing → 0 missing (164 checked)
 - Cross-document facts: Aligned + auto-sync enabled
 - Agent usage: Mandatory protocols documented
-- Weekly maintenance: Checklist defined
+- Weekly maintenance: Checklist defined + Monday reminder active
 - Phase sync: Automatic via PostToolUse hook
+- Documentation audit: Fresh report generated, 50% issue reduction
 
 ---
 
@@ -94,7 +102,7 @@
 
 1. **Monitor for 1 week**: Verify new signals classify correctly
 2. **Investigate WF3 error status**: May be timeout on large batches, doesn't affect processing
-3. **Phase 3 (Scheduling)**: Embed audit cadence into workflow
+3. **Phase 4 (Documentation)**: Address remaining audit action items (guardrail refs in specs)
 4. **After validation**: Implement SPEC-010 (agentic enrichment)
 
 ---
