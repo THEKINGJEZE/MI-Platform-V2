@@ -1,86 +1,111 @@
 # MI Platform — Session Status
 
-**Updated**: 21 January 2025
-**Phase**: 1c — Dashboard MVP
-**Status**: ✅ DEPLOYED TO PRODUCTION
+**Updated**: 21 January 2025  
+**Phase**: 1d — Quality Improvement  
+**Status**: ✅ IMPLEMENTATION COMPLETE — Pending deployment & testing
 
-### Session Work (21 Jan)
-- ✅ V1 UI Chrome restored: card borders, NavRail sidebar, filter tabs
-- ✅ NavRail route updated /focus → /review
-- ✅ Segmented control styling for Hot/All filter
-- ✅ Deployed to VPS via Docker Compose
-- ✅ Fixed Traefik network connectivity (connected to traefik-public)
-- ✅ Production verified: 46 opportunities loading correctly
+---
 
-### Session Work (20 Jan Night - Late)
-- ✅ SPEC-009 all 6 stages complete
-- ✅ Focus-mode components rewritten for V2 (now-card, queue-panel, contact-card, etc.)
-- ✅ Data layer (lib/airtable.ts) rewritten for V2 4-table schema
-- ✅ /review route created with Three-Zone layout
-- ✅ Sort order fixed: priority tier first, then recency
-- ✅ Homepage redirects to /review (not /focus)
-- ✅ @ts-nocheck added to 21 non-MVP files
-- ✅ Pins store and captures store stubs created
-- ✅ npm run build succeeds
+## Session Work (21 Jan - Afternoon)
 
-### Session Work (20 Jan Evening)
-- ✅ V1 code copied to `dashboard/`
-- ✅ SPEC-009 (Dashboard V1 Migration) created and ready
-- ✅ SPEC-007/007a/007b superseded and cleaned up
+### Phase 1: Classification Fixes (WF3) ✅
+- ✅ Fixed gate logic: `confidence >= 70` → `aiResponse.relevant === true`
+- ✅ Updated classification prompt with hard gates (sworn officers, non-police orgs, out-of-scope roles)
+- ✅ Added schema fields: role_type, seniority, ai_confidence, force_source
+- ✅ Classifier now writes all extracted fields to Airtable
+
+### Phase 1b: Deduplication ✅
+- ✅ Added lifecycle fields: first_seen, last_seen, scrape_count
+- ✅ Implemented upsert in Indeed ingestion (jobs-receiver.json)
+- ✅ Implemented upsert in competitor receiver (WF9)
+
+### Phase 2: Opportunity Creator (WF4) ✅
+- ✅ Tracks competitor signals in "Code: Filter & Group by Force"
+- ✅ Sets is_competitor_intercept flag on create and update
+- ✅ Opportunity lookup filter verified correct
+
+### Phase 3: Enrichment (WF5) ✅
+- ✅ Added signal fetch nodes for rich context
+- ✅ Enrichment prompt now includes actual signal titles and role types
+- ✅ Added P1 guardrail (G-013): Competitor intercepts forced to score≥90, tier='hot'
+
+### Phase 4: Data Cleanup Scripts ✅
+- ✅ `scripts/cleanup-signals.js` — Reclassify irrelevant signals
+- ✅ `scripts/merge-opportunities.js` — Merge duplicate opportunities per force
+- ✅ `scripts/recompute-priorities.js` — Fix competitor opportunity priorities
+
+### Phase 5: Agentic Spec ✅
+- ✅ `specs/SPEC-010-agentic-enrichment.md` — Multi-agent architecture design
+
+---
+
+## Next Actions
+
+1. **Run cleanup scripts (dry-run first)**:
+   ```bash
+   node scripts/cleanup-signals.js --dry-run
+   node scripts/merge-opportunities.js --dry-run
+   node scripts/recompute-priorities.js --dry-run
+   ```
+2. **Test end-to-end**: Run pipeline with a test signal to verify all changes work together
+3. **Monitor for 1 week**: Verify false positive rate drops and competitor signals get P1 priority
+4. **After validation**: Implement SPEC-010 (agentic enrichment)
 
 ---
 
 ## Current State
 
-| Phase | Status | Notes |
-|-------|--------|-------|
-| Phase 1: Core Pipeline | 95% | WF1-6 built, bugs fixed, pending 1-week burn-in |
-| Phase 1b: Competitors | 100% | WF9 live, Bright Data connected |
-| Phase 1c: Dashboard | 100% | Build succeeds, pending deploy + timing test |
-
-**Live URL**: https://dashboard.peelplatforms.co.uk/review
-
----
-
-## Next Action
-
-> **Timing test** — Use dashboard for a Monday review, verify ≤15 min for 5 opportunities
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Dashboard | ✅ Deployed | https://dashboard.peelplatforms.co.uk/review |
+| WF3 (Classification) | ✅ Deployed | Gate logic fixed, writes role_type, seniority |
+| WF4 (Opportunity Creator) | ✅ Deployed | G-013 competitor flag added |
+| WF5 (Enrichment) | ✅ Deployed | Signal fetch + P1 guardrail added |
+| WF9 (Competitor Receiver) | ✅ Deployed | Upsert logic implemented |
+| Jobs Receiver | ✅ Deployed | Upsert logic, first_seen/last_seen/scrape_count |
+| Cleanup Scripts | ✅ Created | Ready for dry-run |
+| Schema | ✅ Updated | New fields added via MCP |
 
 ---
 
-## Active Workflows
+## Files Modified This Session
 
-WF1-6 (Jobs Pipeline) + WF9 (Competitor Receiver) — All active.
-See ROADMAP.md for workflow details.
+**Workflows**:
+- `n8n/workflows/jobs-classifier.json`
+- `n8n/workflows/jobs-receiver.json`
+- `n8n/workflows/opportunity-creator.json`
+- `n8n/workflows/opportunity-enricher.json`
+- WF9: MI: Competitor Receiver (via n8n MCP)
+
+**Scripts (new)**:
+- `scripts/cleanup-signals.js`
+- `scripts/merge-opportunities.js`
+- `scripts/recompute-priorities.js`
+
+**Specs (new)**:
+- `specs/SPEC-010-agentic-enrichment.md`
+
+**Schema additions**:
+- Signals: role_type, seniority, ai_confidence, force_source, first_seen, last_seen, scrape_count
 
 ---
 
-## Spec Status
+## Success Criteria (Phase 1d)
 
-| Spec | Status |
-|------|--------|
-| SPEC-001: Airtable Schema | Complete |
-| SPEC-002: Jobs Ingestion | Built |
-| SPEC-003: Signal Classification | Built |
-| SPEC-004: Opportunity Creator | Built |
-| SPEC-005: Opportunity Enricher | Built |
-| SPEC-009: Dashboard V1 Migration | ✅ Complete |
-| SPEC-1b: Competitor Monitoring | Complete |
-| SPEC-008: Morning Brief | Deferred |
+| Metric | Before | Target | Status |
+|--------|--------|--------|--------|
+| False positive rate | ~80% | <10% | Pending test |
+| Duplicate signals | 37-53% | <5% | Pending test |
+| Competitor opps flagged P1 | 22% | 100% | Pending test |
+| Summaries cite signals | ~15% | >90% | Pending test |
+| Opps per force | 1-5 | 1 | Pending cleanup |
 
 ---
 
 ## Blockers
 
-None.
+None — ready for deployment and testing.
 
 ---
 
-## Schema Status
-
-**4 tables**: Forces (48), Signals, Opportunities, Contacts
-See SPEC-001 for field details.
-
----
-
-*Last aligned with ANCHOR.md: 20 January 2025*
+*Last aligned with ANCHOR.md: 21 January 2025*

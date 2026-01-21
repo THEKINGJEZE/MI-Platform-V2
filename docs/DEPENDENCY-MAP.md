@@ -232,6 +232,7 @@ All documents that contain project information:
 | docs/STRATEGY.md | Platform strategy | → ROADMAP, GUARDRAILS, specs |
 | docs/STRATEGY-N8N.md | n8n monitoring | → docs/STRATEGY.md |
 | docs/STRATEGY-AGENTS.md | Agentic architecture | → docs/STRATEGY.md |
+| docs/QUALITY-IMPROVEMENT-PLAN.md | Pipeline fixes | → ROADMAP (Phase 1d), workflows |
 | .claude/hooks/*.sh | Automation | ← CLAUDE.md, DOCUMENT-HYGIENE |
 | specs/*.md | Build specs | ← ROADMAP acceptance criteria |
 | skills/*.md | Design patterns | ← skills/README.md |

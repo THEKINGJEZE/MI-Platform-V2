@@ -4,7 +4,7 @@
 
 This roadmap breaks the MI Platform build into sequential phases. Each phase has clear acceptance criteria — it's either done or it isn't.
 
-**Current Phase**: 1c — Dashboard MVP (SPEC-009 implemented, pending deploy)
+**Current Phase**: 1d — Quality Improvement (implementation complete, pending deployment)
 
 ---
 
@@ -96,6 +96,59 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 **Duration**: ~2 weeks
 
 **Note**: V1 dashboard code migration approach per Decision A9. Supersedes SPEC-007/007a/007b.
+
+---
+
+### Phase 1d: Quality Improvement
+**Goal**: Fix critical pipeline quality issues identified in audits
+
+**Acceptance Criteria**:
+- [ ] Classification false positive rate < 10% (from ~80%)
+- [ ] Duplicate signals < 5% (from 37-53%)
+- [ ] Competitor opportunities flagged P1/Hot = 100% (from 22%)
+- [ ] Summaries reference actual signal titles > 90%
+- [ ] 1 opportunity per force (no duplicates)
+- [ ] Existing bad data cleaned up
+
+**Dependencies**: Dashboard deployed (Phase 1c complete)
+
+**Plan**: `docs/QUALITY-IMPROVEMENT-PLAN.md`
+
+**Workflows fixed** ✅:
+- WF3: jobs-classifier.json (gate logic, prompt, schema fields)
+- jobs-receiver.json (upsert deduplication)
+- WF9: competitor-receiver.json (upsert deduplication)
+- WF4: opportunity-creator.json (competitor flag)
+- WF5: opportunity-enricher.json (signal fetch, P1 guardrail)
+
+**Schema additions** ✅:
+- Signals: role_type, seniority, ai_confidence, force_source, first_seen, last_seen, scrape_count
+
+**Cleanup scripts created** ✅:
+- `scripts/cleanup-signals.js`
+- `scripts/merge-opportunities.js`
+- `scripts/recompute-priorities.js`
+
+**Duration**: ~1 week
+
+**Status**: ✅ Implementation complete — pending deployment & 1-week validation
+
+---
+
+### Phase 1e: Agentic Enrichment (SPEC-010)
+**Goal**: Intelligent contact research and message drafting
+
+**Acceptance Criteria**:
+- [ ] Contact research automated (LinkedIn, force websites)
+- [ ] Message drafts follow SALES-STRATEGY structure
+- [ ] Quality gates catch policy violations
+- [ ] Monday review time ≤ 15 min for 5 opportunities
+
+**Dependencies**: Phase 1d complete (quality issues fixed)
+
+**Spec**: `specs/SPEC-010-agentic-enrichment.md` (to be created)
+
+**Duration**: ~1 week
 
 ---
 
@@ -200,11 +253,15 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 ```
 Phase 1: Core Jobs Pipeline
     │
-    ├──→ Phase 1b: Competitor Monitoring
+    ├──→ Phase 1b: Competitor Monitoring ✅
     │
-    ├──→ Phase 1c: Dashboard V1 Migration (SPEC-009)
+    ├──→ Phase 1c: Dashboard V1 Migration (SPEC-009) ✅
+    │
+    ├──→ Phase 1d: Quality Improvement 🔄 ← CURRENT
     │         │
-    │         └──→ Dashboard Enhancement: Morning Brief (SPEC-008)
+    │         └──→ Phase 1e: Agentic Enrichment (SPEC-010)
+    │                   │
+    │                   └──→ Dashboard Enhancement: Morning Brief (SPEC-008)
     │
     ├──→ Phase 2a: Email Integration
     │
@@ -365,7 +422,8 @@ A phase is complete when:
 | SPEC-005: Opportunity Enricher | 1 | ✅ Built |
 | SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-009 |
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
-| SPEC-009: Dashboard V1 Migration | 1c | ✅ Implemented (build succeeds, pending deploy) |
+| SPEC-009: Dashboard V1 Migration | 1c | ✅ Complete |
+| SPEC-010: Agentic Enrichment | 1e | ✅ Spec written (pending 1d validation) |
 | SPEC-1b: Competitor Monitoring | 1b | ✅ Complete |
 
 ---

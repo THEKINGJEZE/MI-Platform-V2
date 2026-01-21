@@ -113,13 +113,61 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract IDs from opportunity record\nconst item = $input.first().json;\nconst fields = item.fields || item;\nconst forceLinks = fields.force || [];\nconst signalLinks = fields.signals || [];\nreturn [{ json: { opportunity_id: item.id, force_id: forceLinks.length > 0 ? forceLinks[0] : null, signal_ids: signalLinks, skip_contact_lookup: item.skip_contact_lookup || false, existing_contact_id: item.existing_contact_id || null, opp_fields: fields } }];"
+        "jsCode": "// Extract IDs from opportunity record\n// Also check is_competitor_intercept flag for P1 guardrail (G-013)\nconst item = $input.first().json;\nconst fields = item.fields || item;\nconst forceLinks = fields.force || [];\nconst signalLinks = fields.signals || [];\nconst isCompetitorIntercept = fields.is_competitor_intercept === true;\nreturn [{ json: { opportunity_id: item.id, force_id: forceLinks.length > 0 ? forceLinks[0] : null, signal_ids: signalLinks, skip_contact_lookup: item.skip_contact_lookup || false, existing_contact_id: item.existing_contact_id || null, opp_fields: fields, is_competitor_intercept: isCompetitorIntercept } }];"
       },
       "id": "extract-ids",
       "name": "Code: Extract IDs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build filterByFormula to fetch all signals for this opportunity\n// Uses OR() with RECORD_ID() = 'id' for each signal\nconst item = $input.first().json;\nconst signalIds = item.signal_ids || [];\n\nif (signalIds.length === 0) {\n  return [{ json: { ...item, signal_filter: '', has_signals: false } }];\n}\n\n// Build OR clause: OR(RECORD_ID()='rec1', RECORD_ID()='rec2', ...)\nconst orClauses = signalIds.map(id => `RECORD_ID()='${id}'`).join(',');\nconst filterFormula = `OR(${orClauses})`;\n\nreturn [{ json: { ...item, signal_filter: filterFormula, has_signals: true } }];"
+      },
+      "id": "build-signal-filter",
+      "name": "Code: Build Signal Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1312, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblez9trodMzKKqXq",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "filterByFormula", "value": "={{ $json.signal_filter }}"},
+            {"name": "fields[]", "value": "title"},
+            {"name": "fields[]", "value": "type"},
+            {"name": "fields[]", "value": "source"},
+            {"name": "fields[]", "value": "detected_at"},
+            {"name": "fields[]", "value": "role_type"},
+            {"name": "fields[]", "value": "seniority"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-signals",
+      "name": "HTTP: Fetch Signal Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1424, 400],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge fetched signal details into context\nconst ctx = $('Code: Build Signal Filter').first().json;\nconst response = $input.first().json;\nconst records = response.records || [];\n\n// Build signal summary for AI context\nconst signalDetails = records.map(r => ({\n  id: r.id,\n  title: r.fields?.title || 'Unknown',\n  type: r.fields?.type || 'unknown',\n  source: r.fields?.source || 'unknown',\n  detected_at: r.fields?.detected_at || null,\n  role_type: r.fields?.role_type || null,\n  seniority: r.fields?.seniority || null\n}));\n\n// Check if any signals are competitor_job type\nconst hasCompetitorSignal = signalDetails.some(s => s.type === 'competitor_job');\n\nreturn [{ json: { \n  ...ctx, \n  signal_details: signalDetails,\n  signal_summary: signalDetails.map(s => `${s.title} (${s.role_type || s.type}, ${s.source})`).join('; '),\n  has_competitor_signal: hasCompetitorSignal || ctx.is_competitor_intercept\n} }];"
+      },
+      "id": "merge-signals",
+      "name": "Code: Merge Signal Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1536, 400]
     },
     {
       "parameters": {
@@ -132,14 +180,14 @@
       "name": "HTTP: Fetch Force Details",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1424, 400],
+      "position": [1648, 400],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Merge force data with opportunity context\nconst prevContext = $('Code: Extract IDs').first().json;\nconst forceResponse = $input.first().json;\nconst force = forceResponse.fields || forceResponse;\nreturn [{ json: { opportunity_id: prevContext.opportunity_id, force_id: prevContext.force_id, signal_ids: prevContext.signal_ids || [], skip_contact_lookup: prevContext.skip_contact_lookup || false, existing_contact_id: prevContext.existing_contact_id || null, opp_fields: prevContext.opp_fields || {}, force_name: force.name || 'Unknown Force', force_region: force.region || '', force_size: force.size || '', hubspot_company_id: force.hubspot_company_id || null } }];"
+        "jsCode": "// Merge force data with opportunity context and signal data\nconst signalContext = $('Code: Merge Signal Data').first().json;\nconst forceResponse = $input.first().json;\nconst force = forceResponse.fields || forceResponse;\nreturn [{ json: { opportunity_id: signalContext.opportunity_id, force_id: signalContext.force_id, signal_ids: signalContext.signal_ids || [], signal_details: signalContext.signal_details || [], signal_summary: signalContext.signal_summary || '', has_competitor_signal: signalContext.has_competitor_signal || false, is_competitor_intercept: signalContext.is_competitor_intercept || false, skip_contact_lookup: signalContext.skip_contact_lookup || false, existing_contact_id: signalContext.existing_contact_id || null, opp_fields: signalContext.opp_fields || {}, force_name: force.name || 'Unknown Force', force_region: force.region || '', force_size: force.size || '', hubspot_company_id: force.hubspot_company_id || null } }];"
       },
       "id": "merge-force",
       "name": "Code: Merge Force Data",
@@ -356,7 +404,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build AI context for OpenAI enrichment call\nconst item = $input.first().json;\nconst systemPrompt = 'You are an Opportunity Enrichment Agent for Peel Solutions, a UK police sector staffing company. Your task: Analyse opportunity context and generate ready-to-send outreach. ABOUT PEEL SOLUTIONS: We provide managed investigator teams to police forces. Our model: outcome-based delivery, not just agency temps. We handle recruitment, management, and quality assurance. Differentiator: We take responsibility for results, not just filling seats. YOUR APPROACH: 1. Analyse the signals to understand what is happening at this force 2. Consider the relationship history with this contact 3. Determine the best outreach angle based on context 4. Write a compelling, personalised message appropriate for the channel 5. Score the opportunity based on urgency and fit 6. Explain why now in 2-3 sentences';\nconst userPrompt = 'Enrich this opportunity for outreach. FORCE: ' + (item.force_name || 'Unknown') + ' (' + (item.force_region || '') + ', ' + (item.force_size || '') + ') CONTACT: ' + (item.contact_name || 'Unknown') + ', ' + (item.contact_role || 'Unknown role') + ' RELATIONSHIP: ' + (item.contact_relationship_status || 'unknown') + ', last interaction: ' + (item.contact_last_interaction || 'never') + ', ' + (item.contact_interaction_count || 0) + ' previous interactions CHANNEL: ' + item.outreach_channel + ' OUTREACH ANGLE: ' + item.outreach_angle + ' COMPETITOR INTERCEPT: ' + item.is_competitor_intercept + ' Return JSON only with these fields: outreach_draft (under 100 words, personalised, signed James), subject_line, priority_score (0-100), priority_tier (hot/high/medium/low), why_now (2-3 sentences), reasoning (brief scoring explanation)';\nreturn [{ json: { ...item, ai_system_prompt: systemPrompt, ai_user_prompt: userPrompt } }];"
+        "jsCode": "// Build AI context for OpenAI enrichment call\n// Include actual signal details for grounded, specific summaries\nconst item = $input.first().json;\n\n// Build signal summary with actual titles and types\nconst signalDetails = item.signal_details || [];\nconst signalList = signalDetails.map(s => \n  `- ${s.title} (${s.role_type || s.type}, ${s.source}, detected ${s.detected_at ? new Date(s.detected_at).toLocaleDateString() : 'recently'})`\n).join('\\\\n');\n\nconst systemPrompt = `You are an Opportunity Enrichment Agent for Peel Solutions, a UK police sector staffing company. Your task: Analyse opportunity context and generate ready-to-send outreach.\n\nABOUT PEEL SOLUTIONS:\nWe provide managed investigator teams to police forces. Our model: outcome-based delivery, not just agency temps. We handle recruitment, management, and quality assurance. Differentiator: We take responsibility for results, not just filling seats.\n\nCRITICAL REQUIREMENTS:\n1. Your summary MUST reference the actual signal titles provided - be specific, not generic\n2. Your message hook MUST cite the triggering signal(s) directly\n3. Talking points MUST be force-specific (use the force context provided)\n4. If this is a COMPETITOR INTERCEPT, use the collaborative competitor angle - position Peel as an additional option, never criticise the competitor\n5. Follow Hook → Bridge → Value → CTA message structure\n\nYOUR APPROACH:\n1. Analyse the signals to understand what is happening at this force\n2. Consider the relationship history with this contact\n3. Determine the best outreach angle based on context\n4. Write a compelling, personalised message appropriate for the channel\n5. Score the opportunity based on urgency and fit\n6. Explain why now in 2-3 sentences referencing specific signals`;\n\nconst userPrompt = `Enrich this opportunity for outreach.\n\nFORCE: ${item.force_name || 'Unknown'} (${item.force_region || ''}, ${item.force_size || ''})\n\nSIGNALS DETECTED:\n${signalList || 'No specific signals available'}\n\nCONTACT: ${item.contact_name || 'Unknown'}, ${item.contact_role || 'Unknown role'}\nRELATIONSHIP: ${item.contact_relationship_status || 'unknown'}, last interaction: ${item.contact_last_interaction || 'never'}, ${item.contact_interaction_count || 0} previous interactions\n\nCHANNEL: ${item.outreach_channel}\nOUTREACH ANGLE: ${item.outreach_angle}\nCOMPETITOR INTERCEPT: ${item.is_competitor_intercept || item.has_competitor_signal}\n\nReturn JSON only with these fields:\n- outreach_draft (under 100 words, MUST reference specific signal titles, personalised, signed James)\n- subject_line (reference the signal/role if appropriate)\n- priority_score (0-100, competitor intercepts should score 90+)\n- priority_tier (hot/high/medium/low)\n- why_now (2-3 sentences citing specific signals by name)\n- reasoning (brief scoring explanation)`;\n\nreturn [{ json: { ...item, ai_system_prompt: systemPrompt, ai_user_prompt: userPrompt } }];"
       },
       "id": "build-ai-context",
       "name": "Code: Build AI Context",
@@ -386,7 +434,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse OpenAI JSON response\nconst ctx = $('Code: Build AI Context').first().json;\nconst response = $input.first().json;\nlet enrichment = {};\ntry { const content = response.choices?.[0]?.message?.content || '{}'; enrichment = JSON.parse(content); }\ncatch (e) { enrichment = { outreach_draft: 'AI enrichment failed - manual review needed', subject_line: 'Peel Solutions - Capacity Support', priority_score: 50, priority_tier: 'medium', why_now: 'Unable to generate - please review manually', reasoning: 'Parse error' }; }\nlet score = parseInt(enrichment.priority_score) || 50;\nscore = Math.max(0, Math.min(100, score));\nlet tier = enrichment.priority_tier || '';\nif (!tier || !['hot', 'high', 'medium', 'low'].includes(tier)) { if (score >= 90) tier = 'hot'; else if (score >= 70) tier = 'high'; else if (score >= 50) tier = 'medium'; else tier = 'low'; }\nreturn [{ json: { opportunity_id: ctx.opportunity_id, contact_id: ctx.contact_id, contact_confidence: ctx.contact_confidence || 'guess', outreach_channel: ctx.outreach_channel, outreach_angle: ctx.outreach_angle, outreach_draft: enrichment.outreach_draft || '', subject_line: enrichment.subject_line || '', priority_score: score, priority_tier: tier, why_now: enrichment.why_now || '', reasoning: enrichment.reasoning || '' } }];"
+        "jsCode": "// Parse OpenAI JSON response\n// GUARDRAIL G-013: Competitor intercepts ALWAYS get P1/Hot priority\nconst ctx = $('Code: Build AI Context').first().json;\nconst response = $input.first().json;\nlet enrichment = {};\ntry { const content = response.choices?.[0]?.message?.content || '{}'; enrichment = JSON.parse(content); }\ncatch (e) { enrichment = { outreach_draft: 'AI enrichment failed - manual review needed', subject_line: 'Peel Solutions - Capacity Support', priority_score: 50, priority_tier: 'medium', why_now: 'Unable to generate - please review manually', reasoning: 'Parse error' }; }\nlet score = parseInt(enrichment.priority_score) || 50;\nscore = Math.max(0, Math.min(100, score));\n\n// G-013: Competitor intercepts ALWAYS P1/Hot - override AI score if needed\nconst isCompetitorIntercept = ctx.is_competitor_intercept || ctx.has_competitor_signal;\nif (isCompetitorIntercept) {\n  score = Math.max(score, 90);\n  console.log('G-013 applied: Competitor intercept forced to P1');\n}\n\nlet tier = enrichment.priority_tier || '';\nif (!tier || !['hot', 'high', 'medium', 'low'].includes(tier)) { if (score >= 90) tier = 'hot'; else if (score >= 70) tier = 'high'; else if (score >= 50) tier = 'medium'; else tier = 'low'; }\n\n// Ensure competitor intercepts get 'hot' tier even if AI said otherwise\nif (isCompetitorIntercept && tier !== 'hot') {\n  tier = 'hot';\n  console.log('G-013 applied: Tier forced to hot for competitor intercept');\n}\n\nreturn [{ json: { opportunity_id: ctx.opportunity_id, contact_id: ctx.contact_id, contact_confidence: ctx.contact_confidence || 'guess', outreach_channel: ctx.outreach_channel, outreach_angle: ctx.outreach_angle, outreach_draft: enrichment.outreach_draft || '', subject_line: enrichment.subject_line || '', priority_score: score, priority_tier: tier, why_now: enrichment.why_now || '', reasoning: enrichment.reasoning || (isCompetitorIntercept ? 'Competitor intercept - P1 priority per G-013' : ''), is_competitor_intercept: isCompetitorIntercept } }];"
       },
       "id": "parse-ai-response",
       "name": "Code: Parse AI Response",
@@ -433,7 +481,10 @@
     "Code: Split Records": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]},
     "Loop: Each Opportunity": {"main": [[], [{"node": "Code: Check Verified Contact", "type": "main", "index": 0}]]},
     "Code: Check Verified Contact": {"main": [[{"node": "Code: Extract IDs", "type": "main", "index": 0}]]},
-    "Code: Extract IDs": {"main": [[{"node": "HTTP: Fetch Force Details", "type": "main", "index": 0}]]},
+    "Code: Extract IDs": {"main": [[{"node": "Code: Build Signal Filter", "type": "main", "index": 0}]]},
+    "Code: Build Signal Filter": {"main": [[{"node": "HTTP: Fetch Signal Details", "type": "main", "index": 0}]]},
+    "HTTP: Fetch Signal Details": {"main": [[{"node": "Code: Merge Signal Data", "type": "main", "index": 0}]]},
+    "Code: Merge Signal Data": {"main": [[{"node": "HTTP: Fetch Force Details", "type": "main", "index": 0}]]},
     "HTTP: Fetch Force Details": {"main": [[{"node": "Code: Merge Force Data", "type": "main", "index": 0}]]},
     "Code: Merge Force Data": {"main": [[{"node": "IF: Skip Contact Lookup", "type": "main", "index": 0}]]},
     "IF: Skip Contact Lookup": {"main": [[{"node": "HTTP: Fetch Existing Contact", "type": "main", "index": 0}], [{"node": "HTTP: Lookup Airtable Contacts", "type": "main", "index": 0}]]},

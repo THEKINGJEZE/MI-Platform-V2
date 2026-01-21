@@ -133,7 +133,28 @@
       "position": [1340, 0],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const jobs = $('Code: Generate External IDs').all();\nconst airtableResults = $input.all();\nconst existingIds = new Set();\n\nfor (const result of airtableResults) {\n  if (result.json.external_id) {\n    existingIds.add(result.json.external_id);\n  }\n  if (result.json.raw_data) {\n    try {\n      const parsed = JSON.parse(result.json.raw_data);\n      if (parsed.external_id) {\n        existingIds.add(parsed.external_id);\n      }\n    } catch (e) {}\n  }\n}\n\nconst newJobs = jobs.filter(job => !existingIds.has(job.json.external_id));\nconst skipped = jobs.length - newJobs.length;\n\nconsole.log(`Dedupe: ${jobs.length} total, ${newJobs.length} new, ${skipped} skipped`);\n\nreturn newJobs;"
+        "jsCode": "// UPSERT LOGIC: New jobs get created, existing jobs get last_seen bumped\nconst jobs = $('Code: Generate External IDs').all();\nconst airtableResults = $input.all();\n\n// Build lookup: external_id -> { recordId, scrape_count }\nconst existingRecords = new Map();\nfor (const result of airtableResults) {\n  const extId = result.json.external_id;\n  if (extId) {\n    existingRecords.set(extId, {\n      recordId: result.json.id,\n      scrape_count: result.json.scrape_count || 1\n    });\n  }\n  // Also check raw_data for external_id (legacy records)\n  if (result.json.raw_data) {\n    try {\n      const parsed = JSON.parse(result.json.raw_data);\n      if (parsed.external_id && !existingRecords.has(parsed.external_id)) {\n        existingRecords.set(parsed.external_id, {\n          recordId: result.json.id,\n          scrape_count: result.json.scrape_count || 1\n        });\n      }\n    } catch (e) {}\n  }\n}\n\nconst now = new Date().toISOString();\nconst results = [];\n\nfor (const job of jobs) {\n  const existing = existingRecords.get(job.json.external_id);\n  if (existing) {\n    // EXISTING: Mark for update (bump last_seen, increment scrape_count)\n    results.push({\n      json: {\n        ...job.json,\n        _is_new: false,\n        _existing_record_id: existing.recordId,\n        _new_scrape_count: existing.scrape_count + 1,\n        last_seen: now\n      }\n    });\n  } else {\n    // NEW: Mark for create (set first_seen, last_seen, scrape_count = 1)\n    results.push({\n      json: {\n        ...job.json,\n        _is_new: true,\n        first_seen: now,\n        last_seen: now,\n        scrape_count: 1\n      }\n    });\n  }\n}\n\nconst newCount = results.filter(r => r.json._is_new).length;\nconst existingCount = results.filter(r => !r.json._is_new).length;\nconsole.log(`Upsert prep: ${jobs.length} total, ${newCount} new, ${existingCount} existing`);\n\nreturn results;"
+      }
+    },
+    {
+      "id": "if-new-or-existing",
+      "name": "IF: New or Existing",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1520, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "is-new",
+              "leftValue": "={{ $json._is_new }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
       }
     },
     {
@@ -141,15 +162,47 @@
       "name": "Split: Batch 10",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [1600, 0],
+      "position": [1700, -100],
       "parameters": { "batchSize": 10, "options": {} }
+    },
+    {
+      "id": "split-batches-update",
+      "name": "Split: Batch Updates",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1700, 100],
+      "parameters": { "batchSize": 10, "options": {} }
+    },
+    {
+      "id": "airtable-update-existing",
+      "name": "Airtable: Update Existing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1880, 100],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblez9trodMzKKqXq/{{ $json._existing_record_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"last_seen\": {{ JSON.stringify($json.last_seen) }},\n    \"scrape_count\": {{ $json._new_scrape_count }}\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
     },
     {
       "id": "airtable-create",
       "name": "Airtable: Create Signal",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [1560, 0],
+      "position": [1880, -100],
       "parameters": {
         "operation": "create",
         "base": { "__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id" },
@@ -165,7 +218,10 @@
             "raw_data": "={{ JSON.stringify($json) }}",
             "detected_at": "={{ $json.detected_at }}",
             "force": "={{ $json.force_record_id ? [$json.force_record_id] : [] }}",
-            "external_id": "={{ $json.external_id }}"
+            "external_id": "={{ $json.external_id }}",
+            "first_seen": "={{ $json.first_seen }}",
+            "last_seen": "={{ $json.last_seen }}",
+            "scrape_count": "={{ $json.scrape_count }}"
           }
         },
         "options": { "typecast": true }
@@ -251,7 +307,13 @@
       "main": [[{ "node": "Code: Filter New Jobs", "type": "main", "index": 0 }]]
     },
     "Code: Filter New Jobs": {
-      "main": [[{ "node": "Split: Batch 10", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "IF: New or Existing", "type": "main", "index": 0 }]]
+    },
+    "IF: New or Existing": {
+      "main": [
+        [{ "node": "Split: Batch 10", "type": "main", "index": 0 }],
+        [{ "node": "Split: Batch Updates", "type": "main", "index": 0 }]
+      ]
     },
     "Split: Batch 10": {
       "main": [
@@ -261,6 +323,15 @@
     },
     "Airtable: Create Signal": {
       "main": [[{ "node": "Split: Batch 10", "type": "main", "index": 0 }]]
+    },
+    "Split: Batch Updates": {
+      "main": [
+        [{ "node": "Set: Log Summary", "type": "main", "index": 0 }],
+        [{ "node": "Airtable: Update Existing", "type": "main", "index": 0 }]
+      ]
+    },
+    "Airtable: Update Existing": {
+      "main": [[{ "node": "Split: Batch Updates", "type": "main", "index": 0 }]]
     }
   },
   "settings": {

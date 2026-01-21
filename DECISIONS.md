@@ -83,6 +83,19 @@ Track decisions that **actively affect current work**. Not a historical record â
 - Strategy document Section 11 to be updated to match skills  
 **Skills referenced**: `action-oriented-ux`, `adhd-interface-design`, `uk-police-design-system`, `notification-system`, `b2b-visualisation`
 
+#### A10: Quality-First Pipeline Fix Before New Features
+**Date**: 21 January 2025  
+**Decision**: Fix core pipeline quality issues before implementing agentic enrichment or other new features  
+**Context**: Three ChatGPT audits (5.2, 5.2 Pro, 5.2 Research) revealed signal classification at ~20% accuracy, 37-53% duplicate signals, 78% competitor opportunities not flagged P1. Claude Code verified root causes in actual workflow code.  
+**Approach**:
+- Phase 1: Fix classification gate logic and prompts
+- Phase 1b: Implement upsert deduplication
+- Phase 2-3: Fix opportunity creation and enrichment
+- Phase 4: Clean up existing bad data
+- Phase 5: Then implement agentic enrichment (SPEC-010)  
+**Why**: Garbage-in-garbage-out. Adding sophisticated agentic workflows on top of broken classification would amplify problems, not solve them.  
+**Files**: `docs/QUALITY-IMPROVEMENT-PLAN.md`, `docs/archive/audits-2025-01-21/`
+
 #### A9: V1 Dashboard Code Migration
 **Date**: 20 January 2025  
 **Decision**: Replace V2 dashboard code with V1's proven codebase, then rewire data layer for V2 schema  
