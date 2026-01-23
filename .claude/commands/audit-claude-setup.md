@@ -60,7 +60,46 @@ Ensure the `docs/audits/` directory exists first.
 # Claude Code Setup Audit — {date}
 
 ## Executive Summary
-{2-3 sentence overview: config health, key findings, top recommendation}
+{2-3 sentences: health status first, then key findings}
+
+Example if healthy:
+> "Setup is healthy (9/10). All configurations valid, no security issues. Top recommendation: Add sandbox mode for safer workflow testing."
+
+Example if issues found:
+> "Setup has 2 critical issues requiring immediate attention. The `docs-fetcher` subagent references an invalid model name, and one hook script is missing. Fix these before adding new capabilities."
+
+## Setup Health Check
+
+### Overall Status: {✅ Healthy / ⚠️ Issues Found / ❌ Critical Problems}
+
+**Health Score**: {X}/10
+
+### Critical Issues (Must Fix Before Anything Else)
+| Issue | Location | Problem | Fix |
+|-------|----------|---------|-----|
+| {issue name} | {file:line} | {what's wrong} | {how to fix} |
+
+{If none: "✅ No critical issues found"}
+
+### Warnings (Should Address)
+| Warning | Location | Concern | Recommendation |
+|---------|----------|---------|----------------|
+| {warning name} | {file} | {potential issue} | {what to do} |
+
+{If none: "✅ No warnings"}
+
+### Validation Summary
+| Category | Passed | Failed | Warnings |
+|----------|--------|--------|----------|
+| CLAUDE.md | | | |
+| Settings | | | |
+| Hooks | | | |
+| Skills | | | |
+| Agents | | | |
+| Commands | | | |
+| Security | | | |
+| Consistency | | | |
+| **Total** | | | |
 
 ## Current Configuration
 
@@ -113,10 +152,21 @@ Ensure the `docs/audits/` directory exists first.
 
 ## Recommendations
 
-### 🔴 High Priority
-{Recommendations with significant impact, relatively easy to implement}
+### 🔴 Critical Issues (Fix These First)
+{Validation failures, broken configs, security vulnerabilities}
 
 #### 1. {title}
+- **Problem**: {what's broken}
+- **Location**: {file path}
+- **Fix**: {exact steps}
+- **Impact if not fixed**: {what will fail}
+
+{If none: "✅ No critical issues — proceed to high priority recommendations"}
+
+### 🟠 High Priority
+{Recommendations with significant impact, relatively easy to implement}
+
+#### {N}. {title}
 - **Gap**: {what's missing or suboptimal}
 - **Recommendation**: {what to do}
 - **Docs reference**: {url or section}
@@ -153,6 +203,12 @@ Recommended: {date + 1 month}
 - [ ] Report saved to `docs/audits/YYYY-MM-DD-audit.md`
 - [ ] All doc URLs attempted (failures logged)
 - [ ] All .claude/ contents cataloged
+- [ ] **Validation checks run for all config files**
+- [ ] **Failed validations include specific fix instructions with file paths**
+- [ ] **Health score calculated (0-10 based on pass/fail/warning ratio)**
+- [ ] **Critical issues appear at top of report, before other recommendations**
+- [ ] **Security checks included in every audit**
+- [ ] **Report clearly distinguishes "broken" vs "could be better"**
 - [ ] At least 3 actionable recommendations generated
 - [ ] Report readable and actionable within 5 minutes
 

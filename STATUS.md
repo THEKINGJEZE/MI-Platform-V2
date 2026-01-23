@@ -1,8 +1,33 @@
 # MI Platform — Session Status
 
-**Updated**: 21 January 2026
+**Updated**: 23 January 2026
 **Phase**: 1d — Quality Improvement
-**Status**: ✅ DEPLOYED & TESTED — Enforcement hooks added
+**Status**: ✅ DEPLOYED & TESTED — Validation layer added to /audit-claude-setup
+
+---
+
+## Session Work (23 Jan)
+
+### Enhanced /audit-claude-setup with validation layer ✅
+
+| File | Change |
+|------|--------|
+| `.claude/agents/config-auditor.md` | Added validation checks (CLAUDE.md, settings, hooks, skills, agents, commands, security, consistency) + health scoring |
+| `.claude/agents/improvement-planner.md` | Added 🔴 Critical tier for broken configs, updated prioritisation |
+| `.claude/commands/audit-claude-setup.md` | Added Setup Health Check section with overall status, critical issues, warnings, validation summary |
+
+**New capabilities:**
+- Health score (0-10) based on validation results
+- Distinguishes "broken" (critical) from "could be better" (improvements)
+- Security checks included in every audit
+- Failed validations include specific fix instructions with file paths
+
+### Updated /audit-claude-setup subagents to Opus 4.5 ✅
+
+All three subagents now use `claude-opus-4-5-20251101` for better quality analysis:
+- `docs-fetcher.md`
+- `config-auditor.md`
+- `improvement-planner.md`
 
 ---
 

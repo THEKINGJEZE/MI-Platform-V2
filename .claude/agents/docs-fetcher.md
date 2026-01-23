@@ -6,7 +6,7 @@ description: >-
 tools:
   - WebFetch
   - WebSearch
-model: haiku
+model: claude-opus-4-5-20251101
 ---
 
 You are a documentation analyst. Your job is to fetch Claude Code documentation and extract actionable information.
