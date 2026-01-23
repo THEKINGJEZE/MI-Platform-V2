@@ -34,6 +34,14 @@ These skills are automatically loaded by Claude Code when relevant to the curren
 | `action-oriented-ux` | Queue/action interface patterns | Building review flows, keyboard nav |
 | `technical-architecture` | React/n8n/Airtable stack patterns | Architecture decisions, data layer |
 | `force-matching` | UK police force pattern matching (G-005) | Force identification in workflows |
+| `airtable-operations` | Airtable API patterns for MI Platform | Airtable CRUD, batch ops, filters |
+| `n8n-code-javascript` | JavaScript in n8n Code nodes | Writing JS in n8n, $input/$json syntax |
+| `n8n-code-python` | Python in n8n Code nodes | Writing Python in n8n |
+| `n8n-expression-syntax` | n8n expression validation | {{}} syntax, $json/$node variables |
+| `n8n-mcp-tools-expert` | n8n-mcp MCP tools usage | Searching nodes, validating configs |
+| `n8n-node-configuration` | Operation-aware node configuration | Configuring nodes, property dependencies |
+| `n8n-validation-expert` | Validation error interpretation | Fixing validation errors, false positives |
+| `n8n-workflow-patterns` | Proven workflow architectural patterns | Building new workflows, webhook patterns |
 
 ### `skills/` — Reference Skills (Deferred)
 
@@ -245,7 +253,15 @@ technical-architecture (foundation)
 |-------|----------|-------------|
 | `action-oriented-ux` | `.claude/skills/` | Three-Zone Model, 2-minute loops |
 | `adhd-interface-design` | `.claude/skills/` | ADHD-optimised patterns |
+| `airtable-operations` | `.claude/skills/` | Airtable API patterns for MI Platform |
 | `force-matching` | `.claude/skills/` | UK police force pattern matching |
+| `n8n-code-javascript` | `.claude/skills/` | JavaScript in n8n Code nodes |
+| `n8n-code-python` | `.claude/skills/` | Python in n8n Code nodes |
+| `n8n-expression-syntax` | `.claude/skills/` | n8n expression validation |
+| `n8n-mcp-tools-expert` | `.claude/skills/` | n8n-mcp MCP tools usage |
+| `n8n-node-configuration` | `.claude/skills/` | Operation-aware node configuration |
+| `n8n-validation-expert` | `.claude/skills/` | Validation error interpretation |
+| `n8n-workflow-patterns` | `.claude/skills/` | Proven workflow patterns |
 | `technical-architecture` | `.claude/skills/` | Data layer patterns |
 | `uk-police-design-system` | `.claude/skills/` | Design tokens, components |
 | `uk-police-market-domain` | `.claude/skills/` | Domain knowledge |

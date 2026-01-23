@@ -3,6 +3,7 @@ name: force-matching
 description: >-
   UK police force identification via JavaScript pattern matching.
   ALWAYS use this before AI classification (see Guardrail G-005).
+user-invocable: false
 ---
 
 # Force Matching Skill
