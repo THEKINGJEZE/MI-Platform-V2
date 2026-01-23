@@ -11,17 +11,17 @@
 | Stage | Name | Status | Completed |
 |-------|------|--------|-----------|
 | 1 | Parse | ✅ | 2026-01-23 |
-| 2 | Audit | 🔄 | - |
-| 3 | Plan | ⬜ | - |
+| 2 | Audit | ✅ | 2026-01-23 |
+| 3 | Plan | 🔄 | - |
 | 4 | Build | ⬜ | - |
 | 5 | Verify | ⬜ | - |
 | 6 | Document | ⬜ | - |
 
 ## Current State
 
-**Working on**: Stage 2 - Auditing preconditions
+**Working on**: Stage 3 - Creating build plan
 **Blockers**: None
-**Next action**: Confirm audit results, proceed to PLAN stage
+**Next action**: Confirm plan, proceed to BUILD stage
 
 ## Stage Outputs
 
@@ -162,7 +162,61 @@ SPEC-011 specifies n8n AI Agent nodes with tools. Current WF5 uses HTTP→OpenAI
 **Blockers**: None identified. All schema and API dependencies satisfied.
 
 ### Stage 3: Plan
-*Pending Stage 2 completion*
+
+**Implementation Approach**: Hybrid (per audit recommendation)
+- **Contact Research**: AI Agent with tool calling (complex multi-source lookup)
+- **Outreach Drafting**: Enhanced single AI call (predictable generation)
+
+**Build Sequence** (18 tasks, ordered by dependency):
+
+#### Phase A: Preparation (Tasks 1-3)
+
+| # | Task | Description | Depends On |
+|---|------|-------------|------------|
+| 1 | Create Peel Services reference | Create `reference-data/peel-services.json` for get_peel_services tool | — |
+| 2 | Back up current WF5 | Copy `opportunity-enricher.json` to `opportunity-enricher-backup.json` | — |
+| 3 | Create workflow skeleton | New WF5 with trigger, fetch opp, fetch force nodes (reuse from current) | 2 |
+
+#### Phase B: Contact Research Agent (Tasks 4-9)
+
+| # | Task | Description | Depends On |
+|---|------|-------------|------------|
+| 4 | Build search_hubspot_contacts tool | HTTP node to HubSpot search API with company filter | 3 |
+| 5 | Build get_contact_history tool | Airtable lookup for contact + linked opportunities | 3 |
+| 6 | Build get_force_org_structure tool | Airtable lookup on Forces + linked Contacts | 3 |
+| 7 | Build evaluate_contact_fit tool | AI sub-call for fit assessment | 3 |
+| 8 | Integrate Contact Research Agent | n8n AI Agent node with tools 4-7, system prompt from prompts/contact-research-agent.md | 4,5,6,7 |
+| 9 | Add contact routing logic | Branch: contact found → continue, not found → status="needs_contact" | 8 |
+
+#### Phase C: Outreach Drafting (Tasks 10-13)
+
+| # | Task | Description | Depends On |
+|---|------|-------------|------------|
+| 10 | Build signal fetching | Fetch all linked signals with details (reuse from current WF5) | 9 |
+| 11 | Build previous outreach lookup | Search Opportunities with status=sent for this force | 9 |
+| 12 | Build enhanced AI context | Combine signals, contact, force context, Peel services | 10,11 |
+| 13 | Build Outreach Drafting AI call | Single AI call with comprehensive context, self-critique in prompt | 12 |
+
+#### Phase D: Integration & Verification (Tasks 14-18)
+
+| # | Task | Description | Depends On |
+|---|------|-------------|------------|
+| 14 | Build opportunity update | Write all enrichment fields to Airtable | 13 |
+| 15 | Add batch loop handling | Process multiple "researching" opportunities | 14 |
+| 16 | Test: problem owner selection | Verify agent selects Head of Crime over HR | 15 |
+| 17 | Test: competitor intercept | Verify no competitor names in message, P1 priority | 15 |
+| 18 | Deploy and verify | Import to n8n, activate, verify with real opportunity | 16,17 |
+
+**Checkpoint Strategy**:
+- After Task 3: Skeleton working, can fallback to backup
+- After Task 9: Contact Research Agent complete, testable
+- After Task 15: Full workflow complete, ready for testing
+- After Task 18: Production deployment
+
+**Rollback Plan**:
+- Keep `opportunity-enricher-backup.json` available
+- Both workflows deployed during testing
+- Disable new WF5 and re-enable backup if issues
 
 ### Stage 4: Build
 *Pending Stage 3 completion*

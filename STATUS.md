@@ -49,18 +49,23 @@
 ## SPEC-011 Agent Enrichment — In Progress
 
 **Tracker**: `specs/IMPL-011.md`
-**Current Stage**: 2 (Audit) — ✅ Complete, awaiting gate confirmation
+**Current Stage**: 3 (Plan) — ✅ Complete, awaiting gate confirmation
 
-### Stage 2 Audit Summary
+### Stage 3 Plan Summary
 
-- ✅ **Airtable schema**: All 12 required fields already exist
-- ✅ **HubSpot API**: Verified working (contacts.read, companies.read scopes)
-- ✅ **Agent prompts**: Both exist in prompts/ folder
-- ⚠️ **n8n implementation**: Current WF5 uses HTTP→OpenAI, needs migration to AI Agent nodes
+**Approach**: Hybrid architecture
+- Contact Research: n8n AI Agent with 4 tools
+- Outreach Drafting: Enhanced single AI call
 
-**Technical Decision**: Recommend hybrid approach — AI Agent for contact research, HTTP for drafting
+**18 tasks across 4 phases**:
+- Phase A (1-3): Preparation — backup, skeleton
+- Phase B (4-9): Contact Research Agent — 4 tools + integration
+- Phase C (10-13): Outreach Drafting — signal fetch, AI context, generation
+- Phase D (14-18): Integration & Verification — update, test, deploy
 
-**Next Action**: User confirms "y" to proceed to Stage 3 (Plan)
+**Checkpoints**: After tasks 3, 9, 15, 18
+
+**Next Action**: User confirms "y" to proceed to Stage 4 (Build)
 
 ---
 
