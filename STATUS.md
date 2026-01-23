@@ -240,8 +240,8 @@ node scripts/data-quality-audit.cjs
 
 ## Next Actions
 
-1. **Deploy dashboard** — Push email queue changes to production
-2. **Phase 2a-5: Test end-to-end email flow** — Approve draft → Outlook draft created
+1. **Phase 2a-5: Live end-to-end test** — User approves email → Make.com creates Outlook draft
+2. **Merge PR to main** — Email integration branch ready for review
 3. **Continue Phase 1d monitoring** — track daily signal quality (background)
 4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
