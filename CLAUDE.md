@@ -43,23 +43,53 @@ These agents MUST be used for specific tasks — not optional.
 
 | Agent | MUST Use When | Why |
 |-------|---------------|-----|
-| `workflow-builder` | Creating or modifying ANY n8n workflow | Enforces logging, error handling, naming standards |
+| `workflow-builder` | Creating or modifying ANY n8n workflow | Loads 6 n8n skills, enforces logging, error handling |
+| `airtable-architect` | Creating/modifying Airtable tables, fields, or queries | Loads airtable-operations skill, enforces G-011 upsert |
 | `signal-triage` | Creating/modifying classification prompts or logic | UK police domain expertise, reduces false positives |
 | `alignment-checker` | Before major architectural decisions | Catches mission drift early |
 
-**Invocation protocol:**
+**Violation = rework.** Ad-hoc changes without agent review will likely need fixing later.
+
+## Agent Invocation Protocol
+
+### Method 1: Direct Request (Recommended)
 ```
-# Before creating a workflow
-Use workflow-builder agent to design: [workflow name]
-
-# Before modifying classification
-Use signal-triage agent to review: [classification change]
-
-# Before major changes
-Use alignment-checker to verify: [proposed change]
+Use workflow-builder agent to design the email classifier workflow
+Use airtable-architect agent to add decay tracking fields to Contacts
+Use signal-triage agent to review this classification prompt
 ```
 
-**Violation = rework.** Ad-hoc workflows or classification changes without agent review will likely need fixing later.
+### Method 2: Task Tool
+Use the Task tool with `subagent_type` matching the agent name.
+
+### Method 3: Via Commands (Where Available)
+| Command | Agent(s) Used |
+|---------|---------------|
+| `/check-alignment` | alignment-checker |
+| `/doc-audit` | All 5 audit agents (parallel) |
+
+### When to Invoke
+
+| Trigger | Agent | How |
+|---------|-------|-----|
+| Creating/editing n8n workflow | `workflow-builder` | Direct request before writing JSON |
+| Creating/editing Airtable schema | `airtable-architect` | Direct request before any schema change |
+| Changing classification logic | `signal-triage` | Direct request with prompt text |
+| Major architecture decision | `alignment-checker` | `/check-alignment` or direct request |
+| Finished spec implementation | All audit agents | `/doc-audit` |
+| Exploring unfamiliar code | `Explore` agent | Use 2-3 in parallel for broad research |
+
+### Skill-Agent Chain
+
+Agents load skills automatically. The chain is:
+
+```
+workflow-builder → loads 6 n8n skills (patterns, validation, expressions, etc.)
+airtable-architect → loads airtable-operations skill
+signal-triage → loads uk-police-market-domain skill
+```
+
+Skills provide domain knowledge; agents apply it with enforcement.
 
 ## Load On-Demand (Never Memorize)
 | Topic | Reference |

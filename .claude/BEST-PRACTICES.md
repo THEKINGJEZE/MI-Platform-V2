@@ -112,6 +112,42 @@ opportunity creation. Report the file paths and key functions.
 
 The subagent explores thoroughly, then reports back concisely.
 
+### Parallel Agent Exploration
+
+**When to launch multiple agents simultaneously:**
+- Open-ended codebase exploration (different search paths)
+- Audit tasks (run all validators at once)
+- Design research (patterns, constraints, prior art)
+- Complex questions with multiple facets
+
+**When NOT to use parallel agents:**
+- Simple file lookup (use Glob/Read directly)
+- Sequential dependencies (agent B needs agent A's output)
+- Trivial tasks
+
+**Pattern: Parallel Exploration (2-3 agents)**
+```
+Launch 3 Explore agents simultaneously:
+- Agent 1: Find existing implementations of X
+- Agent 2: Check related components and dependencies
+- Agent 3: Investigate testing patterns for X
+```
+
+Each agent gets a specific search focus. They run in parallel and return findings that you synthesize.
+
+**Pattern: Parallel Audit**
+```
+/doc-audit
+```
+This command launches 5 audit agents in parallel:
+- guardrail-compliance
+- reference-integrity
+- roadmap-alignment
+- schema-alignment
+- single-source-truth
+
+**Key insight**: Parallel agents complete faster AND provide diverse perspectives. Use them for any broad research task.
+
 ### Checkpoint Before Risk
 
 Before risky operations (workflow changes, schema changes):
