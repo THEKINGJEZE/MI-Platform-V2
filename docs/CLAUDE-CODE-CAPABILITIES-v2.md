@@ -2510,19 +2510,35 @@ This enables diagnostics, navigation, and code intelligence within Claude Code.
 
 **Purpose**: Browser automation directly from Claude Code
 
-**Setup**:
-1. Install Chrome extension "Claude in Chrome"
-2. Enable in Claude Code via `/mcp`
+**Status**: ✅ **Active and tested** (January 2026) — Dashboard verified at `https://dashboard.peelplatforms.co.uk`
 
-**Tools Available**: Under `claude-in-chrome` MCP server
+**Setup**:
+1. Install Chrome extension "Claude in Chrome" from Chrome Web Store
+2. Start Claude Code with `claude --chrome` or enable via `/chrome`
+
+**Two Options Available**:
+
+| Option | Tools Prefix | Best For |
+|--------|--------------|----------|
+| **Chrome Extension** | `claude-in-chrome` | Your actual Chrome with logged-in sessions |
+| **Playwright MCP** | `mcp__plugin_playwright_playwright__*` | Headless automation, scraping |
+
+**Playwright MCP Tools** (currently active):
+- `browser_navigate`, `browser_click`, `browser_fill_form` — Navigation & interaction
+- `browser_snapshot`, `browser_take_screenshot` — Capture state
+- `browser_console_messages` — Debug JavaScript errors
+- `browser_press_key` — Test keyboard shortcuts (j/k navigation)
+- `browser_tabs` — Manage multiple tabs
 
 **Use Cases**:
-- End-to-end browser testing
-- Web scraping with full browser
-- UI verification
-- Form automation
+- Dashboard UI verification (`https://dashboard.peelplatforms.co.uk`)
+- Testing keyboard navigation (j/k keys)
+- Checking console for JavaScript errors
+- Recording demo GIFs
 
-**Documentation**: https://code.claude.com/docs/en/chrome
+**Project Documentation**: @.claude/MCP-SERVERS.md, @.claude/BEST-PRACTICES.md
+
+**Official Documentation**: https://code.claude.com/docs/en/chrome
 
 ---
 

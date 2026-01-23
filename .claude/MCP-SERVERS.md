@@ -43,14 +43,24 @@ MCP (Model Context Protocol) servers extend Claude Code with external tool acces
 
 **Project Usage**: Supplementary integrations and HubSpot engagement tracking
 
-### Playwright (`mcp__plugin_playwright_playwright__*`)
-**Purpose**: Browser automation for web scraping and UI testing
+### Playwright / Chrome Integration (`mcp__plugin_playwright_playwright__*`)
+**Purpose**: Browser automation for UI testing, verification, and web interaction
+**Status**: ✅ Active and tested (Jan 2026)
 **Key Tools**:
-- `browser_navigate`, `browser_click`, `browser_fill_form` — Navigation
-- `browser_take_screenshot`, `browser_snapshot` — Capture state
-- `browser_evaluate` — Run JavaScript in browser context
+- `browser_navigate`, `browser_click`, `browser_fill_form` — Navigation & interaction
+- `browser_take_screenshot`, `browser_snapshot` — Capture page state
+- `browser_evaluate`, `browser_run_code` — Run JavaScript in browser
+- `browser_console_messages` — Read console logs for debugging
+- `browser_tabs` — Manage multiple tabs
+- `browser_press_key` — Keyboard input for testing shortcuts
 
-**Project Usage**: Available for future dashboard testing or web scraping
+**Project Usage**:
+- Dashboard UI verification (`https://dashboard.peelplatforms.co.uk`)
+- Testing keyboard navigation (j/k keys)
+- Checking console for JavaScript errors
+- Recording demo GIFs
+
+**Setup**: Requires Claude Chrome extension. See @.claude/BEST-PRACTICES.md for setup instructions.
 
 ### Context7 (`mcp__plugin_context7_context7__*`)
 **Purpose**: Documentation retrieval for external libraries
@@ -67,6 +77,19 @@ MCP (Model Context Protocol) servers extend Claude Code with external tool acces
 - `suggest_connectors` — Get recommendations
 
 **Project Usage**: Expand integrations as needed
+
+## Chrome Extension vs Playwright MCP
+
+Two browser automation options exist — they serve different purposes:
+
+| Feature | Chrome Extension | Playwright MCP |
+|---------|-----------------|----------------|
+| Browser | Your actual Chrome | Headless Chromium |
+| Auth | Uses your logged-in sessions | No existing sessions |
+| Best for | Testing authenticated apps, real user flows | Scraping, automation |
+| Setup | Install extension, run `claude --chrome` | Auto-available |
+
+**For this project**: Use Chrome extension for dashboard testing (you're already logged in).
 
 ## Deferred Tools Access
 
