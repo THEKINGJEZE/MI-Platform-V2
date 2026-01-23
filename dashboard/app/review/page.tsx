@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   QueuePanel,
   NowCard,
@@ -14,7 +14,21 @@ import { NavRail } from "@/components/app-shell/nav-rail";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { CardSkeleton } from "@/components/feedback/card-skeleton";
+import { useToast } from "@/components/feedback/toast";
 import type { Opportunity } from "@/lib/types/opportunity";
+
+// Undo buffer duration (30 seconds)
+const UNDO_BUFFER_MS = 30000;
+
+// Pending action for undo stack
+interface PendingAction {
+  id: string;
+  action: "send" | "skip" | "dismiss";
+  opportunity: Opportunity;
+  originalIndex: number;
+  timerId: ReturnType<typeof setTimeout>;
+  toastId: string;
+}
 
 /**
  * Review Page - Three-Zone Layout
@@ -29,8 +43,15 @@ import type { Opportunity } from "@/lib/types/opportunity";
  * - E: Send email
  * - S: Skip
  * - D: Dismiss with reason
+ * - Z: Undo last action (within 30 seconds)
  */
 export default function ReviewPage() {
+  // Toast notifications
+  const { addToast, removeToast } = useToast();
+
+  // Undo stack for pending actions
+  const undoStackRef = useRef<PendingAction[]>([]);
+
   // State
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
@@ -116,38 +137,163 @@ export default function ReviewPage() {
     }
   }, [currentIndex, opportunities]);
 
-  // Actions
-  const handleSend = useCallback(async () => {
-    if (!currentId) return;
+  // Execute pending action (called after undo window expires)
+  const executePendingAction = useCallback(
+    async (pendingAction: PendingAction) => {
+      const { id, action, opportunity } = pendingAction;
+      const forceName = opportunity.force?.name || "opportunity";
 
-    try {
-      const response = await fetch(`/api/opportunities/${currentId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "sent" }),
-      });
+      try {
+        if (action === "send") {
+          const response = await fetch(`/api/opportunities/${opportunity.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "sent" }),
+          });
+          if (!response.ok) throw new Error("Failed to send");
+        }
 
-      if (!response.ok) {
-        throw new Error("Failed to update opportunity");
+        // Remove from undo stack
+        undoStackRef.current = undoStackRef.current.filter((p) => p.id !== id);
+
+        // Update toast to confirmed
+        removeToast(pendingAction.toastId);
+        addToast({
+          type: "success",
+          title: "Sent",
+          description: `Outreach to ${forceName} confirmed`,
+          duration: 3000,
+        });
+      } catch (err) {
+        console.error(`Failed to execute ${action}:`, err);
+        // Restore on failure
+        undoStackRef.current = undoStackRef.current.filter((p) => p.id !== id);
+        setOpportunities((prev) => {
+          const newList = [...prev];
+          newList.splice(pendingAction.originalIndex, 0, opportunity);
+          return newList;
+        });
+        addToast({
+          type: "error",
+          title: "Action failed",
+          description: `Could not complete action for ${forceName}. Restored to queue.`,
+        });
       }
+    },
+    [addToast, removeToast]
+  );
 
-      // Update local state
-      setOpportunities((prev) => prev.filter((o) => o.id !== currentId));
+  // Undo the last pending action
+  const handleUndo = useCallback(() => {
+    const lastPending = undoStackRef.current[undoStackRef.current.length - 1];
+    if (!lastPending) {
+      addToast({
+        type: "info",
+        title: "Nothing to undo",
+        description: "No recent actions to undo",
+        duration: 2000,
+      });
+      return;
+    }
+
+    // Cancel the timer
+    clearTimeout(lastPending.timerId);
+
+    // Remove the toast
+    removeToast(lastPending.toastId);
+
+    // Restore opportunity to queue at original position
+    setOpportunities((prev) => {
+      const newList = [...prev];
+      newList.splice(lastPending.originalIndex, 0, lastPending.opportunity);
+      return newList;
+    });
+
+    // Select the restored item
+    setCurrentId(lastPending.opportunity.id);
+
+    // Update session stats (decrement if it was a send)
+    if (lastPending.action === "send") {
       setSessionStats((prev) => ({
         ...prev,
-        processed: prev.processed + 1,
-        actionTimes: [...prev.actionTimes, Date.now() - prev.startTime],
+        processed: Math.max(0, prev.processed - 1),
+        actionTimes: prev.actionTimes.slice(0, -1),
       }));
-
-      // Move to next
-      selectNext();
-    } catch (err) {
-      console.error("Failed to send:", err);
     }
-  }, [currentId, selectNext]);
+
+    // Remove from undo stack
+    undoStackRef.current = undoStackRef.current.filter(
+      (p) => p.id !== lastPending.id
+    );
+
+    addToast({
+      type: "success",
+      title: "Undone",
+      description: `${lastPending.opportunity.force?.name || "Opportunity"} restored to queue`,
+      duration: 3000,
+    });
+  }, [addToast, removeToast]);
+
+  // Actions
+  const handleSend = useCallback(() => {
+    if (!currentId) return;
+
+    const opp = opportunities.find((o) => o.id === currentId);
+    if (!opp) return;
+
+    const forceName = opp.force?.name || "opportunity";
+    const originalIndex = currentIndex;
+    const pendingId = `pending-${Date.now()}`;
+
+    // Remove from visible queue immediately (optimistic UI)
+    setOpportunities((prev) => prev.filter((o) => o.id !== currentId));
+
+    // Update session stats
+    setSessionStats((prev) => ({
+      ...prev,
+      processed: prev.processed + 1,
+      actionTimes: [...prev.actionTimes, Date.now() - prev.startTime],
+    }));
+
+    // Show undo toast with countdown
+    const toastId = addToast({
+      type: "undo",
+      title: "Email queued",
+      description: `Outreach to ${forceName} will be sent`,
+      duration: UNDO_BUFFER_MS,
+      action: {
+        label: "Undo",
+        onClick: handleUndo,
+      },
+    });
+
+    // Set timer to execute the action after buffer expires
+    const timerId = setTimeout(() => {
+      const pending = undoStackRef.current.find((p) => p.id === pendingId);
+      if (pending) {
+        executePendingAction(pending);
+      }
+    }, UNDO_BUFFER_MS);
+
+    // Add to undo stack
+    undoStackRef.current.push({
+      id: pendingId,
+      action: "send",
+      opportunity: opp,
+      originalIndex,
+      timerId,
+      toastId,
+    });
+
+    // Move to next
+    selectNext();
+  }, [currentId, currentIndex, opportunities, selectNext, addToast, handleUndo, executePendingAction]);
 
   const handleSkip = useCallback(async () => {
     if (!currentId) return;
+
+    const opp = opportunities.find((o) => o.id === currentId);
+    const forceName = opp?.force?.name || "opportunity";
 
     try {
       const response = await fetch(`/api/opportunities/${currentId}/dismiss`, {
@@ -162,15 +308,31 @@ export default function ReviewPage() {
 
       // Update local state
       setOpportunities((prev) => prev.filter((o) => o.id !== currentId));
+
+      // Show info toast
+      addToast({
+        type: "info",
+        title: "Skipped",
+        description: `${forceName} moved to skipped`,
+      });
+
       selectNext();
     } catch (err) {
       console.error("Failed to skip:", err);
+      addToast({
+        type: "error",
+        title: "Failed to skip",
+        description: "Could not skip opportunity. Please try again.",
+      });
     }
-  }, [currentId, selectNext]);
+  }, [currentId, opportunities, selectNext, addToast]);
 
   const handleDismiss = useCallback(
     async (reason: string) => {
       if (!currentId) return;
+
+      const opp = opportunities.find((o) => o.id === currentId);
+      const forceName = opp?.force?.name || "opportunity";
 
       setIsDismissing(true);
       try {
@@ -187,14 +349,27 @@ export default function ReviewPage() {
         // Update local state
         setOpportunities((prev) => prev.filter((o) => o.id !== currentId));
         setShowDismissModal(false);
+
+        // Show info toast
+        addToast({
+          type: "info",
+          title: "Dismissed",
+          description: `${forceName}: ${reason}`,
+        });
+
         selectNext();
       } catch (err) {
         console.error("Failed to dismiss:", err);
+        addToast({
+          type: "error",
+          title: "Failed to dismiss",
+          description: "Could not dismiss opportunity. Please try again.",
+        });
       } finally {
         setIsDismissing(false);
       }
     },
-    [currentId, selectNext]
+    [currentId, opportunities, selectNext, addToast]
   );
 
   // Keyboard navigation
@@ -224,6 +399,9 @@ export default function ReviewPage() {
         case "d":
           setShowDismissModal(true);
           break;
+        case "z":
+          handleUndo();
+          break;
         case "escape":
           setShowDismissModal(false);
           break;
@@ -232,7 +410,7 @@ export default function ReviewPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectNext, selectPrevious, handleSend, handleSkip]);
+  }, [selectNext, selectPrevious, handleSend, handleSkip, handleUndo]);
 
   // Calculate average time
   const averageTime =

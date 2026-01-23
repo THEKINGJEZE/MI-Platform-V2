@@ -10,7 +10,27 @@ import {
   ChevronRight,
   LayoutList,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Opportunity, PriorityTier } from "@/lib/types/opportunity";
+
+// Check for reduced motion preference
+const prefersReducedMotion =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+
+// Animation variants for queue items
+const itemVariants = {
+  initial: prefersReducedMotion
+    ? { opacity: 1 }
+    : { opacity: 0, x: -20 },
+  animate: prefersReducedMotion
+    ? { opacity: 1 }
+    : { opacity: 1, x: 0 },
+  exit: prefersReducedMotion
+    ? { opacity: 0 }
+    : { opacity: 0, x: -100, transition: { duration: 0.2 } },
+};
 
 // V2 simplified queue modes
 export type QueueMode = "all" | "hot";
@@ -115,15 +135,29 @@ export function QueuePanel({
           </div>
         ) : (
           <div className="divide-y divide-surface-1">
-            {opportunities.map((opportunity, index) => (
-              <QueueItem
-                key={opportunity.id}
-                opportunity={opportunity}
-                isActive={opportunity.id === currentOpportunityId}
-                index={index}
-                onClick={() => onSelectOpportunity(opportunity.id)}
-              />
-            ))}
+            <AnimatePresence mode="popLayout" initial={false}>
+              {opportunities.map((opportunity, index) => (
+                <motion.div
+                  key={opportunity.id}
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  layout={!prefersReducedMotion}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.2,
+                    layout: { duration: 0.2 },
+                  }}
+                >
+                  <QueueItem
+                    opportunity={opportunity}
+                    isActive={opportunity.id === currentOpportunityId}
+                    index={index}
+                    onClick={() => onSelectOpportunity(opportunity.id)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>

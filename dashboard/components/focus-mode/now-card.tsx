@@ -14,11 +14,43 @@ import {
   Lightbulb,
   User,
   TrendingUp,
+  Target,
+  Calendar,
+  ExternalLink,
 } from "lucide-react";
 
 interface NowCardProps {
   opportunity: Opportunity;
   className?: string;
+}
+
+/**
+ * Format relative time for "When" display
+ */
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 14) return "Last week";
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+/**
+ * Get the primary signal source
+ */
+function getPrimarySource(opportunity: Opportunity): string {
+  if (opportunity.signals && opportunity.signals.length > 0) {
+    const sources = [...new Set(opportunity.signals.map((s) => s.source))];
+    if (sources.length === 1) return sources[0];
+    return `${sources[0]} + ${sources.length - 1} more`;
+  }
+  return "Unknown";
 }
 
 /**
@@ -77,9 +109,22 @@ export function NowCard({ opportunity, className }: NowCardProps) {
           )}
         </div>
 
-        {/* Why Now Context */}
-        {opportunity.whyNow && (
-          <div className="space-y-4 p-4 rounded-lg bg-surface-1/30 border border-surface-1">
+        {/* Context Capsule: What / Why / Next / When / Source */}
+        <div className="space-y-4 p-4 rounded-lg bg-surface-1/30 border border-surface-1">
+          {/* WHAT - The task at hand */}
+          <ContextRow
+            label="What"
+            icon={<Target className="h-4 w-4 text-action" />}
+          >
+            <p className="text-primary text-sm font-medium">
+              {opportunity.signalCount === 1
+                ? `1 signal detected for ${opportunity.force?.name || "this force"}`
+                : `${opportunity.signalCount} signals detected for ${opportunity.force?.name || "this force"}`}
+            </p>
+          </ContextRow>
+
+          {/* WHY - Context/importance */}
+          {opportunity.whyNow && (
             <ContextRow
               label="Why"
               icon={<Lightbulb className="h-4 w-4 text-warning" />}
@@ -88,23 +133,52 @@ export function NowCard({ opportunity, className }: NowCardProps) {
                 {opportunity.whyNow}
               </p>
             </ContextRow>
+          )}
 
-            {/* Recommended action */}
-            <ContextRow
-              label="Next"
-              icon={<ChevronRight className="h-4 w-4 text-action" />}
-            >
-              <div className="flex items-center gap-2">
-                <ChannelIcon channel={opportunity.outreachChannel} />
-                <span className="text-primary">
-                  {opportunity.outreachChannel === "linkedin"
-                    ? "Send LinkedIn message"
-                    : "Send email"}
-                </span>
-              </div>
-            </ContextRow>
-          </div>
-        )}
+          {/* NEXT - Recommended action */}
+          <ContextRow
+            label="Next"
+            icon={<ChevronRight className="h-4 w-4 text-success" />}
+          >
+            <div className="flex items-center gap-2">
+              <ChannelIcon channel={opportunity.outreachChannel} />
+              <span className="text-primary">
+                {opportunity.outreachChannel === "linkedin"
+                  ? "Send LinkedIn message"
+                  : "Send email"}
+              </span>
+            </div>
+          </ContextRow>
+
+          {/* WHEN - Time constraint/signal age */}
+          <ContextRow
+            label="When"
+            icon={<Calendar className="h-4 w-4 text-info" />}
+          >
+            <span className="text-primary text-sm font-mono">
+              {opportunity.signals && opportunity.signals.length > 0
+                ? formatRelativeTime(
+                    opportunity.signals[0].createdAt || opportunity.createdAt
+                  )
+                : formatRelativeTime(opportunity.createdAt)}
+            </span>
+            {opportunity.priorityTier === "hot" && (
+              <span className="ml-2 text-xs text-danger font-medium">
+                — Act today
+              </span>
+            )}
+          </ContextRow>
+
+          {/* SOURCE - Where it came from */}
+          <ContextRow
+            label="Source"
+            icon={<ExternalLink className="h-4 w-4 text-muted" />}
+          >
+            <span className="text-secondary text-sm">
+              {getPrimarySource(opportunity)}
+            </span>
+          </ContextRow>
+        </div>
 
         {/* Signals List */}
         {opportunity.signals && opportunity.signals.length > 0 && (
