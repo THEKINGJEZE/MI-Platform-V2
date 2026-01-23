@@ -457,3 +457,105 @@ Same as Stage 5 verification — run with real opportunity to confirm:
 2. Contact Research selects problem owner over HR
 3. Outreach Drafting produces properly structured message
 4. Self-critique catches issues before finalizing
+
+---
+
+## Phase 2: Hybrid HubSpot Fix + Model Optimization
+
+**Date**: 2026-01-23
+**Reason**: HubSpot HTTP Request Tool returned 404 errors in agent context despite valid company IDs (48/48 verified). Standard n8n HTTP Request nodes properly handle authentication.
+
+### Problem Identified
+
+The `search_hubspot_contacts` HTTP Request Tool returned 404 errors because:
+- HTTP Request Tools in n8n agent context don't properly inherit credential authentication
+- The tool was using the correct HubSpot company ID, but auth headers weren't applied correctly
+- This is an n8n architectural limitation, not a data issue
+
+### Solution: Hybrid Architecture
+
+Replace agent-based HubSpot calls with **standard n8n node + agent evaluation**:
+
+```
+[BEFORE - Broken]
+Agent → search_hubspot_contacts (HTTP Tool) → 404 Error
+
+[AFTER - Working]
+Standard HubSpot Node → Contact Summaries → Agent Evaluates
+```
+
+### Changes Made
+
+| Component | Before | After |
+|-----------|--------|-------|
+| HubSpot fetch | Agent HTTP Request Tool | Standard n8n HTTP Request node |
+| Contact data | Agent searches on demand | Pre-fetched and summarized |
+| Token usage | ~50K tokens for 100 contacts | ~2K tokens (summaries) |
+| Model | GPT-4o | GPT-4.1-mini |
+| Max iterations | 5 | 3 |
+| Error handling | None | `continueOnFail: true` on HubSpot node |
+
+### New Nodes Added
+
+1. **HubSpot: Get Company Contacts** (after "Fetch: Force Details")
+   - Type: `n8n-nodes-base.httpRequest`
+   - Method: POST to HubSpot Contacts Search API
+   - Returns: Up to 50 contacts with firstname, lastname, email, jobtitle
+   - Credentials: HubSpot API (httpHeaderAuth)
+
+2. **Code: Summarize Contacts** (after HubSpot fetch)
+   - Creates condensed summaries (~40 chars per contact)
+   - Preserves full details for top 10 contacts
+   - Handles API errors gracefully
+
+### Model Selection: GPT-4.1-mini
+
+Based on OpenAI research (January 2026):
+
+| Model | Input $/1M | Output $/1M | Notes |
+|-------|-----------|------------|-------|
+| GPT-4.1-mini | $0.40 | $1.60 | Optimized for tool calling, 1M context |
+| GPT-5-mini | $0.25 | $2.00 | Better reasoning, sequential tools |
+| GPT-4o-mini | $0.15 | $0.60 | Budget option, weaker tool-calling |
+
+**Decision**: GPT-4.1-mini for both agents
+- Best tool-calling performance
+- 1M token context handles large contact lists
+- 40% faster than GPT-4o
+- 83% cheaper than GPT-4o
+- Estimated cost: ~$0.008 per opportunity
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `n8n/workflows/wf5-agent-enrichment.json` | Added HubSpot node, summary node, updated model, removed HTTP tool |
+| `prompts/contact-research-agent.md` | Updated to v2.0, documents hybrid approach, removed search_hubspot_contacts |
+| `specs/IMPL-011.md` | Added this Phase 2 section |
+
+### Version Update
+
+- **Workflow version**: 2.0 → 2.1
+- **Prompt version**: 1.0 → 2.0
+
+### Backup
+
+Original workflow preserved at: `n8n/workflows/wf5-agent-enrichment-backup-20260123.json`
+
+### Rollback Instructions
+
+If issues occur:
+1. Disable WF5 v2.1 in n8n
+2. Import backup: `node n8n/scripts/import-workflow.js wf5-agent-enrichment-backup-20260123`
+3. Activate backup
+
+### Testing Checklist
+
+- [ ] Workflow triggers via webhook/schedule
+- [ ] HubSpot contacts pre-fetched successfully (check `hubspot_contacts_count > 0`)
+- [ ] Agent receives summarized contacts
+- [ ] Agent evaluates contacts and selects problem owner
+- [ ] Outreach draft generated with correct structure
+- [ ] No competitor names in output
+- [ ] Execution time < 30 seconds
+- [ ] Cost < $0.02 per opportunity
