@@ -82,7 +82,7 @@
 |-----------|--------|-------|
 | Dashboard | ✅ Live | https://dashboard.peelplatforms.co.uk/review |
 | WF3 (Classification) | ✅ Updated | v2.1 prompt deployed |
-| WF5 (Agent Enrichment) | ✅ Tested | ID: c8TY69N65fGzQNai (live test passed) |
+| WF5 (Agent Enrichment) | ✅ v2.2 Live | Deployed & tested (hybrid HubSpot + GPT-4.1-mini) |
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
@@ -95,29 +95,34 @@
 
 ### Implementation Summary
 
-**Approach**: Proper n8n AI Agents with tool-calling
-- Contact Research Agent: 4 tools (HubSpot search, contact history, org structure, fit evaluation)
+**Approach**: Proper n8n AI Agents with tool-calling + hybrid HubSpot integration
+- Contact Research Agent: 3 tools (contact history, org structure, fit evaluation)
 - Outreach Drafting Agent: 5 tools (signals, previous outreach, force context, Peel services, self-critique)
-- Both agents use `@n8n/n8n-nodes-langchain.agent` with GPT-4o
+- Both agents use `@n8n/n8n-nodes-langchain.agent` with **GPT-4.1-mini**
+- HubSpot contacts pre-fetched via standard n8n node (not agent tool)
 
 **Key Files**:
-- `n8n/workflows/wf5-agent-enrichment.json` — 31-node workflow with AI Agents
-- `n8n/workflows/opportunity-enricher-backup.json` — Backup of original
+- `n8n/workflows/wf5-agent-enrichment.json` — 33-node workflow with AI Agents (v2.2)
+- `n8n/workflows/wf5-agent-enrichment-backup-20260123.json` — Pre-v2.1 backup
+- `n8n/workflows/opportunity-enricher-backup.json` — Original backup
 - `reference-data/peel-services.json` — Service reference data
+- `prompts/contact-research-agent.md` — Updated to v2.0 (hybrid approach)
 
 **n8n Workflow**: `MI: Agent Enrichment (SPEC-011)` (ID: `c8TY69N65fGzQNai`)
-**Status**: ✅ Live tested and activated
+**Status**: ✅ v2.2 deployed and tested
 
 ### Live Test Results (23 Jan 2026)
 
 | Check | Result |
 |-------|--------|
 | Workflow triggers via webhook | ✅ |
+| HubSpot contacts pre-fetched | ✅ |
+| Contact summary reduces tokens | ✅ |
 | Agent uses tools with correct parameters | ✅ |
 | Agent returns structured JSON | ✅ |
 | Airtable update succeeds | ✅ |
-| Graceful error handling | ✅ |
-| Execution time | ~9 seconds |
+| Tool schema errors fixed (v2.2) | ✅ |
+| Execution time | ~7 seconds |
 
 ### HubSpot Data Validation (23 Jan 2026) ✅
 
@@ -128,19 +133,28 @@
 | Sample contacts (North Wales) | ✅ 30 contacts found |
 | Data foundation | ✅ Solid |
 
-### HubSpot Integration Issue Identified
+### HubSpot Integration Issue — FIXED ✅
 
-**Problem**: HTTP Request Tool for HubSpot returns 404, despite valid company IDs and contacts existing.
+**Problem**: HTTP Request Tool for HubSpot returned 404, despite valid company IDs and contacts existing.
 
-**Root cause**: Used HTTP Request Tool instead of standard HubSpot n8n node. No HubSpot Tool node exists for AI Agents.
+**Root cause**: HTTP Request Tools in n8n agent context don't properly inherit credential authentication.
 
-**Decision**: Refactor to **hybrid approach**:
-1. Use standard HubSpot node to batch-fetch contact IDs + basic info (reliable auth)
-2. Code node creates summary (name, title - keeps token count low)
-3. Agent evaluates summary, picks top 2-3 candidates
-4. Agent tool fetches full details only for selected candidates
+**Solution implemented (v2.1)**:
+1. ✅ Standard n8n HTTP Request node pre-fetches contacts (reliable auth)
+2. ✅ Code node summarizes contacts (~2K tokens vs 50K)
+3. ✅ Agent evaluates pre-fetched summary
+4. ✅ Model switched to GPT-4.1-mini (optimized for tool calling, 83% cheaper than GPT-4o)
 
-This handles scalability (100+ contacts per force) while using reliable standard nodes.
+### v2.2 Changes Summary
+
+| Change | Before | After |
+|--------|--------|-------|
+| HubSpot fetch | Agent HTTP Tool (broken) | Standard n8n node |
+| Contact data | Agent searches on demand | Pre-fetched & summarized |
+| Model | GPT-4o | GPT-4.1-mini |
+| Max iterations | 5 | 3 |
+| Tool schemas | Missing (caused errors) | All HTTP tools have inputSchema |
+| Estimated cost/opp | ~$0.04 | ~$0.008 |
 
 ---
 
@@ -358,8 +372,10 @@ Daily (5 min):
 
 ## Next Actions
 
-1. **Merge PR to main** — Email integration branch ready at `stupefied-williams`
-2. **Continue Phase 1d monitoring** — track daily signal quality (background)
+## Next Actions
+
+1. **Continue Phase 1d monitoring** — track daily signal quality (background)
+2. **Monitor WF5 enrichment quality** — verify HubSpot hybrid approach working
 3. **Daily email quality check** — 5 min spot-check per protocol above
 4. **Build Phase 2a-7**: Relationship Decay Scanner workflow
 5. **Build Phase 2a-8**: Contact Auto-Creator workflow

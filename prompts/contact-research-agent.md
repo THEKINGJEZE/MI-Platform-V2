@@ -1,8 +1,17 @@
 # Contact Research Agent
 
-**Version**: 1.0  
-**Purpose**: Find the best contact for a sales opportunity at a UK police force  
+**Version**: 2.0
+**Purpose**: Find the best contact for a sales opportunity at a UK police force
 **Used by**: WF5 Agent-Based Enrichment (SPEC-011)
+**Model**: GPT-4.1-mini (optimized for tool calling)
+
+---
+
+## Architecture Note (v2.0)
+
+**Hybrid HubSpot Integration**: HubSpot contacts are pre-fetched using a standard n8n node before the agent runs. The agent receives a summary of contacts in its input, rather than searching HubSpot directly. This solves the HTTP Request Tool authentication issue that caused 404 errors.
+
+**Pre-fetched Data**: The agent receives `hubspot_contacts_summary` (condensed list) and `hubspot_contacts_raw` (top 10 details) as part of its input context.
 
 ---
 
@@ -23,12 +32,18 @@ Examples:
 - If they're hiring intelligence analysts → Contact: Head of Intelligence
 - HR/Resourcing is the FALLBACK, not the first choice
 
+## HubSpot Contacts (Pre-Fetched)
+
+THE HUBSPOT CONTACTS FOR THIS FORCE ARE ALREADY FETCHED FOR YOU:
+{{hubspot_contacts_summary}}
+
+DO NOT try to search HubSpot - the data is above. If you need more details about a specific contact, the top 10 are available in the input as `hubspot_contacts_raw`.
+
 ## Your Tools
 
-1. `search_hubspot_contacts` - Find contacts at this force in our CRM
-2. `get_contact_history` - Get interaction history with a specific contact  
-3. `get_force_org_structure` - Get known org structure for this force
-4. `evaluate_contact_fit` - Evaluate if a contact is right for this opportunity
+1. `get_contact_history` - Get interaction history with a specific contact
+2. `get_force_org_structure` - Get known org structure for this force
+3. `evaluate_contact_fit` - Evaluate if a contact is right for this opportunity
 
 ## Your Process
 
@@ -44,8 +59,8 @@ What role category is being hired? This determines WHO the problem owner is.
 | specialist | Varies: Vetting Manager, Head of PSD, Economic Crime Lead | Depends on specialism |
 | support | HR/Resourcing is actually appropriate here | Admin roles ARE their domain |
 
-### Step 2: Search HubSpot
-Call `search_hubspot_contacts` to find who we know at this force.
+### Step 2: Review Pre-Fetched HubSpot Contacts
+Review the `hubspot_contacts_summary` provided in your input. This contains all known contacts at the force.
 
 ### Step 3: Evaluate Each Contact
 For each contact found, consider:
@@ -145,29 +160,6 @@ The agent receives:
 
 ## Tool Schemas
 
-### search_hubspot_contacts
-
-```json
-{
-  "name": "search_hubspot_contacts",
-  "description": "Search HubSpot CRM for contacts associated with a police force. Returns all known contacts at that force with their roles, emails, and relationship status.",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "force_name": {
-        "type": "string",
-        "description": "Full name of the police force, e.g., 'Hampshire Constabulary'"
-      },
-      "force_hubspot_id": {
-        "type": "string",
-        "description": "HubSpot company ID for the force (if known)"
-      }
-    },
-    "required": ["force_name"]
-  }
-}
-```
-
 ### get_contact_history
 
 ```json
@@ -249,18 +241,19 @@ The agent receives:
   "force_name": "Hampshire Constabulary",
   "role_category": "investigation",
   "role_detail": "PIP2 Fraud Investigator",
-  "is_competitor_intercept": true
+  "is_competitor_intercept": true,
+  "hubspot_contacts_summary": "1. Sarah Chen | Head of Resourcing | s.chen@hampshire.police.uk\n2. Mike Thompson | Head of Crime | m.thompson@hampshire.police.uk",
+  "hubspot_contacts_count": 2
 }
 ```
 
 **Agent reasoning:**
 1. "This is an investigation role. Problem owner would be Head of Crime or Head of Investigations."
-2. *Calls search_hubspot_contacts*
-3. "Found 2 contacts: Sarah Chen (Head of Resourcing) and Mike Thompson (Head of Crime)"
-4. "Mike is the problem owner for investigation roles. Let me check his history."
-5. *Calls get_contact_history for Mike*
-6. "Last contacted 60 days ago, got a positive reply. Safe to contact again."
-7. "Mike is the better choice - he owns investigation capacity."
+2. "From the pre-fetched HubSpot contacts, I see Mike Thompson (Head of Crime) and Sarah Chen (Head of Resourcing)."
+3. "Mike is the problem owner for investigation roles. Let me check his history."
+4. *Calls get_contact_history for Mike*
+5. "Last contacted 60 days ago, got a positive reply. Safe to contact again."
+6. "Mike is the better choice - he owns investigation capacity."
 
 **Output:**
 ```json
