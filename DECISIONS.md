@@ -191,7 +191,25 @@ Track decisions that **actively affect current work**. Not a historical record �
 
 ### Tier 3 — Implementation (Until Built)
 
-*None yet — add as building starts*
+#### I1: HubSpot as Primary Data Source for Relationship Tracking
+**Date**: 23 January 2026
+**Decision**: Use HubSpot (via MCP) as the primary source for contact engagement and relationship decay, not Airtable
+**Context**: Phase 2a relationship decay needs engagement data. HubSpot already has:
+- `notes_last_contacted`, `hs_last_sales_activity_timestamp` — engagement timestamps
+- `hs_predictivecontactscore_v2` — Breeze AI scoring
+- `hs_sales_email_last_replied`, `hs_email_last_open_date` — email engagement
+- Deal associations and pipeline stages
+**Why**: HubSpot is already the CRM with rich engagement data. Duplicating to Airtable would create sync complexity and data staleness.
+**Pattern**: n8n workflows query HubSpot MCP for decay calculations → surface alerts in dashboard
+**Affects**: WF4 (Decay Scanner), Dashboard relationship alerts section
+
+#### I2: Email Classifier Uses LLM Chain (Not AI Agent)
+**Date**: 23 January 2026
+**Decision**: Email classification uses LLM Chain (direct API call) not AI Agent (tool-calling)
+**Context**: SPEC-012 specified LLM Chain for speed. Email classifier workflow (email-classifier.json) implements this correctly.
+**Why**: AI Agents add latency for tool discovery. Classification is a simple input→output task, not multi-step reasoning.
+**Implementation**: `n8n/workflows/email-classifier.json` uses OpenAI node with gpt-4o-mini, no agent nodes
+**Status**: ✅ Implemented and tested (21 emails classified successfully)
 
 ---
 

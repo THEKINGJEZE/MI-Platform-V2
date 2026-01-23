@@ -5,10 +5,10 @@
 That file defines WHY. It never changes. If anything conflicts with ANCHOR.md, ANCHOR.md wins.
 
 ## Current Focus
-**Phase**: 1d — Quality Improvement
-**Goal**: Fix pipeline quality issues, enable enforcement hooks
+**Phase**: 1d + 2a (Parallel)
+**Goal**: Jobs monitoring (1d) + Email integration (2a)
 **Blocker**: None
-**Completed**: Phase 1 (95%), Phase 1b (100%), Phase 1c (100%)
+**Completed**: Phase 1 (95%), Phase 1b (100%), Phase 1c (100%), SPEC-010 (100%), SPEC-011 (100%)
 
 See @STATUS.md for session-level tracking.
 
