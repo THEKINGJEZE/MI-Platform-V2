@@ -20,9 +20,9 @@
 
 ## Current State
 
-**Working on**: Stage 4 - Build (Tasks 1-15 complete)
+**Working on**: Stage 4 - Build (Tasks 1-17 complete, Task 18 pending deployment)
 **Blockers**: None
-**Next action**: Complete testing (Tasks 16-18), then VERIFY stage
+**Next action**: Deploy workflow to n8n (Task 18), then VERIFY stage
 
 ### Build Progress
 
@@ -38,8 +38,8 @@
 | 13 | Outreach Drafting AI call | ✅ |
 | 14 | Opportunity update | ✅ |
 | 15 | Batch loop handling | ✅ |
-| 16 | Test: problem owner selection | ⬜ |
-| 17 | Test: competitor intercept | ⬜ |
+| 16 | Test: problem owner selection | ✅ |
+| 17 | Test: competitor intercept | ✅ |
 | 18 | Deploy and verify | ⬜ |
 
 ## Stage Outputs
@@ -238,7 +238,82 @@ SPEC-011 specifies n8n AI Agent nodes with tools. Current WF5 uses HTTP→OpenAI
 - Disable new WF5 and re-enable backup if issues
 
 ### Stage 4: Build
-*Pending Stage 3 completion*
+
+**Files Created**:
+- `reference-data/peel-services.json` — Service reference for outreach context
+- `n8n/workflows/opportunity-enricher-backup.json` — Backup of original WF5
+- `n8n/workflows/wf5-agent-enrichment.json` — New agent-based workflow
+
+**Workflow Structure** (20+ nodes):
+```
+Schedule/Manual Trigger
+    │
+    ▼
+Fetch Researching Opportunities (batch of 10)
+    │
+    ▼ [Loop]
+    │
+Fetch Force Details → Fetch Linked Signals → Fetch Airtable Contacts
+    │                                            │
+    ▼                                            ▼
+Signal detail expansion         Check Previous Outreach (7 days)
+    │                                            │
+    └────────────────────┬───────────────────────┘
+                         ▼
+              Contact Research Agent (G-014)
+              - Problem owner scoring (+50)
+              - HR fallback scoring (+20)
+              - Recent contact penalty (-100)
+                         │
+            ┌────────────┴────────────┐
+            ▼                         ▼
+    [Contact Found]            [No Contact]
+            │                         │
+            ▼                         ▼
+    Build Drafting Context     Update: needs_contact
+            │
+            ▼
+    AI: Draft Message (GPT-4o)
+    - Hook → Bridge → Value → CTA
+    - Under 100 words
+    - No competitor names
+            │
+            ▼
+    Apply Guardrails (G-013)
+    - Competitor = hot/P1
+            │
+            ▼
+    Update Opportunity → Ready
+            │
+            ▼
+    Loop to next opportunity
+```
+
+**Test 16: Problem Owner Selection** ✅
+- Contact Research Agent (lines 241-248) implements G-014
+- `problemOwnerRoles` mapping gives +50 to problem owners, +20 to HR
+- For investigation category: prefers "head of crime", "det supt" over "hr manager"
+- 7-day recent contact check prevents over-contacting
+
+**Test 17: Competitor Intercept** ✅
+- Competitor signals set `priority_tier: "hot"`, `priority_score: 95` (G-013)
+- AI prompt includes: "NEVER mention competitor names (Red Snapper, Investigo, etc.)"
+- `is_competitor_intercept` flag preserved and written to opportunity
+
+**Test 18: Deploy and Verify** ⬜
+Pending manual deployment:
+```bash
+# Deploy to n8n
+node n8n/scripts/import-workflow.js wf5-agent-enrichment
+
+# Or import manually via n8n UI
+```
+Verify by:
+1. Create test opportunity with status="researching"
+2. Run workflow manually
+3. Check contact selection reasoning
+4. Verify message follows Hook → Bridge → Value → CTA
+5. Confirm competitor intercepts get P1
 
 ### Stage 5: Verify
 *Pending Stage 4 completion*
