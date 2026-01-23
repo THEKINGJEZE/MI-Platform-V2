@@ -9,6 +9,7 @@ import {
   Settings,
   Focus,
   LayoutDashboard,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ interface NavItem {
 
 const primaryNavItems: NavItem[] = [
   { icon: Focus, label: "Review", href: "/review" },
+  { icon: Mail, label: "Email", href: "/email" },
   { icon: Shield, label: "Forces", href: "/forces" },
   { icon: LayoutDashboard, label: "Board", href: "/board" },
 ];

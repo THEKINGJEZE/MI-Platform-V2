@@ -1,8 +1,7 @@
 /**
  * Airtable Integration for V2
  *
- * Simplified adapter for 4-table schema.
- * No dual-track scoring, contracts, or email features.
+ * Adapter for 6-table schema (Phase 2a adds Email_Raw and Emails).
  */
 
 import type {
@@ -15,17 +14,27 @@ import type {
   ContactConfidence,
   OutreachChannel,
 } from '@/lib/types/opportunity';
+import type {
+  Email,
+  EmailClassification,
+  EmailActionType,
+  EmailStatus,
+  EmailQueueStats,
+} from '@/lib/types/email';
 
 // Environment variables
 const API_KEY = process.env.AIRTABLE_API_KEY;
 const BASE_ID = process.env.AIRTABLE_BASE_ID;
 
-// Table IDs from .env.local
+// Table IDs from .env.local (or hardcoded for email tables)
 const TABLES = {
   forces: process.env.AIRTABLE_TABLE_FORCES!,
   contacts: process.env.AIRTABLE_TABLE_CONTACTS!,
   signals: process.env.AIRTABLE_TABLE_SIGNALS!,
   opportunities: process.env.AIRTABLE_TABLE_OPPORTUNITIES!,
+  // Phase 2a email tables
+  emailRaw: process.env.AIRTABLE_TABLE_EMAIL_RAW || 'tblYYyNm7yGbX3Ehj',
+  emails: process.env.AIRTABLE_TABLE_EMAILS || 'tblaeAuzLbmzW8ktJ',
 };
 
 // =============================================================================
@@ -440,4 +449,260 @@ export async function skipOpportunity(
 export async function fetchForces(): Promise<Force[]> {
   const forces = await getForces();
   return Array.from(forces.values());
+}
+
+// =============================================================================
+// EMAIL FUNCTIONS (Phase 2a)
+// =============================================================================
+
+interface AirtableEmailRawFields {
+  email_id?: string;
+  conversation_id?: string;
+  subject?: string;
+  from_email?: string;
+  from_name?: string;
+  body_preview?: string;
+  received_at?: string;
+  folder?: string;
+  has_attachments?: boolean;
+  synced_at?: string;
+  processed?: boolean;
+}
+
+interface AirtableEmailFields {
+  email_id?: string;
+  classification?: string;
+  priority?: number;
+  action_type?: string;
+  status?: string;
+  draft_response?: string;
+  key_request?: string;
+  ai_confidence?: number;
+  ai_reasoning?: string;
+  waiting_since?: string;
+  follow_up_draft?: string;
+  skip_count?: number;
+  actioned_at?: string;
+  force?: string[];
+  contact?: string[];
+  hubspot_contact_id?: string;
+  has_open_deal?: boolean;
+  // Joined from Email_Raw
+  subject?: string;
+  from_email?: string;
+  from_name?: string;
+  body_preview?: string;
+  received_at?: string;
+  folder?: string;
+  has_attachments?: boolean;
+  conversation_id?: string;
+}
+
+function mapEmailClassification(classification?: string): EmailClassification {
+  const mapping: Record<string, EmailClassification> = {
+    'urgent': 'Urgent',
+    'today': 'Today',
+    'week': 'Week',
+    'fyi': 'FYI',
+    'archive': 'Archive',
+  };
+  return mapping[classification?.toLowerCase() || ''] || 'FYI';
+}
+
+function mapEmailActionType(actionType?: string): EmailActionType {
+  const mapping: Record<string, EmailActionType> = {
+    'reply': 'Reply',
+    'forward': 'Forward',
+    'fyi': 'FYI',
+    'archive': 'Archive',
+  };
+  return mapping[actionType?.toLowerCase() || ''] || 'FYI';
+}
+
+function mapEmailStatus(status?: string): EmailStatus {
+  const mapping: Record<string, EmailStatus> = {
+    'new': 'new',
+    'draft_ready': 'draft_ready',
+    'approved': 'approved',
+    'sent': 'sent',
+    'waiting_for_reply': 'waiting_for_reply',
+    'done': 'done',
+    'skipped': 'skipped',
+  };
+  return mapping[status?.toLowerCase() || ''] || 'new';
+}
+
+/**
+ * Fetch emails for the email queue
+ */
+export async function fetchEmails(options?: {
+  classification?: EmailClassification;
+  status?: EmailStatus;
+  limit?: number;
+}): Promise<Email[]> {
+  const filters: string[] = [];
+
+  // Default: show actionable emails (not done/skipped)
+  if (options?.status) {
+    filters.push(`{status} = "${options.status}"`);
+  } else {
+    filters.push(`NOT(OR({status} = "done", {status} = "skipped"))`);
+  }
+
+  if (options?.classification) {
+    filters.push(`{classification} = "${options.classification}"`);
+  }
+
+  const filterFormula =
+    filters.length > 1 ? `AND(${filters.join(', ')})` : filters[0] || '';
+
+  const records = await airtableFetch<AirtableEmailFields>(
+    TABLES.emails,
+    {
+      filterByFormula: filterFormula,
+      maxRecords: options?.limit || 50,
+      sort: [
+        { field: 'priority', direction: 'asc' },
+        { field: 'received_at', direction: 'desc' },
+      ],
+    }
+  );
+
+  // Get forces for lookup
+  const forces = await getForces();
+
+  // Fetch linked contacts
+  const contactIds = new Set<string>();
+  records.forEach((r) => {
+    r.fields.contact?.forEach((id) => contactIds.add(id));
+  });
+
+  const contactsMap = new Map<string, { id: string; name: string }>();
+  if (contactIds.size > 0) {
+    const contactRecords = await airtableFetch<AirtableContactFields>(
+      TABLES.contacts,
+      {
+        filterByFormula: `OR(${Array.from(contactIds)
+          .map((id) => `RECORD_ID()='${id}'`)
+          .join(',')})`,
+      }
+    );
+    contactRecords.forEach((c) => {
+      contactsMap.set(c.id, {
+        id: c.id,
+        name: c.fields.name || 'Unknown',
+      });
+    });
+  }
+
+  // Transform records
+  const emails = records.map((record): Email => {
+    const fields = record.fields;
+    const forceId = fields.force?.[0];
+    const force = forceId ? forces.get(forceId) : undefined;
+    const contactId = fields.contact?.[0];
+    const contact = contactId ? contactsMap.get(contactId) : undefined;
+
+    return {
+      id: record.id,
+      emailId: fields.email_id || '',
+      subject: fields.subject || '(No Subject)',
+      fromEmail: fields.from_email || '',
+      fromName: fields.from_name || 'Unknown Sender',
+      bodyPreview: fields.body_preview || '',
+      receivedAt: fields.received_at || record.createdTime,
+      folder: fields.folder,
+      hasAttachments: fields.has_attachments || false,
+      conversationId: fields.conversation_id,
+      classification: mapEmailClassification(fields.classification),
+      priority: fields.priority || 5,
+      actionType: mapEmailActionType(fields.action_type),
+      status: mapEmailStatus(fields.status),
+      keyRequest: fields.key_request,
+      draftResponse: fields.draft_response,
+      aiConfidence: fields.ai_confidence || 0,
+      aiReasoning: fields.ai_reasoning,
+      force: force ? { id: force.id, name: force.name } : undefined,
+      contact: contact,
+      hubspotContactId: fields.hubspot_contact_id,
+      hasOpenDeal: fields.has_open_deal || false,
+      waitingSince: fields.waiting_since,
+      followUpDraft: fields.follow_up_draft,
+      skipCount: fields.skip_count || 0,
+      actionedAt: fields.actioned_at,
+    };
+  });
+
+  // Sort by priority (1 = highest)
+  return emails.sort((a, b) => a.priority - b.priority);
+}
+
+/**
+ * Fetch email queue stats
+ */
+export async function fetchEmailStats(): Promise<EmailQueueStats> {
+  const emails = await fetchEmails({ limit: 100 });
+
+  return {
+    total: emails.length,
+    urgent: emails.filter((e) => e.classification === 'Urgent').length,
+    today: emails.filter((e) => e.classification === 'Today').length,
+    week: emails.filter((e) => e.classification === 'Week').length,
+    fyi: emails.filter((e) => e.classification === 'FYI').length,
+  };
+}
+
+/**
+ * Update email status
+ */
+export async function updateEmailStatus(
+  id: string,
+  status: EmailStatus,
+  additionalFields?: Record<string, unknown>
+): Promise<void> {
+  const fields: Record<string, unknown> = {
+    status,
+    ...additionalFields,
+  };
+
+  if (status === 'done' || status === 'sent') {
+    fields.actioned_at = new Date().toISOString();
+  }
+
+  await airtableUpdate(TABLES.emails, id, fields);
+}
+
+/**
+ * Skip email (increment skip count, optionally mark as skipped)
+ */
+export async function skipEmail(id: string, permanent = false): Promise<void> {
+  // First, fetch current skip count
+  const emails = await fetchEmails({ limit: 100 });
+  const email = emails.find((e) => e.id === id);
+  const currentSkipCount = email?.skipCount || 0;
+  const newSkipCount = currentSkipCount + 1;
+
+  // After 3 skips, auto-archive
+  const shouldAutoArchive = newSkipCount >= 3;
+
+  const fields: Record<string, unknown> = {
+    skip_count: newSkipCount,
+  };
+
+  if (permanent || shouldAutoArchive) {
+    fields.status = 'skipped';
+    fields.actioned_at = new Date().toISOString();
+  }
+
+  await airtableUpdate(TABLES.emails, id, fields);
+}
+
+/**
+ * Approve email draft (triggers Make.com to create Outlook draft)
+ */
+export async function approveEmailDraft(id: string): Promise<void> {
+  await airtableUpdate(TABLES.emails, id, {
+    status: 'approved',
+    actioned_at: new Date().toISOString(),
+  });
 }

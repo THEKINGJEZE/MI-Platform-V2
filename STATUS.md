@@ -1,8 +1,8 @@
 # MI Platform — Session Status
 
 **Updated**: 23 January 2026
-**Phase**: 1d — Quality Improvement
-**Status**: ✅ SPEC-010 Implementation Complete — Monitoring Period
+**Phase**: 1d + 2a (Parallel)
+**Status**: Jobs monitoring + Email integration starting
 
 ---
 
@@ -104,11 +104,146 @@ This handles scalability (100+ contacts per force) while using reliable standard
 
 ---
 
+## Phase 1d Monitoring Period
+
+**Started**: 23 January 2026
+**Target End**: 30 January 2026 (1 week)
+**Purpose**: Validate quality fixes before moving to Phase 2a
+
+### Daily Checks (Automated via Bright Data)
+
+| Day | Date | New Signals | Classification Quality | Notes |
+|-----|------|-------------|----------------------|-------|
+| 1 | 23 Jan | TBD | TBD | Monitoring started |
+| 2 | 24 Jan | | | |
+| 3 | 25 Jan | | | |
+| 4 | 26 Jan | | | |
+| 5 | 27 Jan | | | |
+| 6 | 28 Jan | | | |
+| 7 | 29 Jan | | | |
+
+### Success Criteria for Phase Transition
+
+- [ ] 7 days of data collected
+- [ ] Classification accuracy >70% (false positive rate <30%)
+- [ ] No duplicate signals created
+- [ ] Competitor signals correctly flagged P1
+- [ ] Data quality audit score >70/100
+
+### Audit Command (Run at end of monitoring)
+
+```bash
+node scripts/data-quality-audit.cjs
+```
+
+---
+
+## Phase 2a Email Integration — ACTIVE 🔄
+
+**Spec**: `specs/SPEC-012-email-integration.md`
+**Rationale**: Email workflow is independent of jobs pipeline — can run in parallel
+
+### Make.com OAuth ✅ VERIFIED
+
+| Connection | ID | Status |
+|------------|-----|--------|
+| My Microsoft connection | 6957096 | ✅ Active |
+| V3 - Peel Solutions | 13210516 | ✅ Active |
+| V4 | 13211124 | ✅ Active |
+
+### Phase 2a-1: Make.com Bridge Setup ✅ COMPLETE
+
+- [x] Verify Microsoft OAuth credentials
+- [x] Create Airtable tables: Email_Raw (`tblYYyNm7yGbX3Ehj`), Emails (`tblaeAuzLbmzW8ktJ`)
+- [x] Add relationship decay fields to Contacts table
+- [x] Reactivate Email Sync scenario (ID: 8287614) — renamed to "V2"
+- [x] Test Outlook → Make.com → Airtable flow — **10 emails synced successfully**
+- [x] Reactivate Draft Creator scenario (ID: 8260100) — ✅ Activated
+- [x] Reactivate Email Mover scenario (ID: 8260117) — ✅ Activated
+
+### Phase 2a-2: Email Classifier Workflow ✅ COMPLETE
+
+**n8n Workflow**: `MI: Email Classifier (V2)` (ID: `claAxaAZpqMbqUfr`)
+**Status**: ✅ Live and operational
+
+- [x] Create email classifier workflow (19 nodes)
+- [x] Implement LLM Chain with gpt-4o-mini (NOT Agent per SPEC-012)
+- [x] Add HubSpot contact enrichment (priority boost for open deals)
+- [x] Add force pattern matching (G-005 compliance)
+- [x] Test classification on synced emails — **21 emails classified successfully**
+
+**Classification Results (23 Jan 2026)**:
+
+| Classification | Count | Examples |
+|----------------|-------|----------|
+| 🔴 Urgent | 1 | Payment failed |
+| 🟡 Today | 1 | Property inquiry |
+| 🟢 Week | 3 | Follow-ups, meeting requests |
+| ⚪ FYI | 16 | Newsletters, promotions, Google Alerts |
+
+**Workflow Architecture**:
+- Schedule: Every 5 minutes
+- Fetches unprocessed emails from Email_Raw
+- Force pattern matching before AI (G-005)
+- HubSpot contact lookup for priority boost
+- GPT-4o-mini classification with structured output
+- Upserts to Emails table, marks Email_Raw as processed
+
+### Phase 2a-3: Make.com Action Scenarios ✅ COMPLETE
+
+**Activated scenarios** (23 Jan 2026):
+
+| Scenario | ID | Webhook URL | Status |
+|----------|-----|-------------|--------|
+| Agent Tool – Draft Reply | 8260100 | `https://hook.eu2.make.com/5vldcow7gpmx847e48l7mm12t6jlnr74` | ✅ Active |
+| Agent Tool – Move Email | 8260117 | `https://hook.eu2.make.com/9h0gbl5rekjux8yvza6reiysdr3wk3on` | ✅ Active |
+
+### Phase 2a-4: Dashboard Email Queue ✅ COMPLETE
+
+**New dashboard route**: `/email`
+
+**Files created**:
+- `dashboard/app/email/page.tsx` — Three-zone email review interface
+- `dashboard/components/email-mode/` — Email-specific components
+  - `email-queue-panel.tsx` — Queue with Urgent/Today/Week/All filters
+  - `email-now-card.tsx` — Current email context display
+  - `email-action-panel.tsx` — Draft preview + Approve/Skip/Archive actions
+- `dashboard/app/api/emails/route.ts` — Email list API
+- `dashboard/app/api/emails/[id]/route.ts` — Email action API
+- `dashboard/lib/types/email.ts` — TypeScript types
+- `dashboard/lib/airtable.ts` — Added email fetching functions
+
+**Features**:
+- J/K keyboard navigation
+- E (Approve), S (Skip), D (Archive) shortcuts
+- Z to undo (30-second window)
+- Make.com webhook integration for Outlook draft creation
+- ADHD-first design with Focus Mode filters
+
+### Schema (Option D — 2 tables)
+
+**Email_Raw** (Make.com syncs here):
+- email_id, conversation_id, subject, from_email, from_name
+- body_preview, received_at, folder, has_attachments
+- synced_at, processed
+
+**Emails** (n8n classifies here):
+- email_id, classification, priority, action_type, status
+- draft_response, key_request, ai_confidence, ai_reasoning
+- waiting_since, follow_up_draft, skip_count, actioned_at
+- force, contact, opportunity, hubspot_contact_id, has_open_deal
+
+**Contacts additions**:
+- relationship_status, last_contact_date, decay_alert_sent, next_touchpoint_suggestion
+
+---
+
 ## Next Actions
 
-1. **Refactor WF5 HubSpot integration** — implement hybrid approach (standard node + agent)
-2. **Monitor for 1 week** — verify ongoing classification quality
-3. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
+1. **Deploy dashboard** — Push email queue changes to production
+2. **Phase 2a-5: Test end-to-end email flow** — Approve draft → Outlook draft created
+3. **Continue Phase 1d monitoring** — track daily signal quality (background)
+4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 

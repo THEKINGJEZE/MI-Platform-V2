@@ -97,17 +97,43 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Files**: `docs/QUALITY-IMPROVEMENT-PLAN.md`, `docs/archive/audits-2025-01-21/`
 
 #### A9: V1 Dashboard Code Migration
-**Date**: 20 January 2025  
-**Decision**: Replace V2 dashboard code with V1's proven codebase, then rewire data layer for V2 schema  
-**Context**: Claude Code struggled to match V1's UI quality when building from scratch. V1 has 30+ polished components, rich type system, clean separation between UI and data layers.  
+**Date**: 20 January 2025
+**Decision**: Replace V2 dashboard code with V1's proven codebase, then rewire data layer for V2 schema
+**Context**: Claude Code struggled to match V1's UI quality when building from scratch. V1 has 30+ polished components, rich type system, clean separation between UI and data layers.
 **Approach**:
 - Copy V1's `dashboard-react/` into V2's `dashboard/`
 - Strip features V2 doesn't support yet (contracts, follow-ups, dual-track scoring, email actions)
 - Rewrite `lib/airtable.ts` to fetch from V2's 4-table schema
 - Simplify type definitions where V2 is simpler
-**Why**: Reverse-engineering working code to fit a new backend is more tractable than recreating quality from scratch. UI components don't care where data comes from — they render typed objects.  
+**Why**: Reverse-engineering working code to fit a new backend is more tractable than recreating quality from scratch. UI components don't care where data comes from — they render typed objects.
 **Supersedes**: P1c-01 (dashboard MVP approach) — now migrating proven code instead of building minimal version
 **Spec**: SPEC-009 — Created, ready for implementation
+
+#### A11: V1 Vision Reprioritisation
+**Date**: 23 January 2026
+**Decision**: Reprioritise two features from V1's UNIFIED-COMMAND-VISION.md into earlier phases
+**Context**: V1 created a comprehensive "Unified Command Vision" document describing ADHD-focused enhancements beyond market intelligence. V2 had deferred most of these to Phase 6+. After review, two features should come earlier.
+**Changes**:
+1. **Relationship Decay Alerts** → Move to Phase 2a (alongside email integration)
+   - Daily scan for contacts going cold (14-45 days)
+   - Dashboard section "Relationships Need Attention"
+   - AI-suggested touchpoints (not salesy)
+   - Why: High ADHD value — prevents "forgetting to follow up"
+2. **Social Engagement System** → Add as new Phase 3
+   - Daily 15-min engagement queue (5 posts: 3 comment, 2 like)
+   - Priority accounts (police contacts + industry influencers)
+   - AI-suggested comments
+   - Streak tracking
+   - Why: Addresses ADHD inconsistency with social presence
+**Not reprioritised** (confirmed OK to defer):
+- Pre-call briefs → Phase 7
+- Weekly planning ritual → Phase 7
+- Deal health monitoring → Phase 7+
+**Files affected**:
+- `ROADMAP.md` — Updated phase structure, added Phase 3 and Phase 7
+- `specs/SPEC-013-social-engagement.md` — Created
+- `docs/UNIFIED-COMMAND-VISION.md` — Reference document (in main repo)
+**Reference**: Analysis in `/Users/jamesjeram/.claude/plans/luminous-swimming-pizza.md`
 
 ---
 

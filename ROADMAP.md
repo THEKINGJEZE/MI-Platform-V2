@@ -152,8 +152,8 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 ---
 
-### Phase 2a: Email Integration
-**Goal**: Manage inbox — classify incoming emails, draft responses
+### Phase 2a: Email Integration + Relationship Decay Alerts
+**Goal**: Manage inbox — classify incoming emails, draft responses. Alert when relationships go cold.
 
 **Acceptance Criteria**:
 - [ ] Email ingestion from Outlook working
@@ -161,14 +161,24 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 - [ ] Draft responses generated for emails needing reply
 - [ ] Email queue in dashboard
 - [ ] Can send response from dashboard
+- [ ] Relationship decay tracking active (daily scan)
+- [ ] Dashboard shows "Relationships Need Attention" section
+- [ ] AI-suggested touchpoints for cold contacts
 
-**Dependencies**: Phase 1c complete
+**Dependencies**: Phase 1e complete
 
-**Spec**: `specs/phase-2a-email.md` (to be created)
+**Spec**: `specs/SPEC-012-email-integration.md` (to be created)
 
 **Skills used**: `hubspot-integration`
 
+**Schema additions**:
+- `relationship_status` (Single Select: Active/Warming/Cold/At-Risk) on Contacts
+- `last_contact_date` (Date) on Contacts (if not already present)
+- `decay_alert_sent` (DateTime) on Contacts
+
 **Duration**: ~3 weeks
+
+**Note**: Relationship decay alerts added per Decision A11 (V1 vision reprioritisation).
 
 ---
 
@@ -193,7 +203,41 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 ---
 
-### Phase 3: Contract Awards Intel
+### Phase 3: Social Engagement System
+**Goal**: Daily 15-minute social engagement routine with AI-curated content
+
+**Acceptance Criteria**:
+- [ ] Priority accounts list maintained (police contacts + industry influencers)
+- [ ] n8n workflow fetches recent posts from priority accounts (LinkedIn + Twitter)
+- [ ] AI scoring selects top 5 posts worth engaging with
+- [ ] AI-suggested comments in James's voice
+- [ ] Dashboard shows daily engagement queue (3 to comment, 2 to like)
+- [ ] "Engagement Session" mode guides 15-min routine
+- [ ] Streak tracking and consistency metrics
+- [ ] 80% engagement consistency target
+
+**Dependencies**: Phase 2a complete
+
+**Spec**: `specs/SPEC-013-social-engagement.md`
+
+**Skills used**: `adhd-interface-design` (habit formation, streak tracking)
+
+**Schema additions**:
+- New table: `Social_Engagement` (post_id, platform, author, author_tier, post_url, post_preview, posted_at, engagement_type, suggested_comment, status, engaged_at, force, contact)
+- New table: `Priority_Accounts` (name, platform, profile_url, tier, category, force, contact, notes, last_engaged)
+
+**Technical considerations**:
+- LinkedIn: RSS feeds or scraping (API is restrictive)
+- Twitter/X: API access
+- No auto-posting (TOS risk) — system curates, you click
+
+**Duration**: ~3 weeks
+
+**Note**: Added per Decision A11 (V1 vision reprioritisation). Based on V1's UNIFIED-COMMAND-VISION.md.
+
+---
+
+### Phase 4: Contract Awards Intel
 **Goal**: Track who wins contracts, build competitor intelligence
 
 **Acceptance Criteria**:
@@ -205,13 +249,13 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 2b complete
 
-**Spec**: `specs/phase-3-awards.md` (to be created)
+**Spec**: `specs/phase-4-awards.md` (to be created)
 
 **Duration**: ~2 weeks
 
 ---
 
-### Phase 4: Regulatory Signals
+### Phase 5: Regulatory Signals
 **Goal**: Monitor HMICFRS reports and Reg 28s for forces under pressure
 
 **Acceptance Criteria**:
@@ -223,7 +267,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1 complete
 
-**Spec**: `specs/phase-4-regulatory.md` (to be created)
+**Spec**: `specs/phase-5-regulatory.md` (to be created)
 
 **Skills used**: `uk-police-market-domain`, `intelligence-source-grading`
 
@@ -231,7 +275,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 ---
 
-### Phase 5: News Monitoring
+### Phase 6: News Monitoring
 **Goal**: Catch breaking news about forces (backlogs, staffing issues, etc.)
 
 **Acceptance Criteria**:
@@ -242,7 +286,29 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1 complete
 
-**Spec**: `specs/phase-5-news.md` (to be created)
+**Spec**: `specs/phase-6-news.md` (to be created)
+
+**Duration**: ~2 weeks
+
+---
+
+### Phase 7: Advanced Features
+**Goal**: Pre-call briefs, weekly planning ritual, deal health monitoring
+
+**Acceptance Criteria**:
+- [ ] On-demand pre-call brief generation
+- [ ] Monday planning session interface
+- [ ] Friday review/celebration interface
+- [ ] Deal health status tracking (green/yellow/red)
+- [ ] At-risk deal alerts
+
+**Dependencies**: Phase 3 complete (social engagement working)
+
+**Spec**: `specs/phase-7-advanced.md` (to be created)
+
+**Duration**: ~4 weeks
+
+**Note**: Deferred features from V1 UNIFIED-COMMAND-VISION.md. Revisit after Phase 3 validation.
 
 **Duration**: ~2 weeks
 
@@ -259,17 +325,21 @@ Phase 1: Core Jobs Pipeline
     │
     ├──→ Phase 1d: Quality Improvement 🔄 ← CURRENT
     │         │
-    │         └──→ Phase 1e: Agentic Enrichment (SPEC-010)
+    │         └──→ Phase 1e: Agentic Enrichment (SPEC-010/011)
     │                   │
     │                   └──→ Dashboard Enhancement: Morning Brief (SPEC-008)
     │
-    ├──→ Phase 2a: Email Integration
+    ├──→ Phase 2a: Email + Relationship Decay Alerts (SPEC-012)
     │
-    ├──→ Phase 2b: Tenders ──→ Phase 3: Awards
+    ├──→ Phase 2b: Tenders ──→ Phase 4: Contract Awards
     │
-    ├──→ Phase 4: Regulatory
+    ├──→ Phase 3: Social Engagement (SPEC-013) ← NEW
     │
-    └──→ Phase 5: News
+    ├──→ Phase 5: Regulatory
+    │
+    ├──→ Phase 6: News
+    │
+    └──→ Phase 7: Advanced Features (pre-call briefs, weekly planning, deal health)
 ```
 
 ---
@@ -334,7 +404,45 @@ The Airtable schema grows incrementally to support features:
 
 **Optional**: Sessions table for tracking completion
 
-### Future: Monitoring (Phase 6+)
+### Phase 2a: Email + Relationship Decay
+
+**Add to Contacts**:
+- `relationship_status` (Single Select: Active/Warming/Cold/At-Risk)
+- `last_contact_date` (Date) — if not already present
+- `decay_alert_sent` (DateTime)
+
+**New table: Emails**:
+- See SPEC-012 for full schema
+
+### Phase 3: Social Engagement
+
+**New table: Social_Engagement**:
+- `post_id` (Text) — Platform-specific post ID
+- `platform` (Single Select: LinkedIn/Twitter)
+- `author` (Text)
+- `author_tier` (Single Select: High/Medium/Low)
+- `post_url` (URL)
+- `post_preview` (Long Text)
+- `posted_at` (DateTime)
+- `engagement_type` (Single Select: Comment/Like)
+- `suggested_comment` (Long Text)
+- `status` (Single Select: Pending/Done/Skipped)
+- `engaged_at` (DateTime)
+- `force` (Link to Forces)
+- `contact` (Link to Contacts)
+
+**New table: Priority_Accounts**:
+- `name` (Text)
+- `platform` (Single Select: LinkedIn/Twitter/Both)
+- `profile_url` (URL)
+- `tier` (Single Select: High/Medium/Low)
+- `category` (Single Select: Police Contact/Industry Influencer/Competitor/Other)
+- `force` (Link to Forces)
+- `contact` (Link to Contacts)
+- `notes` (Long Text)
+- `last_engaged` (Date)
+
+### Future: Monitoring (Phase 7+)
 
 **New tables**:
 - `System_Logs` — Workflow execution logs
@@ -441,6 +549,9 @@ A phase is complete when:
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
 | SPEC-009: Dashboard V1 Migration | 1c | ✅ Complete |
 | SPEC-010: Agentic Enrichment | 1e | ✅ Spec written (pending 1d validation) |
+| SPEC-011: Agent Enrichment | 1e | ✅ Complete |
+| SPEC-012: Email + Relationship Decay | 2a | ✅ Spec Written |
+| SPEC-013: Social Engagement | 3 | 📋 Planned |
 | SPEC-1b: Competitor Monitoring | 1b | ✅ Complete |
 
 ---

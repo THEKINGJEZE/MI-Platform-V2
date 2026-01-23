@@ -1,0 +1,379 @@
+{
+  "name": "MI: Email Classifier (V2)",
+  "id": "wf-email-classifier-v2",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 5}]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 500],
+      "parameters": {}
+    },
+    {
+      "id": "set-start-time",
+      "name": "Set: Start Time",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "start-time", "name": "start_time", "value": "={{ Date.now() }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-emails",
+      "name": "Airtable: Fetch Unprocessed Emails",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [540, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblYYyNm7yGbX3Ehj", "mode": "id"},
+        "filterByFormula": "={processed}=FALSE()",
+        "sort": {"property": [{"field": "received_at", "direction": "asc"}]},
+        "limit": 10,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "if-has-emails",
+      "name": "IF: Has Emails",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [760, 400],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "has-items", "leftValue": "={{ $input.all().length }}", "rightValue": 0, "operator": {"type": "number", "operation": "gt"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-forces",
+      "name": "Airtable: Fetch Forces",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [980, 300],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblbAjBEdpv42Smpw", "mode": "id"},
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "merge-emails-forces",
+      "name": "Merge: Emails + Forces",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [1200, 400],
+      "parameters": {
+        "mode": "append",
+        "mergeByFields": {"values": []},
+        "options": {},
+        "combinationMode": "multiplex"
+      }
+    },
+    {
+      "id": "code-force-pattern-match",
+      "name": "Code: Force Pattern Match",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 400],
+      "parameters": {
+        "jsCode": "// G-005: Fuzzy JS Matching Before AI\n// Check email sender domain and name for force patterns\n\nconst FORCE_PATTERNS = {\n  'metropolitan police': 'Metropolitan Police Service',\n  'met police': 'Metropolitan Police Service',\n  'greater manchester police': 'Greater Manchester Police',\n  'west midlands police': 'West Midlands Police',\n  'west yorkshire police': 'West Yorkshire Police',\n  'city of london police': 'City of London Police',\n  'kent police': 'Kent Police',\n  'essex police': 'Essex Police',\n  'surrey police': 'Surrey Police',\n  'sussex police': 'Sussex Police',\n  'thames valley police': 'Thames Valley Police',\n  'hampshire constabulary': 'Hampshire Constabulary',\n  'hertfordshire constabulary': 'Hertfordshire Constabulary',\n  'bedfordshire police': 'Bedfordshire Police',\n  'avon and somerset': 'Avon and Somerset Police',\n  'devon and cornwall': 'Devon & Cornwall Police',\n  'dorset police': 'Dorset Police',\n  'gloucestershire constabulary': 'Gloucestershire Constabulary',\n  'wiltshire police': 'Wiltshire Police',\n  'merseyside police': 'Merseyside Police',\n  'lancashire constabulary': 'Lancashire Constabulary',\n  'cheshire constabulary': 'Cheshire Constabulary',\n  'cumbria constabulary': 'Cumbria Constabulary',\n  'south yorkshire police': 'South Yorkshire Police',\n  'north yorkshire police': 'North Yorkshire Police',\n  'humberside police': 'Humberside Police',\n  'northumbria police': 'Northumbria Police',\n  'cleveland police': 'Cleveland Police',\n  'durham constabulary': 'Durham Constabulary',\n  'nottinghamshire police': 'Nottinghamshire Police',\n  'leicestershire police': 'Leicestershire Police',\n  'lincolnshire police': 'Lincolnshire Police',\n  'northamptonshire police': 'Northamptonshire Police',\n  'derbyshire constabulary': 'Derbyshire Constabulary',\n  'warwickshire police': 'Warwickshire Police',\n  'west mercia police': 'West Mercia Police',\n  'staffordshire police': 'Staffordshire Police',\n  'norfolk constabulary': 'Norfolk Constabulary',\n  'suffolk constabulary': 'Suffolk Constabulary',\n  'cambridgeshire constabulary': 'Cambridgeshire Constabulary',\n  'dyfed-powys police': 'Dyfed-Powys Police',\n  'gwent police': 'Gwent Police',\n  'north wales police': 'North Wales Police',\n  'south wales police': 'South Wales Police',\n  'police scotland': 'Police Scotland',\n  'british transport police': 'British Transport Police',\n  'counter terrorism policing': 'Counter Terrorism Policing',\n  'national crime agency': 'National Crime Agency',\n  'ministry of defence police': 'Ministry of Defence Police',\n  'civil nuclear constabulary': 'Civil Nuclear Constabulary'\n};\n\n// Domain patterns for police email addresses\nconst DOMAIN_PATTERNS = {\n  'met.police.uk': 'Metropolitan Police Service',\n  'gmp.police.uk': 'Greater Manchester Police',\n  'westmidlands.police.uk': 'West Midlands Police',\n  'westyorkshire.police.uk': 'West Yorkshire Police',\n  'cityoflondon.police.uk': 'City of London Police',\n  'kent.police.uk': 'Kent Police',\n  'essex.police.uk': 'Essex Police',\n  'surrey.police.uk': 'Surrey Police',\n  'sussex.police.uk': 'Sussex Police',\n  'thamesvalley.police.uk': 'Thames Valley Police',\n  'hampshire.police.uk': 'Hampshire Constabulary',\n  'herts.police.uk': 'Hertfordshire Constabulary',\n  'bedfordshire.police.uk': 'Bedfordshire Police',\n  'avonandsomerset.police.uk': 'Avon and Somerset Police',\n  'devonandcornwall.police.uk': 'Devon & Cornwall Police',\n  'dorset.police.uk': 'Dorset Police',\n  'gloucestershire.police.uk': 'Gloucestershire Constabulary',\n  'wiltshire.police.uk': 'Wiltshire Police',\n  'merseyside.police.uk': 'Merseyside Police',\n  'lancashire.police.uk': 'Lancashire Constabulary',\n  'cheshire.police.uk': 'Cheshire Constabulary',\n  'cumbria.police.uk': 'Cumbria Constabulary',\n  'southyorkshire.police.uk': 'South Yorkshire Police',\n  'northyorkshire.police.uk': 'North Yorkshire Police',\n  'humberside.police.uk': 'Humberside Police',\n  'northumbria.police.uk': 'Northumbria Police',\n  'cleveland.police.uk': 'Cleveland Police',\n  'durham.police.uk': 'Durham Constabulary',\n  'nottinghamshire.police.uk': 'Nottinghamshire Police',\n  'leicestershire.police.uk': 'Leicestershire Police',\n  'lincs.police.uk': 'Lincolnshire Police',\n  'northants.police.uk': 'Northamptonshire Police',\n  'derbyshire.police.uk': 'Derbyshire Constabulary',\n  'warwickshire.police.uk': 'Warwickshire Police',\n  'westmercia.police.uk': 'West Mercia Police',\n  'staffordshire.police.uk': 'Staffordshire Police',\n  'norfolk.police.uk': 'Norfolk Constabulary',\n  'suffolk.police.uk': 'Suffolk Constabulary',\n  'cambs.police.uk': 'Cambridgeshire Constabulary',\n  'dyfed-powys.police.uk': 'Dyfed-Powys Police',\n  'gwent.police.uk': 'Gwent Police',\n  'northwales.police.uk': 'North Wales Police',\n  'southwales.police.uk': 'South Wales Police',\n  'scotland.police.uk': 'Police Scotland',\n  'btp.police.uk': 'British Transport Police'\n};\n\nfunction lookupForce(text) {\n  if (!text) return null;\n  const textLower = text.toLowerCase();\n  for (const [pattern, forceName] of Object.entries(FORCE_PATTERNS)) {\n    if (textLower.includes(pattern)) {\n      return forceName;\n    }\n  }\n  return null;\n}\n\nfunction lookupForceByDomain(email) {\n  if (!email) return null;\n  const emailLower = email.toLowerCase();\n  for (const [domain, forceName] of Object.entries(DOMAIN_PATTERNS)) {\n    if (emailLower.includes(domain)) {\n      return forceName;\n    }\n  }\n  return null;\n}\n\n// Build force name to record ID lookup from forces data\nconst forces = [];\nconst seenForceIds = new Set();\nfor (const item of $input.all()) {\n  const forceName = item.json.name || item.json.Name;\n  if (forceName && item.json.id && !seenForceIds.has(item.json.id)) {\n    // Distinguish forces from emails by checking for email-specific fields\n    if (!item.json.email_id && !item.json.from_email) {\n      forces.push({ name: forceName, recordId: item.json.id });\n      seenForceIds.add(item.json.id);\n    }\n  }\n}\n\nconst forceLookup = {};\nfor (const force of forces) {\n  forceLookup[force.name] = force.recordId;\n}\n\n// Get unique emails\nconst emailsMap = new Map();\nfor (const item of $input.all()) {\n  if (item.json.email_id && !emailsMap.has(item.json.id)) {\n    emailsMap.set(item.json.id, item.json);\n  }\n}\n\nconst results = [];\nfor (const email of emailsMap.values()) {\n  const fromEmail = email.from_email || '';\n  const fromName = email.from_name || '';\n  const subject = email.subject || '';\n  const bodyPreview = email.body_preview || '';\n  \n  // Try domain match first (highest confidence)\n  let matchedForceName = lookupForceByDomain(fromEmail);\n  let matchMethod = matchedForceName ? 'domain' : null;\n  \n  // Fallback to pattern matching in name/subject\n  if (!matchedForceName) {\n    matchedForceName = lookupForce(fromName) || lookupForce(subject);\n    matchMethod = matchedForceName ? 'pattern' : null;\n  }\n  \n  const matchedForceId = matchedForceName ? forceLookup[matchedForceName] : null;\n  const isPoliceSender = matchedForceId !== null;\n  \n  results.push({\n    json: {\n      email_raw_id: email.id,\n      email_id: email.email_id,\n      from_email: fromEmail,\n      from_name: fromName,\n      subject: subject,\n      body_preview: bodyPreview,\n      received_at: email.received_at,\n      pattern_matched_force: matchedForceName,\n      pattern_matched_force_id: matchedForceId,\n      pattern_match_method: matchMethod,\n      is_police_sender: isPoliceSender,\n      force_lookup: forceLookup\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+    {
+      "id": "loop-each-email",
+      "name": "Loop: Process Each",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1640, 400],
+      "parameters": {"batchSize": 1, "options": {}}
+    },
+    {
+      "id": "hubspot-search-contact",
+      "name": "HubSpot: Search Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1860, 400],
+      "parameters": {
+        "resource": "contact",
+        "operation": "search",
+        "filterGroups": {
+          "values": [
+            {
+              "filters": {
+                "values": [
+                  {
+                    "propertyName": "email",
+                    "operator": "EQ",
+                    "value": "={{ $json.from_email }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {},
+        "options": {}
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "code-hubspot-enrich",
+      "name": "Code: HubSpot Enrichment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2080, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Extract HubSpot contact info and check for open deals\nconst emailData = $('Loop: Process Each').item.json;\nconst hubspotResults = $input.item.json;\n\nlet hubspotContactId = null;\nlet hasOpenDeal = false;\n\n// HubSpot search returns results array\nif (hubspotResults && hubspotResults.results && Array.isArray(hubspotResults.results) && hubspotResults.results.length > 0) {\n  const contact = hubspotResults.results[0];\n  hubspotContactId = contact.id || contact.hs_object_id || null;\n  \n  // Check for open deals in associations\n  if (contact.associations && contact.associations.deals && Array.isArray(contact.associations.deals)) {\n    // If any deals exist, assume at least one is open\n    // More sophisticated check would query deal status, but this is faster\n    hasOpenDeal = contact.associations.deals.length > 0;\n  }\n}\n\nreturn {\n  json: {\n    ...emailData,\n    hubspot_contact_id: hubspotContactId,\n    has_open_deal: hasOpenDeal\n  }\n};"
+      }
+    },
+    {
+      "id": "code-build-prompt",
+      "name": "Code: Build Classification Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2300, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Build the classification prompt with all context\nconst email = $input.item.json;\n\nconst systemMessage = \"You classify emails for Peel Solutions (UK police sector consulting). Return JSON only.\";\n\nconst userPrompt = `Classify this email for Peel Solutions (UK police sector). Use JSON.\n\nEmail:\nFrom Name: ${email.from_name || 'Unknown'}\nFrom Email: ${email.from_email || 'Unknown'}\nSubject: ${email.subject || 'No subject'}\nBody Preview: ${email.body_preview || 'No content'}\nPolice Sender: ${email.is_police_sender ? 'Yes' : 'No'}\nHubSpot Contact ID: ${email.hubspot_contact_id || 'None'}\nHas Open Deal: ${email.has_open_deal ? 'Yes' : 'No'}\n\n## Priority Rules\n\n**Urgent** (🔴): Police sender OR time-sensitive language (urgent/asap/deadline/today) OR has open deal\n**Today** (🟡): Direct question/request needing response soon\n**This Week** (🟢): Informational or follow-up that can wait\n**FYI** (⚪): Newsletters, notifications, low value\n\n### HubSpot Boost Rule\n- If \"Has Open Deal\" is true, boost priority up one level\n- Example: \"This Week\" becomes \"Today\"\n\n## Action Types\n\n**Reply**: Questions, requests, invitations\n**Forward**: Not for James, relevant to team\n**FYI**: Updates, confirmations, status\n**Archive**: Marketing, spam, notifications\n\n## Output Schema\n\nReturn JSON only with these exact keys:\n{\n  \"email_id\": \"${email.email_id}\",\n  \"classification\": \"Urgent|Today|Week|FYI|Archive\",\n  \"priority\": 1-5,\n  \"action_type\": \"Reply|Forward|FYI|Archive\",\n  \"key_request\": \"One sentence summary of what's needed\",\n  \"ai_confidence\": 0-100,\n  \"ai_reasoning\": \"Brief explanation\"\n}\n\nIMPORTANT:\n- Include the email_id exactly as provided\n- Be concise in key_request (max 1 sentence)\n- Consider HubSpot boost rule when setting priority`;\n\nreturn {\n  json: {\n    ...email,\n    system_message: systemMessage,\n    user_prompt: userPrompt\n  }\n};"
+      }
+    },
+    {
+      "id": "openai-classify",
+      "name": "OpenAI: Classify Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [2520, 400],
+      "parameters": {
+        "resource": "text",
+        "operation": "response",
+        "modelId": {"__rl": true, "value": "gpt-4o-mini", "mode": "id"},
+        "responses": {
+          "values": [
+            {"type": "text", "role": "system", "content": "={{ $json.system_message }}"},
+            {"type": "text", "role": "user", "content": "={{ $json.user_prompt }}"}
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "maxTokens": 300,
+          "temperature": 0.1,
+          "textFormat": {"textOptions": [{"type": "json_object"}]}
+        }
+      },
+      "credentials": {"openAiApi": {"id": "KPeEyy20q5aUrUtM", "name": "OpenAi account"}}
+    },
+    {
+      "id": "wait-openai",
+      "name": "Wait: 200ms",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2740, 400],
+      "parameters": {"resume": "timeInterval", "unit": "seconds", "amount": 1},
+      "webhookId": "wait-openai-email-classifier"
+    },
+    {
+      "id": "code-parse-classification",
+      "name": "Code: Parse Classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2960, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Parse AI response and prepare Emails table upsert\nconst emailData = $('Code: HubSpot Enrichment').item.json;\nconst aiResponseRaw = $input.item.json;\n\n// Parse the AI response - handle nested OpenAI output structure\nlet aiResponse = {};\ntry {\n  let responseText = '';\n  \n  if (aiResponseRaw.output && Array.isArray(aiResponseRaw.output)) {\n    const firstOutput = aiResponseRaw.output[0];\n    if (firstOutput && firstOutput.content && Array.isArray(firstOutput.content)) {\n      responseText = firstOutput.content[0]?.text || '';\n    }\n  } else if (typeof aiResponseRaw.content === 'string') {\n    responseText = aiResponseRaw.content;\n  } else if (typeof aiResponseRaw.message === 'string') {\n    responseText = aiResponseRaw.message;\n  } else if (typeof aiResponseRaw.text === 'string') {\n    responseText = aiResponseRaw.text;\n  } else {\n    responseText = JSON.stringify(aiResponseRaw);\n  }\n  \n  const jsonMatch = responseText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    aiResponse = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  aiResponse = {\n    classification: 'FYI',\n    priority: 4,\n    action_type: 'Archive',\n    key_request: 'Failed to parse AI response',\n    ai_confidence: 0,\n    ai_reasoning: 'AI parsing error: ' + e.message\n  };\n}\n\n// CRITICAL: Null check before upsert (V1 fix from SPEC-012 section 15)\nif (!emailData.email_id) {\n  throw new Error('Email ID is null - cannot create Emails record');\n}\n\n// Map priority to number if it came back as text\nlet priorityNum = aiResponse.priority;\nif (typeof priorityNum !== 'number') {\n  const priorityMap = {\n    'Urgent': 1,\n    'Today': 2,\n    'Week': 3,\n    'FYI': 4,\n    'Archive': 5\n  };\n  priorityNum = priorityMap[aiResponse.classification] || 3;\n}\n\nreturn {\n  json: {\n    email_raw_id: emailData.email_raw_id,\n    email_id: emailData.email_id,\n    classification: aiResponse.classification || 'FYI',\n    priority: priorityNum,\n    action_type: aiResponse.action_type || 'Archive',\n    status: 'new',\n    key_request: aiResponse.key_request || 'No request identified',\n    ai_confidence: aiResponse.ai_confidence || 0,\n    ai_reasoning: aiResponse.ai_reasoning || 'No reasoning provided',\n    force_id: emailData.pattern_matched_force_id || null,\n    hubspot_contact_id: emailData.hubspot_contact_id || null,\n    has_open_deal: emailData.has_open_deal || false\n  }\n};"
+      }
+    },
+    {
+      "id": "airtable-upsert-email",
+      "name": "Airtable: Upsert to Emails",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3180, 400],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblaeAuzLbmzW8ktJ",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"records\": [\n    {\n      \"fields\": {\n        \"email_id\": {{ JSON.stringify($json.email_id) }},\n        \"classification\": {{ JSON.stringify($json.classification) }},\n        \"priority\": {{ $json.priority }},\n        \"action_type\": {{ JSON.stringify($json.action_type) }},\n        \"status\": \"new\",\n        \"key_request\": {{ JSON.stringify($json.key_request) }},\n        \"ai_confidence\": {{ $json.ai_confidence }},\n        \"ai_reasoning\": {{ JSON.stringify($json.ai_reasoning) }},\n        \"force\": {{ $json.force_id ? JSON.stringify([$json.force_id]) : '[]' }},\n        \"hubspot_contact_id\": {{ $json.hubspot_contact_id ? JSON.stringify($json.hubspot_contact_id) : 'null' }},\n        \"has_open_deal\": {{ $json.has_open_deal }}\n      }\n    }\n  ],\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Using HTTP Request instead of Airtable node due to n8n bug where Resource Locator fields don't evaluate expressions correctly inside splitInBatches loops"
+    },
+    {
+      "id": "wait-airtable-upsert",
+      "name": "Wait: 200ms (Airtable)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3400, 400],
+      "parameters": {"resume": "timeInterval", "unit": "seconds", "amount": 1},
+      "webhookId": "wait-airtable-email-upsert"
+    },
+    {
+      "id": "airtable-mark-processed",
+      "name": "Airtable: Mark Raw Processed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3620, 400],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblYYyNm7yGbX3Ehj/{{ $('Code: Parse Classification').item.json.email_raw_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"processed\": true\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "wait-airtable-mark",
+      "name": "Wait: 200ms (Mark)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3840, 400],
+      "parameters": {"resume": "timeInterval", "unit": "seconds", "amount": 1},
+      "webhookId": "wait-airtable-mark-processed"
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate: Collect Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [4060, 400],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "processed_emails",
+        "options": {}
+      }
+    },
+    {
+      "id": "set-log-summary",
+      "name": "Set: Log Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [4280, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "workflow-name", "name": "workflow_name", "value": "MI: Email Classifier (V2)", "type": "string"},
+            {"id": "emails-processed", "name": "emails_processed", "value": "={{ $json.processed_emails ? $json.processed_emails.length : 0 }}", "type": "number"},
+            {"id": "emails-urgent", "name": "emails_urgent", "value": "={{ $json.processed_emails ? $json.processed_emails.filter(e => e.classification === 'Urgent').length : 0 }}", "type": "number"},
+            {"id": "emails-today", "name": "emails_today", "value": "={{ $json.processed_emails ? $json.processed_emails.filter(e => e.classification === 'Today').length : 0 }}", "type": "number"},
+            {"id": "police-senders", "name": "police_senders", "value": "={{ $json.processed_emails ? $json.processed_emails.filter(e => e.force_id).length : 0 }}", "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "set-no-emails",
+      "name": "Set: No Emails",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [980, 500],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "No unprocessed emails to classify", "type": "string"},
+            {"id": "emails-processed", "name": "emails_processed", "value": 0, "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Every 5 Minutes": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Manual Trigger": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Set: Start Time": {"main": [[{"node": "Airtable: Fetch Unprocessed Emails", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Unprocessed Emails": {"main": [[{"node": "IF: Has Emails", "type": "main", "index": 0}]]},
+    "IF: Has Emails": {"main": [[{"node": "Airtable: Fetch Forces", "type": "main", "index": 0}, {"node": "Merge: Emails + Forces", "type": "main", "index": 0}], [{"node": "Set: No Emails", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Forces": {"main": [[{"node": "Merge: Emails + Forces", "type": "main", "index": 1}]]},
+    "Merge: Emails + Forces": {"main": [[{"node": "Code: Force Pattern Match", "type": "main", "index": 0}]]},
+    "Code: Force Pattern Match": {"main": [[{"node": "Loop: Process Each", "type": "main", "index": 0}]]},
+    "Loop: Process Each": {"main": [[{"node": "Aggregate: Collect Results", "type": "main", "index": 0}], [{"node": "HubSpot: Search Contact", "type": "main", "index": 0}]]},
+    "HubSpot: Search Contact": {"main": [[{"node": "Code: HubSpot Enrichment", "type": "main", "index": 0}]]},
+    "Code: HubSpot Enrichment": {"main": [[{"node": "Code: Build Classification Prompt", "type": "main", "index": 0}]]},
+    "Code: Build Classification Prompt": {"main": [[{"node": "OpenAI: Classify Email", "type": "main", "index": 0}]]},
+    "OpenAI: Classify Email": {"main": [[{"node": "Wait: 200ms", "type": "main", "index": 0}]]},
+    "Wait: 200ms": {"main": [[{"node": "Code: Parse Classification", "type": "main", "index": 0}]]},
+    "Code: Parse Classification": {"main": [[{"node": "Airtable: Upsert to Emails", "type": "main", "index": 0}]]},
+    "Airtable: Upsert to Emails": {"main": [[{"node": "Wait: 200ms (Airtable)", "type": "main", "index": 0}]]},
+    "Wait: 200ms (Airtable)": {"main": [[{"node": "Airtable: Mark Raw Processed", "type": "main", "index": 0}]]},
+    "Airtable: Mark Raw Processed": {"main": [[{"node": "Wait: 200ms (Mark)", "type": "main", "index": 0}]]},
+    "Wait: 200ms (Mark)": {"main": [[{"node": "Loop: Process Each", "type": "main", "index": 0}]]},
+    "Aggregate: Collect Results": {"main": [[{"node": "Set: Log Summary", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "meta": {
+    "spec": "SPEC-012",
+    "phase": "2a-2",
+    "description": "Classifies emails from Email_Raw using OpenAI gpt-4o-mini. Enriches with HubSpot contact/deal data. Force pattern matching runs BEFORE AI (G-005). Creates/upserts Emails records with classification, priority, and action_type. Marks Email_Raw as processed. LLM Chain approach (NOT Agent) for speed.",
+    "guardrails": "G-001 (raw archive first), G-005 (JS matching before AI), G-012 (value proposition first - applies to drafting not classification)",
+    "notes": "HTTP Request nodes used for Airtable updates due to n8n bug with Resource Locator fields in loops. Null check before upsert (V1 fix). Wait nodes for Airtable rate limiting (200ms)."
+  }
+}

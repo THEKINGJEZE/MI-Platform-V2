@@ -16,6 +16,16 @@
     "Opportunities": {
       "id": "tblJgZuI3LM2Az5id",
       "name": "Opportunities"
+    },
+    "Email_Raw": {
+      "id": "tblYYyNm7yGbX3Ehj",
+      "name": "Email_Raw",
+      "description": "Raw emails synced from Outlook via Make.com (G-001 archive)"
+    },
+    "Emails": {
+      "id": "tblaeAuzLbmzW8ktJ",
+      "name": "Emails",
+      "description": "AI-classified emails with drafts, actions, waiting-for tracking"
     }
   },
   "key_fields": {
@@ -35,7 +45,17 @@
     "Opportunities.force": "fldD8bV1En6FWxAto",
     "Opportunities.signals": "fld67K7Z6j6wxZHfP",
     "Opportunities.status": "fldjzdcqrTB44wz3X",
-    "Opportunities.contact": "fld8ZuFVXVnNE0tHI"
+    "Opportunities.contact": "fld8ZuFVXVnNE0tHI",
+    "Email_Raw.email_id": "fldJBWjFypnLTNv7n",
+    "Email_Raw.processed": "fldfFc4wUPBCOaT7F",
+    "Emails.email_id": "fldehSSEdj0hLbEkZ",
+    "Emails.classification": "fldB1JUa1LbPh6cjt",
+    "Emails.status": "fldilPGMIvpykXfNT",
+    "Emails.force": "fldrwlxBjOa3SVdvD",
+    "Emails.contact": "fldOPgEtcnfLk9ORp",
+    "Emails.opportunity": "fld6Q93HXI92VOb1P",
+    "Contacts.decay_alert_sent": "fld9uClGOzqhlYvpr",
+    "Contacts.next_touchpoint_suggestion": "fldyDYhDBsTzD3C8u"
   },
   "notes": {
     "rollup_fields": "signal_count and signal_types rollup fields must be added manually in Airtable UI - API does not support rollup field creation",
