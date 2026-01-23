@@ -1,6 +1,10 @@
 {
   "description": "MI Platform Claude Code settings — anti-decay protections enabled",
-  
+
+  "env": {
+    "ENABLE_TOOL_SEARCH": "true"
+  },
+
   "permissions": {
     "allow": [
       "Bash(node *)",
@@ -39,7 +43,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-start.sh"
+            "command": "bash .claude/hooks/session-start.sh",
+            "once": true
           }
         ]
       }
@@ -84,6 +89,17 @@
           {
             "type": "prompt",
             "prompt": "Before finishing: (1) Is STATUS.md updated? (2) Is next action defined? (3) Any drift from ANCHOR.md? (4) Run git status and ask if user wants to commit changes to GitHub."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Task complete\" with title \"Claude Code\"'"
           }
         ]
       }
