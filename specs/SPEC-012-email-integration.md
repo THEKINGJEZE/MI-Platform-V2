@@ -272,21 +272,50 @@ After completing Focus Mode (5 emails processed):
 
 ## 6. Relationship Decay Alerts
 
-### Logic
+### Two-Tier Monitoring Architecture
 
-Daily scan for contacts where:
-- `last_contact_date` > 14 days AND
-- Contact has `relationship_status` = Active or Warming AND
-- No recent outreach in pipeline
+**Problem**: James has 1000s of contacts. Monitoring all would be overwhelming.
 
-### Decay Thresholds
+**Solution**: Two-tier decay monitoring:
+
+1. **Micro (Deal-Level)** — Only contacts with active deals
+2. **Macro (Organisation-Level)** — Company/force engagement across any contact
+
+### Micro: Deal-Level Decay (Tight Thresholds)
+
+**Scope**: Contacts associated with deals in active pipeline stages (not Closed Won/Lost)
 
 | Days Since Contact | Status | Action |
 |--------------------|--------|--------|
-| 0-14 | Active | No alert |
-| 15-30 | Warming | Yellow alert, suggest touchpoint |
-| 31-45 | Cold | Orange alert, stronger prompt |
-| 45+ | At-Risk | Red alert, urgent re-engagement |
+| 0-7 | Active | No alert |
+| 8-14 | Warming | Yellow alert — "Deal contact going quiet" |
+| 15-30 | At-Risk | Orange alert — urgent re-engagement |
+| 30+ | Cold | Red alert — "Deal stalling, no contact in 30 days" |
+
+**Why tighter**: Active deals need momentum. Silence kills deals.
+
+### Macro: Organisation-Level Decay (Looser Thresholds)
+
+**Scope**: Companies/Forces — last engagement across ANY contact at that org
+
+| Days Since Contact | Status | Action |
+|--------------------|--------|--------|
+| 0-30 | Active | No alert |
+| 31-60 | Warming | Yellow alert — "Haven't spoken to [Force] in 6 weeks" |
+| 61-90 | Cold | Orange alert — suggest re-engagement |
+| 90+ | At-Risk | Red alert — "No contact with [Force] in 3 months" |
+
+**Why looser**: Org relationships can be maintained less frequently.
+
+### Data Source: HubSpot (Decision I1)
+
+**Fields used**:
+- `notes_last_contacted` — Last logged activity
+- `hs_last_sales_activity_timestamp` — Last sales activity
+- `hs_sales_email_last_replied` — Email engagement
+- Deal associations and pipeline stages
+
+**NOT duplicating to Airtable** — query HubSpot directly via MCP.
 
 ### AI-Suggested Touchpoints
 
@@ -301,18 +330,32 @@ Daily scan for contacts where:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  RELATIONSHIPS NEED ATTENTION                           4 items  │
+│  DEAL CONTACTS GOING COLD                               2 items  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  🟠 32 days  Sarah Chen (Kent)                                  │
-│              Suggestion: "Congratulate on the training launch   │
-│              you saw on LinkedIn last week"                     │
-│              [Draft Touchpoint] [Snooze 7 days] [Mark Contacted]│
+│  🟠 16 days  Sarah Chen (Kent) — Active Deal: Q2 Team           │
+│              Last: Proposal sent, awaiting feedback             │
+│              [Draft Follow-up] [Snooze 7 days] [Mark Contacted] │
 │                                                                 │
-│  🟡 18 days  John Smith (Met)                                   │
-│              Suggestion: "Share HMICFRS report on disclosure    │
-│              backlogs — relevant to their situation"            │
-│              [Draft Touchpoint] [Snooze 7 days] [Mark Contacted]│
+│  🟡 9 days   John Smith (Met) — Active Deal: Disclosure Support │
+│              Last: Initial meeting                              │
+│              [Draft Follow-up] [Snooze 7 days] [Mark Contacted] │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ORGANISATIONS GOING QUIET                              3 items  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  🟠 68 days  Merseyside Police                                  │
+│              Last contact: Any — DI Williams (June)             │
+│              Suggestion: "Share HMICFRS report on disclosure"   │
+│              [Draft Touchpoint] [Snooze 30 days]                │
+│                                                                 │
+│  🟡 45 days  Greater Manchester Police                          │
+│              Last contact: DS Patel (December)                  │
+│              Suggestion: "Congratulate on training graduation"  │
+│              [Draft Touchpoint] [Snooze 30 days]                │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -478,16 +521,44 @@ filterByFormula: AND(
 
 **Trigger**: Schedule — Daily at 06:00
 
+**Flow (Two-Tier)**:
+
+**Tier 1: Deal-Level Decay (Micro)**
+1. HubSpot: Get all deals in active pipeline stages
+2. HubSpot: Get contacts associated with each deal
+3. For each deal-contact:
+   - Get `notes_last_contacted`, `hs_last_sales_activity_timestamp`
+   - Calculate days since last contact
+   - Apply tight thresholds (8/15/30 days)
+   - If decaying: Generate touchpoint suggestion
+   - Surface in dashboard "Deal Contacts Going Cold"
+
+**Tier 2: Organisation-Level Decay (Macro)**
+1. HubSpot: Get all companies linked to Forces
+2. For each company:
+   - Get all associated contacts
+   - Find most recent engagement across ANY contact
+   - Calculate days since org-level last contact
+   - Apply loose thresholds (30/60/90 days)
+   - If decaying: Generate touchpoint suggestion
+   - Surface in dashboard "Organisations Going Quiet"
+
+**Output**: Two separate dashboard sections, not mixed together
+
+### WF5: MI: Contact Auto-Creator
+
+**Trigger**: Airtable — Emails where `is_public_sector_sender = true` AND `hubspot_contact_id` IS EMPTY
+
 **Flow**:
-1. Query Contacts where:
-   - `last_contact_date` < TODAY() - 14
-   - `relationship_status` IN (Active, Warming)
-2. For each decaying contact:
-   - Calculate decay severity
-   - Generate touchpoint suggestion (non-salesy)
-   - Update `next_touchpoint_suggestion`
-   - Update `relationship_status` if threshold crossed
-   - If > 30 days: Set `decay_alert_sent` = NOW()
+1. Parse sender email domain
+2. Check if UK public sector domain:
+   - `*.police.uk`, `*.gov.uk`, `*.nhs.uk`, `*.mod.uk`, `*.parliament.uk`
+3. If public sector:
+   - HubSpot: Search for existing contact by email
+   - If not found:
+     - HubSpot: Create contact (name from email headers)
+     - HubSpot: Associate with Company (lookup by domain/force)
+   - Airtable: Update Emails record with hubspot_contact_id
 
 ---
 
@@ -619,9 +690,26 @@ filterByFormula: AND(
 
 - [ ] Add schema fields to Contacts
 - [ ] Create `MI: Relationship Decay Scanner` workflow
-- [ ] Implement decay thresholds
+- [ ] Implement two-tier decay (Deal-Level + Org-Level)
+- [ ] Query HubSpot for engagement data (Decision I1)
 - [ ] AI touchpoint suggestions (non-salesy)
-- [ ] Dashboard "Relationships Need Attention" section
+- [ ] Dashboard "Deal Contacts Going Cold" section
+- [ ] Dashboard "Organisations Going Quiet" section
+
+### Phase 2a-8: Contact Auto-Creation
+
+- [ ] Create `MI: Contact Auto-Creator` workflow
+- [ ] UK public sector domain detection (not just police):
+  - `*.police.uk` — Police forces
+  - `*.gov.uk` — Central government
+  - `*.nhs.uk` — NHS
+  - `*.mod.uk` — Ministry of Defence
+  - `*.parliament.uk` — Parliament
+  - `*.ac.uk` — Universities (if relevant)
+- [ ] Trigger: Email classified with `is_public_sector_sender = true` AND `hubspot_contact_id = null`
+- [ ] Create HubSpot contact via standard node (not AI Agent)
+- [ ] Link to Company by org/force lookup
+- [ ] Update Emails record with new contact ID
 
 ---
 
