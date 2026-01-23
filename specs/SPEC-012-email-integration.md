@@ -1,11 +1,27 @@
 # SPEC-012: Email Integration + Relationship Decay Alerts
 
-**Status**: Spec Written (Pending Phase 1d completion)
+**Status**: Spec Extended (Ready for Phase 2a-6+ implementation)
 **Phase**: 2a
-**Priority**: P1 — After Phase 1d monitoring passes
-**Depends On**: Phase 1d complete, Make.com OAuth valid ✅
+**Priority**: P1 — Active
+**Depends On**: Phase 1d complete ✅, Make.com OAuth valid ✅
 **Created**: 23 January 2026
-**Updated**: 23 January 2026 — Schema updated to Option D (2 tables)
+**Updated**: 23 January 2026 — Added implementation details for WF3/WF4/WF5
+
+---
+
+## Pre-Flight Checklist
+
+Before this spec can be considered complete:
+
+- [x] `/prep-spec relationship-decay-scanner` was run before extending
+- [x] `specs/NEXT-CONTEXT.md` was reviewed
+- [x] Acceptance criteria copied verbatim from ROADMAP.md
+- [x] Guardrails reviewed; applicable ones cited inline (G-XXX)
+- [x] Strategy divergence check completed (no divergence — implements Decision I1, I3, I4)
+- [x] Testing plan includes 5+ specific test scenarios per workflow
+- [x] Build sequence defines implementation order
+
+**Context Brief**: `specs/NEXT-CONTEXT.md` (generated 23 Jan 2026)
 
 ---
 
@@ -590,6 +606,1208 @@ filterByFormula: AND(
 
 ---
 
+## 8a. WF4: Relationship Decay Scanner — Implementation Details
+
+### Overview
+
+**Name**: `MI: Relationship Decay Scanner`
+**Trigger**: Schedule — Daily at 06:00 UK time
+**Purpose**: Scan HubSpot for decaying relationships, generate dashboard alerts
+
+### Node-by-Node Specification
+
+```
+┌─────────────────┐
+│ Schedule Trigger│ Cron: 0 6 * * * (Europe/London)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Set: Config     │ Define thresholds + HubSpot properties
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐ ┌────────┐
+│ Tier 1 │ │ Tier 2 │  (Parallel branches)
+│ Deals  │ │ Orgs   │
+└────┬───┘ └────┬───┘
+     │          │
+     └────┬─────┘
+          ▼
+┌─────────────────┐
+│ Merge Results   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Generate Alerts │ AI touchpoint suggestions (G-012)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Output: JSON    │ Dashboard-consumable format
+└─────────────────┘
+```
+
+### Node 1: Schedule Trigger
+
+```json
+{
+  "parameters": {
+    "rule": {
+      "interval": [{ "field": "cronExpression", "expression": "0 6 * * *" }]
+    }
+  },
+  "type": "n8n-nodes-base.scheduleTrigger",
+  "typeVersion": 1.2,
+  "position": [0, 0]
+}
+```
+
+**Timezone**: Set workflow settings to `Europe/London`
+
+### Node 2: Set Config
+
+```javascript
+return {
+  thresholds: {
+    activePipeline: { warming: 8, atRisk: 15, cold: 30 },
+    closedWon: { warming: 31, atRisk: 61, cold: 90 },
+    organisation: { warming: 31, atRisk: 61, cold: 90 }
+  },
+  hubspotProperties: [
+    'notes_last_contacted',
+    'hs_last_sales_activity_timestamp',
+    'hs_sales_email_last_replied',
+    'hs_email_last_open_date',
+    'firstname',
+    'lastname',
+    'email',
+    'company',
+    'jobtitle'
+  ],
+  dealProperties: [
+    'dealname',
+    'dealstage',
+    'closedate',
+    'amount'
+  ]
+};
+```
+
+### Node 3a: Tier 1 — Get Active Pipeline Deals
+
+**Type**: HubSpot node (native)
+**Operation**: Get All Deals
+**Filters**:
+- `dealstage` NOT IN closed stages
+- OR `dealstage` = closedwon (for client tracking per I4)
+
+**Properties to fetch**: dealname, dealstage, closedate, amount, hs_lastmodifieddate
+
+### Node 3b: Tier 1 — Get Deal Contacts (Loop)
+
+**Type**: HTTP Request (HubSpot API v4 associations)
+**URL**: `https://api.hubapi.com/crm/v4/objects/deals/{{ $json.id }}/associations/contacts`
+
+For each deal, get associated contacts.
+
+### Node 3c: Tier 1 — Get Contact Engagement
+
+**Type**: HubSpot node (batch read)
+**Input**: Contact IDs from associations
+**Properties**: `notes_last_contacted`, `hs_last_sales_activity_timestamp`, `firstname`, `lastname`, `email`
+
+### Node 3d: Tier 1 — Calculate Decay Status
+
+**Type**: Code node
+
+```javascript
+const config = $('Set Config').item.json;
+const today = new Date();
+
+return $input.all().map(item => {
+  const contact = item.json;
+  const deal = contact.deal; // Attached in previous merge
+
+  // Get most recent engagement timestamp
+  const lastContact = new Date(Math.max(
+    new Date(contact.notes_last_contacted || 0),
+    new Date(contact.hs_last_sales_activity_timestamp || 0)
+  ));
+
+  const daysSinceContact = Math.floor((today - lastContact) / (1000 * 60 * 60 * 24));
+
+  // Determine thresholds based on deal stage
+  const isClosedWon = deal.dealstage === 'closedwon';
+  const thresholds = isClosedWon
+    ? config.thresholds.closedWon
+    : config.thresholds.activePipeline;
+
+  // Determine status
+  let status = 'active';
+  let color = 'green';
+  if (daysSinceContact >= thresholds.cold) {
+    status = 'cold'; color = 'red';
+  } else if (daysSinceContact >= thresholds.atRisk) {
+    status = 'at_risk'; color = 'orange';
+  } else if (daysSinceContact >= thresholds.warming) {
+    status = 'warming'; color = 'yellow';
+  }
+
+  // Skip if active (no alert needed)
+  if (status === 'active') return null;
+
+  return {
+    type: isClosedWon ? 'client_checkin' : 'deal_contact',
+    contact: {
+      id: contact.hs_object_id,
+      name: `${contact.firstname || ''} ${contact.lastname || ''}`.trim(),
+      email: contact.email,
+      title: contact.jobtitle
+    },
+    deal: {
+      id: deal.hs_object_id,
+      name: deal.dealname,
+      stage: deal.dealstage
+    },
+    daysSinceContact,
+    status,
+    color,
+    lastContactDate: lastContact.toISOString(),
+    section: isClosedWon ? 'Client Check-ins Due' : 'Deal Contacts Going Cold'
+  };
+}).filter(Boolean); // Remove nulls (active contacts)
+```
+
+### Node 4a: Tier 2 — Get All Companies (Forces)
+
+**Type**: HubSpot node
+**Operation**: Search Companies
+**Filter**: Companies linked to UK police forces (by domain or name pattern)
+
+Using `patterns/force-matching.js` logic (G-005):
+```javascript
+// Filter companies that match police force patterns
+const forcePatterns = require('patterns/force-matching.js');
+```
+
+### Node 4b: Tier 2 — Get Company Contacts
+
+**Type**: HTTP Request (associations)
+**URL**: `https://api.hubapi.com/crm/v4/objects/companies/{{ $json.id }}/associations/contacts`
+
+### Node 4c: Tier 2 — Calculate Org-Level Decay
+
+**Type**: Code node
+
+```javascript
+const config = $('Set Config').item.json;
+const today = new Date();
+
+return $input.all().map(item => {
+  const company = item.json;
+  const contacts = company.contacts || [];
+
+  // Find most recent engagement across ALL contacts at this org
+  let latestContact = null;
+  let latestContactName = null;
+  let latestDate = new Date(0);
+
+  for (const contact of contacts) {
+    const contactDate = new Date(Math.max(
+      new Date(contact.notes_last_contacted || 0),
+      new Date(contact.hs_last_sales_activity_timestamp || 0)
+    ));
+    if (contactDate > latestDate) {
+      latestDate = contactDate;
+      latestContact = contact;
+      latestContactName = `${contact.firstname || ''} ${contact.lastname || ''}`.trim();
+    }
+  }
+
+  const daysSinceContact = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+  const thresholds = config.thresholds.organisation;
+
+  // Determine status
+  let status = 'active';
+  let color = 'green';
+  if (daysSinceContact >= thresholds.cold) {
+    status = 'cold'; color = 'red';
+  } else if (daysSinceContact >= thresholds.atRisk) {
+    status = 'at_risk'; color = 'orange';
+  } else if (daysSinceContact >= thresholds.warming) {
+    status = 'warming'; color = 'yellow';
+  }
+
+  if (status === 'active') return null;
+
+  return {
+    type: 'organisation',
+    organisation: {
+      id: company.hs_object_id,
+      name: company.name,
+      domain: company.domain
+    },
+    lastContact: {
+      name: latestContactName,
+      date: latestDate.toISOString()
+    },
+    daysSinceContact,
+    status,
+    color,
+    section: 'Organisations Going Quiet'
+  };
+}).filter(Boolean);
+```
+
+### Node 5: Merge Results
+
+**Type**: Merge node
+**Mode**: Append
+
+Combines Tier 1 (deal contacts + clients) and Tier 2 (organisations) into single array.
+
+### Node 6: Generate AI Touchpoint Suggestions
+
+**Type**: OpenAI node (gpt-4o-mini)
+**For each decaying item**, generate a touchpoint suggestion.
+
+**Prompt** (per G-012 — NOT salesy):
+
+```
+You are helping maintain a professional relationship. Generate a brief, genuine touchpoint suggestion.
+
+Contact: {{ $json.contact.name }} ({{ $json.contact.title }})
+Organisation: {{ $json.organisation.name || $json.deal.name }}
+Days since contact: {{ $json.daysSinceContact }}
+Context: {{ $json.type }}
+
+Rules:
+- NOT salesy — no pitches, no "checking in to see if you need our services"
+- Genuine relationship maintenance
+- Suggest ONE of these approaches:
+  1. Share a relevant industry article or insight
+  2. Congratulate on recent news or achievement (if known)
+  3. Check in on a previous project or conversation
+  4. Reference an industry development that affects them
+  5. Simple "how are things going" if long relationship
+
+Output format: Single sentence suggestion (max 50 words)
+```
+
+### Node 7: Output JSON
+
+**Type**: Code node
+
+```javascript
+// Group by section for dashboard consumption
+const items = $input.all().map(i => i.json);
+
+const grouped = {
+  deal_contacts_going_cold: items.filter(i => i.section === 'Deal Contacts Going Cold'),
+  client_checkins_due: items.filter(i => i.section === 'Client Check-ins Due'),
+  organisations_going_quiet: items.filter(i => i.section === 'Organisations Going Quiet'),
+  generated_at: new Date().toISOString(),
+  total_alerts: items.length
+};
+
+return [{ json: grouped }];
+```
+
+### Output Storage
+
+**Option A**: Write to Airtable `Decay_Alerts` table (lightweight, for persistence)
+**Option B**: Write to JSON file for dashboard API to read
+**Option C**: Store in Redis/cache with TTL of 24 hours
+
+**Recommended**: Option A (Airtable) for audit trail and dashboard API compatibility.
+
+### Test Cases (WF4)
+
+1. **Active pipeline contact, 10 days no contact** → Yellow alert in "Deal Contacts Going Cold"
+2. **Active pipeline contact, 20 days no contact** → Orange alert
+3. **Closed Won contact, 45 days no contact** → Yellow alert in "Client Check-ins Due"
+4. **Closed Won contact, 75 days no contact** → Orange alert
+5. **Organisation, 70 days no contact across all contacts** → Orange alert in "Organisations Going Quiet"
+6. **AI suggestion** → Verify it's non-salesy (no "services", no "opportunity")
+7. **Contact with recent activity (3 days)** → No alert (filtered out)
+
+---
+
+## 8b. WF5: Contact Auto-Creator — Implementation Details
+
+### Overview
+
+**Name**: `MI: Contact Auto-Creator`
+**Trigger**: Airtable — New record in Emails table with `is_public_sector_sender = true` AND `hubspot_contact_id` IS EMPTY
+**Purpose**: Automatically create HubSpot contacts for UK public sector email senders
+
+### Node-by-Node Specification
+
+```
+┌─────────────────┐
+│ Airtable Trigger│ New Emails where public_sector AND no contact
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Parse Domain    │ Extract domain from sender email
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Check Domain    │ Is UK public sector? (G-005 pattern matching)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ HubSpot Search  │ Check if contact already exists
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+ Exists    Not Found
+    │         │
+    ▼         ▼
+┌────────┐ ┌────────┐
+│ Update │ │ Create │
+│ Emails │ │ Contact│
+└────────┘ └────┬───┘
+               │
+               ▼
+         ┌────────────┐
+         │ Associate  │ Link to Company/Force
+         │ Company    │
+         └────────────┘
+```
+
+### Public Sector Domain Patterns (G-005)
+
+**File**: `patterns/public-sector-domains.js`
+
+```javascript
+/**
+ * UK Public Sector Domain Patterns
+ * Per Decision I3 — includes all UK public sector, not just police
+ */
+
+const PUBLIC_SECTOR_PATTERNS = [
+  // Police forces
+  { pattern: /\.police\.uk$/i, type: 'police', priority: 'high' },
+
+  // Central government
+  { pattern: /\.gov\.uk$/i, type: 'government', priority: 'medium' },
+
+  // NHS
+  { pattern: /\.nhs\.uk$/i, type: 'nhs', priority: 'medium' },
+
+  // Ministry of Defence
+  { pattern: /\.mod\.uk$/i, type: 'defence', priority: 'medium' },
+
+  // Parliament
+  { pattern: /\.parliament\.uk$/i, type: 'parliament', priority: 'low' },
+
+  // Universities (optional — per spec)
+  { pattern: /\.ac\.uk$/i, type: 'education', priority: 'low' }
+];
+
+/**
+ * Check if email domain is UK public sector
+ * @param {string} email - Email address to check
+ * @returns {object|null} - Match info or null
+ */
+function isPublicSectorDomain(email) {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return null;
+
+  for (const { pattern, type, priority } of PUBLIC_SECTOR_PATTERNS) {
+    if (pattern.test(domain)) {
+      return { domain, type, priority, matched: true };
+    }
+  }
+  return null;
+}
+
+/**
+ * Extract force name from police.uk domain
+ * Uses patterns/force-matching.js for lookup
+ */
+function extractForceName(domain) {
+  // e.g., kent.police.uk → Kent Police
+  const subdomain = domain.replace('.police.uk', '');
+  // Lookup in force-matching patterns
+  return lookupForce(subdomain);
+}
+
+module.exports = { isPublicSectorDomain, extractForceName, PUBLIC_SECTOR_PATTERNS };
+```
+
+### Node 1: Airtable Trigger
+
+**Type**: Airtable Trigger
+**Table**: Emails
+**Trigger on**: Record matches conditions
+**Conditions**:
+- `is_public_sector_sender` = TRUE
+- `hubspot_contact_id` IS EMPTY
+
+### Node 2: Parse Domain
+
+**Type**: Code node
+
+```javascript
+const email = $input.item.json.from_email;
+const domain = email.split('@')[1]?.toLowerCase();
+const name = $input.item.json.from_name || '';
+
+// Parse name into first/last
+const nameParts = name.split(' ');
+const firstName = nameParts[0] || '';
+const lastName = nameParts.slice(1).join(' ') || '';
+
+return {
+  email,
+  domain,
+  firstName,
+  lastName,
+  originalRecord: $input.item.json
+};
+```
+
+### Node 3: Check Domain Pattern
+
+**Type**: Code node
+
+```javascript
+const { isPublicSectorDomain, extractForceName } = require('patterns/public-sector-domains.js');
+
+const result = isPublicSectorDomain($json.email);
+
+if (!result) {
+  // Not public sector — stop processing
+  return { skip: true, reason: 'Not UK public sector domain' };
+}
+
+let forceName = null;
+if (result.type === 'police') {
+  forceName = extractForceName($json.domain);
+}
+
+return {
+  ...$json,
+  isPublicSector: true,
+  sectorType: result.type,
+  priority: result.priority,
+  forceName
+};
+```
+
+### Node 4: IF (Skip Check)
+
+**Type**: IF node
+**Condition**: `{{ $json.skip }}` !== true
+
+### Node 5: HubSpot Search Contact
+
+**Type**: HubSpot node
+**Operation**: Search
+**Object**: Contacts
+**Filter**: `email` = `{{ $json.email }}`
+
+### Node 6: IF (Contact Exists)
+
+**Type**: IF node
+**Condition**: `{{ $json.results.length }}` > 0
+
+### Node 7a (Exists): Update Emails Record
+
+**Type**: Airtable node
+**Operation**: Update Record
+**Table**: Emails
+**Record ID**: `{{ $('Airtable Trigger').item.json.id }}`
+**Fields**:
+- `hubspot_contact_id`: `{{ $json.results[0].id }}`
+
+### Node 7b (Not Found): Create HubSpot Contact
+
+**Type**: HubSpot node
+**Operation**: Create
+**Object**: Contact
+**Properties**:
+- `email`: `{{ $json.email }}`
+- `firstname`: `{{ $json.firstName }}`
+- `lastname`: `{{ $json.lastName }}`
+- `hs_lead_status`: 'NEW'
+
+### Node 8: Associate with Company
+
+**Type**: HTTP Request (HubSpot associations API)
+
+First, find company by domain:
+```
+GET /crm/v3/objects/companies/search
+Body: { "filterGroups": [{ "filters": [{ "propertyName": "domain", "operator": "EQ", "value": "{{ $json.domain }}" }] }] }
+```
+
+If found, create association:
+```
+PUT /crm/v4/objects/contacts/{{ $json.contactId }}/associations/companies/{{ $json.companyId }}
+```
+
+For police domains, also try to match Force using `patterns/force-matching.js`.
+
+### Node 9: Update Emails Record (Final)
+
+**Type**: Airtable node
+**Operation**: Update Record
+**Fields**:
+- `hubspot_contact_id`: `{{ $json.newContactId }}`
+- `is_public_sector_sender`: true (confirm)
+
+### Test Cases (WF5)
+
+1. **Email from sarah.chen@kent.police.uk** (no HubSpot contact) → Contact created, linked to Kent Police company
+2. **Email from john.smith@kent.police.uk** (contact exists) → No duplicate, Emails record updated with existing ID
+3. **Email from jane@example.gov.uk** (government domain) → Contact created, type = 'government'
+4. **Email from bob@nhs.uk** → Contact created, type = 'nhs'
+5. **Email from alice@gmail.com** → Skipped (not public sector)
+6. **Company association** → Verify contact linked to correct company by domain lookup
+
+---
+
+## 8c. WF3: Waiting-For Tracker — Implementation Details
+
+### Overview
+
+**Name**: `MI: Waiting-For Tracker`
+**Triggers**:
+1. Airtable — New record in Email_Raw with `folder` = "Sent Items"
+2. Schedule — Daily at 07:00 for overdue scan
+**Purpose**: Track sent emails that expect replies, alert when overdue
+
+### "Asking For" Detection Patterns
+
+**File**: `patterns/waiting-for-patterns.js`
+
+```javascript
+/**
+ * Patterns that indicate an email is asking for something
+ * and expects a reply
+ */
+
+const ASKING_PATTERNS = [
+  // Direct questions
+  { pattern: /\?$/m, type: 'question', weight: 1 },
+
+  // Explicit requests
+  { pattern: /could you (please )?(let me know|confirm|send|provide)/i, type: 'request', weight: 2 },
+  { pattern: /please (confirm|let me know|advise|send|provide)/i, type: 'request', weight: 2 },
+  { pattern: /can you (please )?(confirm|send|let me know)/i, type: 'request', weight: 2 },
+  { pattern: /would you (be able to|mind)/i, type: 'request', weight: 1.5 },
+
+  // Anticipation phrases
+  { pattern: /looking forward to (hearing|your|receiving)/i, type: 'anticipation', weight: 2 },
+  { pattern: /let me know (if|when|what)/i, type: 'anticipation', weight: 1.5 },
+  { pattern: /await(ing)? your (response|reply|feedback|confirmation)/i, type: 'anticipation', weight: 2 },
+
+  // Availability requests
+  { pattern: /when (would you be|are you) available/i, type: 'scheduling', weight: 2 },
+  { pattern: /what times? (work|suit)/i, type: 'scheduling', weight: 1.5 },
+
+  // Decision requests
+  { pattern: /what do you think/i, type: 'opinion', weight: 1 },
+  { pattern: /your thoughts on/i, type: 'opinion', weight: 1 },
+  { pattern: /your feedback (on|would be)/i, type: 'opinion', weight: 1.5 }
+];
+
+/**
+ * Analyze email body for "asking for" patterns
+ * @param {string} body - Email body text
+ * @returns {object} - Analysis result
+ */
+function analyzeForWaitingFor(body) {
+  if (!body) return { isWaitingFor: false };
+
+  let totalWeight = 0;
+  const matchedPatterns = [];
+
+  for (const { pattern, type, weight } of ASKING_PATTERNS) {
+    if (pattern.test(body)) {
+      totalWeight += weight;
+      matchedPatterns.push(type);
+    }
+  }
+
+  // Threshold: weight >= 2 indicates "asking for"
+  const isWaitingFor = totalWeight >= 2;
+
+  return {
+    isWaitingFor,
+    confidence: Math.min(totalWeight / 4, 1), // 0-1 scale
+    matchedPatterns,
+    totalWeight
+  };
+}
+
+/**
+ * Extract what was asked for (for key_request field)
+ * Simple heuristic: find sentence containing strongest pattern
+ */
+function extractKeyRequest(body) {
+  const sentences = body.split(/[.!?]+/);
+
+  for (const sentence of sentences) {
+    for (const { pattern, weight } of ASKING_PATTERNS) {
+      if (weight >= 2 && pattern.test(sentence)) {
+        return sentence.trim().substring(0, 200); // Max 200 chars
+      }
+    }
+  }
+
+  return null;
+}
+
+module.exports = { analyzeForWaitingFor, extractKeyRequest, ASKING_PATTERNS };
+```
+
+### Workflow: Sent Email Detection
+
+```
+┌─────────────────┐
+│ Airtable Trigger│ Email_Raw where folder = "Sent Items"
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Pattern Analysis│ Check for "asking for" patterns
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+ Asking     Not Asking
+    │         │
+    ▼         ▼
+┌────────┐ ┌────────┐
+│ Create │ │  Stop  │
+│ Emails │ │        │
+│ Record │ │        │
+└────────┘ └────────┘
+```
+
+### Node 1: Airtable Trigger
+
+**Type**: Airtable Trigger
+**Table**: Email_Raw
+**Conditions**: `folder` = "Sent Items"
+
+### Node 2: Pattern Analysis
+
+**Type**: Code node
+
+```javascript
+const { analyzeForWaitingFor, extractKeyRequest } = require('patterns/waiting-for-patterns.js');
+
+const body = $input.item.json.body_preview;
+const analysis = analyzeForWaitingFor(body);
+
+if (!analysis.isWaitingFor) {
+  return { skip: true };
+}
+
+const keyRequest = extractKeyRequest(body);
+
+return {
+  email_id: $input.item.json.email_id,
+  subject: $input.item.json.subject,
+  to_email: $input.item.json.to_email || $input.item.json.from_email, // Sent items
+  key_request: keyRequest,
+  confidence: analysis.confidence,
+  matched_patterns: analysis.matchedPatterns,
+  sent_at: $input.item.json.received_at // For sent items, received_at = sent_at
+};
+```
+
+### Node 3: IF (Is Waiting For)
+
+**Type**: IF node
+**Condition**: `{{ $json.skip }}` !== true
+
+### Node 4: Create Emails Record
+
+**Type**: Airtable node
+**Operation**: Create Record
+**Table**: Emails
+**Fields**:
+- `email_id`: `{{ $json.email_id }}`
+- `status`: "waiting_for_reply"
+- `waiting_since`: `{{ $json.sent_at }}`
+- `key_request`: `{{ $json.key_request }}`
+- `ai_confidence`: `{{ Math.round($json.confidence * 100) }}`
+
+### Workflow: Daily Overdue Scan
+
+```
+┌─────────────────┐
+│ Schedule Trigger│ Cron: 0 7 * * * (Europe/London)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Airtable Search │ Emails where status="waiting" AND overdue
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Generate Follow │ AI draft follow-up for each overdue item
+│ Up Drafts       │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Update Emails   │ Set follow_up_draft field
+└─────────────────┘
+```
+
+### Node: Airtable Search (Overdue Items)
+
+**Type**: Airtable node
+**Operation**: Search Records
+**Table**: Emails
+**Formula**:
+```
+AND(
+  {status} = "waiting_for_reply",
+  {waiting_since} < DATEADD(TODAY(), -3, 'days')
+)
+```
+
+### Node: Generate Follow-Up Drafts
+
+**Type**: OpenAI node (gpt-4o-mini)
+
+**Prompt**:
+```
+Generate a brief, professional follow-up email for an unanswered request.
+
+Original subject: {{ $json.subject }}
+What was asked: {{ $json.key_request }}
+Days waiting: {{ Math.floor((Date.now() - new Date($json.waiting_since)) / (1000*60*60*24)) }}
+
+Rules (per G-012, G-015):
+- Professional but not pushy
+- Acknowledge they may be busy
+- Briefly restate the request
+- Clear, simple CTA
+
+Format: Just the email body (no subject line, no greeting/signature — those will be added automatically)
+Max: 75 words
+```
+
+### Test Cases (WF3)
+
+1. **Sent email with "Could you confirm the meeting time?"** → Creates waiting_for_reply record
+2. **Sent email with "Thanks for the update"** (no question) → No record created
+3. **Sent email with "Looking forward to hearing from you"** → Creates waiting_for_reply record
+4. **Waiting item at 4 days old** → Follow-up draft generated
+5. **Waiting item at 2 days old** → No draft yet (under threshold)
+6. **Reply received** → Dashboard should allow marking as "done"
+
+---
+
+## 8d. Dashboard Components — Implementation Details
+
+Per Decision I4 and ADHD interface design principles, the dashboard requires several new components for Phase 2a-6, 2a-7, and 2a-8.
+
+### Component 1: Relationship Decay Panels
+
+Three separate panels, each showing contacts needing attention at different levels:
+
+#### Panel: "Deal Contacts Going Cold"
+
+**Data Source**: WF4 output filtered by `tier = "deal_level"`
+
+**React Component**:
+```tsx
+// components/decay/DealContactsDecay.tsx
+interface DecayContact {
+  contactId: string;
+  contactName: string;
+  email: string;
+  dealName: string;
+  dealStage: string;
+  daysSinceContact: number;
+  status: 'yellow' | 'orange' | 'red';
+  suggestedTouchpoint?: string;
+  force?: string;
+}
+
+export function DealContactsDecay({ contacts }: { contacts: DecayContact[] }) {
+  // Group by status for visual priority
+  const grouped = {
+    red: contacts.filter(c => c.status === 'red'),
+    orange: contacts.filter(c => c.status === 'orange'),
+    yellow: contacts.filter(c => c.status === 'yellow'),
+  };
+
+  return (
+    <DecayPanel
+      title="Deal Contacts Going Cold"
+      icon={<FlameIcon />}
+      groups={grouped}
+      emptyMessage="All deal contacts are engaged 🎉"
+    />
+  );
+}
+```
+
+**Display Rules**:
+- Red items always at top
+- Show contact name, deal name, days since last contact
+- Action buttons: "Send Touchpoint" | "Mark Contacted" | "Snooze 7 days"
+- Keyboard: `T` = Send touchpoint, `M` = Mark contacted, `S` = Snooze
+
+**Visual Design** (per uk-police-design-system):
+- Red status: `--color-priority-1` background (#DC2626)
+- Orange status: `--color-priority-2` background (#F59E0B)
+- Yellow status: `--color-priority-3` background (#FACC15)
+- Status badge left-aligned, contact info right
+
+#### Panel: "Client Check-ins Due"
+
+**Data Source**: WF4 output filtered by `tier = "deal_level"` AND `isClosedWon = true`
+
+**Differences from Deal Contacts**:
+- Different thresholds (30/60/90 vs 8/15/30)
+- Different messaging: "Check-in" vs "Follow-up"
+- Different icon: handshake vs flame
+- Lower urgency styling (no red flashing)
+
+**React Component**:
+```tsx
+// components/decay/ClientCheckIns.tsx
+export function ClientCheckIns({ contacts }: { contacts: DecayContact[] }) {
+  return (
+    <DecayPanel
+      title="Client Check-ins Due"
+      icon={<HandshakeIcon />}
+      groups={groupByStatus(contacts)}
+      emptyMessage="All clients recently contacted 🤝"
+      variant="client"  // Different styling - more relaxed
+    />
+  );
+}
+```
+
+#### Panel: "Organisations Going Quiet"
+
+**Data Source**: WF4 output filtered by `tier = "org_level"`
+
+**Differences**:
+- Shows force name prominently (not individual contact)
+- Aggregates all contacts for that org
+- "Any contact" counts — not individual tracking
+- Suggested action: "Reach out to anyone at [Force]"
+
+**React Component**:
+```tsx
+// components/decay/OrganisationsQuiet.tsx
+interface OrgDecay {
+  forceId: string;
+  forceName: string;
+  daysSinceAnyContact: number;
+  status: 'yellow' | 'orange' | 'red';
+  contactCount: number;
+  lastContactedBy?: string;
+  suggestedTouchpoint?: string;
+}
+
+export function OrganisationsQuiet({ orgs }: { orgs: OrgDecay[] }) {
+  return (
+    <DecayPanel
+      title="Organisations Going Quiet"
+      icon={<BuildingIcon />}
+      groups={groupByStatus(orgs)}
+      emptyMessage="All organisations active 🏢"
+      renderItem={(org) => (
+        <OrgDecayCard
+          org={org}
+          onReachOut={() => showContactPicker(org.forceId)}
+        />
+      )}
+    />
+  );
+}
+```
+
+### Component 2: Waiting-For Section
+
+Shows emails sent by James that are awaiting replies.
+
+**Data Source**: Emails table filtered by `status = "waiting_for_reply"`
+
+**React Component**:
+```tsx
+// components/email/WaitingForSection.tsx
+interface WaitingItem {
+  emailId: string;
+  subject: string;
+  recipientName: string;
+  recipientEmail: string;
+  sentAt: string;
+  waitingDays: number;
+  keyRequest: string;  // What was asked
+  isOverdue: boolean;  // >3 days
+  followUpDraft?: string;
+}
+
+export function WaitingForSection({ items }: { items: WaitingItem[] }) {
+  const overdue = items.filter(i => i.isOverdue);
+  const pending = items.filter(i => !i.isOverdue);
+
+  return (
+    <section className="waiting-for-section">
+      <SectionHeader
+        title="Waiting For Replies"
+        count={items.length}
+        overdueCount={overdue.length}
+      />
+
+      {overdue.length > 0 && (
+        <WaitingGroup
+          title="Overdue (3+ days)"
+          items={overdue}
+          variant="urgent"
+        />
+      )}
+
+      <WaitingGroup
+        title="Pending"
+        items={pending}
+        variant="normal"
+      />
+    </section>
+  );
+}
+```
+
+**Display Rules**:
+- Overdue items (>3 days) highlighted with orange border
+- Show: Subject, recipient, days waiting, key request snippet
+- Actions: "Send Follow-up" | "Mark Received" | "Cancel"
+- Keyboard: `F` = Send follow-up, `R` = Mark received, `X` = Cancel
+
+**Follow-up Flow**:
+```tsx
+// When user clicks "Send Follow-up"
+async function handleSendFollowUp(item: WaitingItem) {
+  // 1. Show draft in composer (pre-populated from WF3)
+  setComposerContent({
+    to: item.recipientEmail,
+    subject: `Re: ${item.subject}`,
+    body: item.followUpDraft || generateDefaultFollowUp(item),
+  });
+
+  // 2. User can edit and send
+  // 3. On send: update Emails record status to "followed_up"
+}
+```
+
+### Component 3: Email Focus Mode
+
+Existing component from Phase 2a-5, but needs integration with new sections.
+
+**Layout Integration**:
+```tsx
+// pages/review.tsx — Updated layout
+export function ReviewPage() {
+  const [activeSection, setActiveSection] = useState<
+    'opportunities' | 'emails' | 'decay' | 'waiting'
+  >('opportunities');
+
+  return (
+    <ThreeZoneLayout>
+      {/* LEFT: Queue Panel */}
+      <QueuePanel>
+        <SectionTabs
+          active={activeSection}
+          onChange={setActiveSection}
+          counts={{
+            opportunities: opportunityCount,
+            emails: emailCount,
+            decay: decayCount,
+            waiting: waitingCount,
+          }}
+        />
+
+        {activeSection === 'opportunities' && <OpportunityQueue />}
+        {activeSection === 'emails' && <EmailQueue />}
+        {activeSection === 'decay' && <DecayQueue />}
+        {activeSection === 'waiting' && <WaitingQueue />}
+      </QueuePanel>
+
+      {/* CENTER: Context Panel */}
+      <ContextPanel section={activeSection} />
+
+      {/* RIGHT: Action Panel */}
+      <ActionPanel section={activeSection} />
+    </ThreeZoneLayout>
+  );
+}
+```
+
+### API Endpoints
+
+#### GET /api/decay
+
+Returns decay alerts from WF4 output.
+
+```typescript
+// pages/api/decay.ts
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Query Airtable for recent decay scan results
+  // Or query HubSpot directly if using real-time approach
+
+  const dealContacts = await fetchDecayAlerts('deal_level');
+  const clientCheckins = await fetchDecayAlerts('deal_level', { isClosedWon: true });
+  const orgQuiet = await fetchDecayAlerts('org_level');
+
+  return res.json({
+    dealContacts,
+    clientCheckins,
+    orgQuiet,
+    lastScan: new Date().toISOString(),
+  });
+}
+```
+
+#### GET /api/waiting-for
+
+Returns waiting-for items from Emails table.
+
+```typescript
+// pages/api/waiting-for.ts
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const items = await airtable('Emails')
+    .select({
+      filterByFormula: '{status} = "waiting_for_reply"',
+      sort: [{ field: 'waiting_since', direction: 'asc' }],
+    })
+    .all();
+
+  return res.json({
+    items: items.map(formatWaitingItem),
+    overdueCount: items.filter(i => isOverdue(i)).length,
+  });
+}
+```
+
+#### POST /api/decay/action
+
+Handles decay panel actions.
+
+```typescript
+// pages/api/decay/action.ts
+interface DecayActionRequest {
+  contactId: string;
+  action: 'send_touchpoint' | 'mark_contacted' | 'snooze';
+  snooze_days?: number;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { contactId, action, snooze_days } = req.body as DecayActionRequest;
+
+  switch (action) {
+    case 'send_touchpoint':
+      // Open composer with suggested touchpoint
+      return res.json({ action: 'open_composer', contactId });
+
+    case 'mark_contacted':
+      // Update HubSpot contact's last_contact_date
+      await hubspot.contacts.update(contactId, {
+        properties: { notes_last_contacted: new Date().toISOString() }
+      });
+      return res.json({ success: true });
+
+    case 'snooze':
+      // Set snooze in local state (or Airtable if persistent)
+      await airtable('Decay_Snoozes').create({
+        contact_id: contactId,
+        snoozed_until: addDays(new Date(), snooze_days || 7),
+      });
+      return res.json({ success: true });
+  }
+}
+```
+
+### Keyboard Shortcuts
+
+Extended shortcuts for new sections:
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `1` | Global | Switch to Opportunities section |
+| `2` | Global | Switch to Emails section |
+| `3` | Global | Switch to Decay section |
+| `4` | Global | Switch to Waiting-For section |
+| `J` / `K` | All queues | Move down / up in list |
+| `T` | Decay item | Send touchpoint |
+| `M` | Decay item | Mark as contacted |
+| `S` | Decay item | Snooze 7 days |
+| `F` | Waiting item | Send follow-up |
+| `R` | Waiting item | Mark reply received |
+| `X` | Waiting item | Cancel waiting |
+
+**Implementation**:
+```tsx
+// hooks/useKeyboardShortcuts.ts
+useKeyboardShortcuts({
+  '1': () => setActiveSection('opportunities'),
+  '2': () => setActiveSection('emails'),
+  '3': () => setActiveSection('decay'),
+  '4': () => setActiveSection('waiting'),
+  // ... section-specific shortcuts
+});
+```
+
+### State Management
+
+Using React Query for server state, local state for UI:
+
+```tsx
+// hooks/useDecayData.ts
+export function useDecayData() {
+  return useQuery({
+    queryKey: ['decay'],
+    queryFn: () => fetch('/api/decay').then(r => r.json()),
+    refetchInterval: 5 * 60 * 1000,  // Refresh every 5 min
+  });
+}
+
+// hooks/useWaitingFor.ts
+export function useWaitingFor() {
+  return useQuery({
+    queryKey: ['waiting-for'],
+    queryFn: () => fetch('/api/waiting-for').then(r => r.json()),
+    refetchInterval: 5 * 60 * 1000,
+  });
+}
+```
+
+### Test Cases (Dashboard Components)
+
+1. **Decay panel shows red items first** → Items sorted by status (red > orange > yellow)
+2. **Empty state when no decay** → Shows celebration message, not blank
+3. **Keyboard nav works in decay section** → J/K moves selection, T/M/S triggers actions
+4. **Waiting-for shows overdue count** → Badge shows "3 overdue" when 3 items >3 days
+5. **Follow-up draft pre-populated** → Composer shows WF3-generated draft
+6. **Section tabs show counts** → Each tab badge shows item count
+7. **Snooze hides item for 7 days** → Item reappears after snooze period
+8. **Mark contacted updates HubSpot** → HubSpot contact's last_contact_date updated
+
+---
+
 ## 9. Make.com Scenarios
 
 ### Scenario 1: Email Sync
@@ -770,35 +1988,98 @@ From ROADMAP.md Phase 2a:
 
 ## 12. Test Plan
 
+**Total Test Cases**: 35+ (minimum 5 per workflow + integration + UX)
+
+### WF4: Relationship Decay Scanner Tests
+
+| # | Scenario | Input | Expected Output | Guardrail |
+|---|----------|-------|-----------------|-----------|
+| 1 | Active deal contact, 10 days silence | Contact on Open Deal, last_contact = 10 days ago | Yellow alert, tier = "deal_level" | — |
+| 2 | Active deal contact, 20 days silence | Contact on Open Deal, last_contact = 20 days ago | Orange alert, tier = "deal_level" | — |
+| 3 | Active deal contact, 35 days silence | Contact on Open Deal, last_contact = 35 days ago | Red alert, tier = "deal_level" | — |
+| 4 | Closed Won contact, 45 days silence | Contact on Closed Won deal, last_contact = 45 days ago | Yellow alert (client tier) | — |
+| 5 | Closed Won contact, 70 days silence | Contact on Closed Won deal, last_contact = 70 days ago | Orange alert (client tier) | — |
+| 6 | Closed Won contact, 95 days silence | Contact on Closed Won deal, last_contact = 95 days ago | Red alert (client tier) | — |
+| 7 | Organisation with no recent contact | Force with all contacts >60 days | Yellow org-level alert | G-005 |
+| 8 | Contact contacted yesterday | Contact with last_contact = 1 day ago | No alert (not in results) | — |
+| 9 | AI touchpoint suggestion | Cold contact identified | Non-salesy touchpoint text | G-012 |
+| 10 | Force matching on org lookup | Organisation name "Kent Police" | Correctly linked to Kent force | G-005 |
+
+### WF5: Contact Auto-Creator Tests
+
+| # | Scenario | Input | Expected Output | Guardrail |
+|---|----------|-------|-----------------|-----------|
+| 1 | Police domain email | Email from john@kent.police.uk | HubSpot contact created, force = Kent | G-005 |
+| 2 | Gov.uk domain email | Email from jane@homeoffice.gov.uk | HubSpot contact created | — |
+| 3 | NHS domain email | Email from dr.smith@nhs.uk | HubSpot contact created | — |
+| 4 | Existing contact | Email from existing@kent.police.uk (already in HubSpot) | No duplicate created | G-011 |
+| 5 | Personal email domain | Email from james@gmail.com | No action (not public sector) | — |
+| 6 | Corporate non-public | Email from sales@vendor.com | No action (not public sector) | — |
+| 7 | Company association | New contact from john@surrey.police.uk | Linked to Surrey Police company | G-005 |
+| 8 | Emails record updated | New contact created | Emails.hubspot_contact_id populated | G-011 |
+
+### WF3: Waiting-For Tracker Tests
+
+| # | Scenario | Input | Expected Output | Guardrail |
+|---|----------|-------|-----------------|-----------|
+| 1 | Explicit question sent | Sent email with "Could you confirm...?" | status = waiting_for_reply | — |
+| 2 | Request pattern sent | Sent email with "Please let me know..." | status = waiting_for_reply | — |
+| 3 | Forward expectation | Sent email with "Looking forward to hearing from you" | status = waiting_for_reply | — |
+| 4 | Thank you only | Sent email with "Thanks for the update" (no request) | status = sent (no waiting) | — |
+| 5 | Overdue item (4 days) | Waiting item, waiting_since = 4 days ago | Follow-up draft generated | — |
+| 6 | Not yet overdue (2 days) | Waiting item, waiting_since = 2 days ago | No follow-up draft | — |
+| 7 | Follow-up message quality | Overdue item | Draft < 75 words, has CTA | G-012, G-015 |
+
 ### Classification Tests
 
-1. **Police sender** → Should be Urgent
-2. **Open deal context** → Should boost priority
-3. **Newsletter** → Should be FYI/Archive
-4. **Direct question** → Should be Today
-5. **Time-sensitive language** → Should be Urgent
+| # | Scenario | Input | Expected Output | Guardrail |
+|---|----------|-------|-----------------|-----------|
+| 1 | Police sender | Email from *.police.uk | priority = Urgent | G-005 |
+| 2 | Open deal context | Sender has open deal in HubSpot | priority boosted | — |
+| 3 | Newsletter | Email with "unsubscribe" link | category = FYI/Archive | — |
+| 4 | Direct question | Email containing "?" requesting action | priority = Today | — |
+| 5 | Time-sensitive | Email with "urgent", "ASAP", "deadline" | priority = Urgent | — |
 
 ### Draft Quality Tests
 
-1. Draft follows Hook → Bridge → Value → CTA structure
-2. Draft doesn't lead with "we have candidates"
-3. Draft is under 150 words
-4. Draft ends with clear CTA
+| # | Scenario | Input | Expected Output | Guardrail |
+|---|----------|-------|-----------------|-----------|
+| 1 | Structure compliance | Any draft | Hook → Bridge → Value → CTA | G-015 |
+| 2 | No commodity pitch | Any draft | Does NOT start with "we have candidates" | G-012 |
+| 3 | Word count | Any draft | < 150 words | — |
+| 4 | Clear CTA | Any draft | Ends with actionable request | G-015 |
 
-### Integration Tests
+### Integration Tests (End-to-End)
 
-1. Outlook email → Make.com → Airtable (within 15 min)
-2. Classification → Draft → Outlook draft created
-3. Skip email → Moves to @Review folder
-4. Archive email → Moves to Archive folder
+| # | Scenario | Flow | Expected Outcome |
+|---|----------|------|------------------|
+| 1 | Email ingestion | Outlook → Make.com → Airtable | Email appears in Email_Raw within 15 min |
+| 2 | Full classification | Email received → n8n WF1 → classified | Emails table populated with priority |
+| 3 | Draft creation | Classification + draft → Make.com → Outlook | Draft appears in Outlook Drafts folder |
+| 4 | Email archival | User archives email → Make.com → Outlook | Email moved to Archive folder |
+| 5 | Decay scan to dashboard | WF4 runs → API endpoint → Dashboard | Decay panels show alerts |
 
-### ADHD UX Tests
+### Dashboard UX Tests
 
-1. Focus Mode shows exactly 5 emails
-2. Progress indicator updates correctly
-3. Celebration appears after 5 processed
-4. "Show More" reveals next batch (max 10)
-5. Skip count increments, auto-archives at 3
+| # | Scenario | Expected Behaviour |
+|---|----------|-------------------|
+| 1 | Focus Mode limit | Shows exactly 5 emails (not more) |
+| 2 | Progress indicator | Updates as items processed (1 of 5, 2 of 5...) |
+| 3 | Completion celebration | "Done!" message after 5 processed |
+| 4 | Decay panel sorting | Red items always above orange, orange above yellow |
+| 5 | Empty state | Shows celebration message when no items |
+| 6 | Keyboard navigation | J/K moves selection in all sections |
+| 7 | Section switching | 1/2/3/4 keys switch between tabs |
+| 8 | Snooze functionality | Snoozed items hidden for specified duration |
+
+### Performance Benchmarks
+
+| Test | Target | Measurement |
+|------|--------|-------------|
+| Email classification latency | <200ms | Time from trigger to Airtable update |
+| Decay scan duration | <60s for 100 contacts | Full WF4 execution time |
+| Dashboard initial load | <2s | Time to first meaningful paint |
+| API response time | <500ms | /api/decay, /api/waiting-for endpoints |
 
 ---
 
