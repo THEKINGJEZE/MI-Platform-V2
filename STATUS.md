@@ -49,15 +49,22 @@
 | Decision | Reference |
 |----------|-----------|
 | HubSpot as primary data source for engagement | DECISIONS.md I1 |
-| Two-tier decay: Deal-level (8/15/30d) + Org-level (30/60/90d) | DECISIONS.md I4, SPEC-012 §6 |
-| Include Closed Won contacts (clients need check-ins) | DECISIONS.md I4 |
-| UK public sector contact auto-creation (not just police) | DECISIONS.md I3, SPEC-012 §10 |
+| Two-tier decay: Deal-level (8/15/30d) + Org-level (30/60/90d) | SPEC-012 §6 |
+| Hook-enforced spec creation (hard block) | DECISIONS.md A13 |
+| Hook enforcement expansion (warnings for workflow/schema/prompt/phase) | DECISIONS.md A14 |
 
 ---
 
 ## Blockers
 
 None.
+
+---
+
+## Completed This Session
+
+- ✅ **A13**: Hook-enforced spec creation process (hard block without `/prep-spec`)
+- ✅ **A14**: Hook enforcement expansion (5 new warnings for drift prevention)
 
 ---
 
