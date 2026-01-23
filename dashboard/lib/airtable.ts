@@ -43,7 +43,7 @@ const TABLES = {
   emailRaw: process.env.AIRTABLE_TABLE_EMAIL_RAW || 'tblYYyNm7yGbX3Ehj',
   emails: process.env.AIRTABLE_TABLE_EMAILS || 'tblaeAuzLbmzW8ktJ',
   // Phase 2a-7 decay alerts
-  decayAlerts: process.env.AIRTABLE_TABLE_DECAY_ALERTS || 'tblDecayAlerts',
+  decayAlerts: process.env.AIRTABLE_TABLE_DECAY_ALERTS || 'tbluVmya44ap5KqwH',
 };
 
 // =============================================================================

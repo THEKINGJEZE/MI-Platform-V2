@@ -266,24 +266,13 @@
     },
     {
       "id": "merge-with-suggestion",
-      "name": "Code: Add Suggestion to Alert",
+      "name": "Code: Format Alert for Airtable",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [3180, 400],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Get the original alert and AI suggestion\nconst alert = $('Split: For AI Suggestions').item.json;\nconst suggestion = $input.item.json.message?.content || $input.item.json.text || 'Check in on how things are going.';\n\nreturn {\n  ...alert,\n  suggestedTouchpoint: suggestion.trim()\n};"
-      }
-    },
-    {
-      "id": "aggregate-with-suggestions",
-      "name": "Code: Final Aggregation",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [3400, 500],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "// Get enriched alerts\nconst enrichedAlerts = $input.all().map(i => i.json);\n\n// Re-group by section\nconst grouped = {\n  deal_contacts_going_cold: enrichedAlerts.filter(a => a.section === 'Deal Contacts Going Cold'),\n  client_checkins_due: enrichedAlerts.filter(a => a.section === 'Client Check-ins Due'),\n  organisations_going_quiet: [],\n  generated_at: new Date().toISOString(),\n  total_alerts: enrichedAlerts.length\n};\n\nreturn [{ json: grouped }];"
+        "jsCode": "// Get the original alert and AI suggestion\nconst alert = $('Split: For AI Suggestions').item.json;\nconst suggestion = $input.item.json.message?.content || $input.item.json.text || 'Check in on how things are going.';\n\n// Format for Airtable with alert_key for upsert (contact_id + deal_id)\nconst alertKey = `${alert.contact.id}-${alert.deal.id}`;\n\nreturn {\n  alert_key: alertKey,\n  alert_type: alert.type,\n  deal_id: alert.deal.id,\n  deal_name: alert.deal.name,\n  is_closed_won: alert.deal.isClosedWon,\n  contact_id: alert.contact.id,\n  contact_name: alert.contact.name,\n  contact_email: alert.contact.email || '',\n  contact_role: alert.contact.title || '',\n  status: alert.status,\n  days_since_contact: alert.daysSinceContact,\n  last_contact_date: alert.lastContactDate ? alert.lastContactDate.split('T')[0] : null,\n  suggested_touchpoint: suggestion.trim(),\n  calculated_at: new Date().toISOString()\n};"
       }
     },
     {
@@ -291,19 +280,28 @@
       "name": "Airtable: Upsert Decay Alerts",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [3620, 500],
+      "position": [3400, 400],
       "parameters": {
         "operation": "upsert",
         "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
-        "table": {"__rl": true, "value": "Decay_Alerts", "mode": "name"},
+        "table": {"__rl": true, "value": "tbluVmya44ap5KqwH", "mode": "id"},
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "scan_date": "={{ $json.generated_at }}",
-            "total_alerts": "={{ $json.total_alerts }}",
-            "deal_contacts_cold": "={{ JSON.stringify($json.deal_contacts_going_cold) }}",
-            "client_checkins_due": "={{ JSON.stringify($json.client_checkins_due) }}",
-            "orgs_going_quiet": "={{ JSON.stringify($json.organisations_going_quiet) }}"
+            "alert_key": "={{ $json.alert_key }}",
+            "alert_type": "={{ $json.alert_type }}",
+            "deal_id": "={{ $json.deal_id }}",
+            "deal_name": "={{ $json.deal_name }}",
+            "is_closed_won": "={{ $json.is_closed_won }}",
+            "contact_id": "={{ $json.contact_id }}",
+            "contact_name": "={{ $json.contact_name }}",
+            "contact_email": "={{ $json.contact_email }}",
+            "contact_role": "={{ $json.contact_role }}",
+            "status": "={{ $json.status }}",
+            "days_since_contact": "={{ $json.days_since_contact }}",
+            "last_contact_date": "={{ $json.last_contact_date }}",
+            "suggested_touchpoint": "={{ $json.suggested_touchpoint }}",
+            "calculated_at": "={{ $json.calculated_at }}"
           }
         },
         "options": {
@@ -312,6 +310,17 @@
       },
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Code: Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3620, 400],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const alerts = $input.all().map(i => i.json);\n\nreturn [{\n  json: {\n    total_alerts: alerts.length,\n    cold: alerts.filter(a => a.status === 'cold').length,\n    at_risk: alerts.filter(a => a.status === 'at_risk').length,\n    warming: alerts.filter(a => a.status === 'warming').length,\n    generated_at: new Date().toISOString()\n  }\n}];"
       }
     },
     {
@@ -401,15 +410,15 @@
       ]
     },
     "OpenAI: Generate Touchpoint": {
-      "main": [[{"node": "Code: Add Suggestion to Alert", "type": "main", "index": 0}]]
+      "main": [[{"node": "Code: Format Alert for Airtable", "type": "main", "index": 0}]]
     },
-    "Code: Add Suggestion to Alert": {
-      "main": [[{"node": "Code: Final Aggregation", "type": "main", "index": 0}]]
-    },
-    "Code: Final Aggregation": {
+    "Code: Format Alert for Airtable": {
       "main": [[{"node": "Airtable: Upsert Decay Alerts", "type": "main", "index": 0}]]
     },
     "Airtable: Upsert Decay Alerts": {
+      "main": [[{"node": "Code: Aggregate Results", "type": "main", "index": 0}]]
+    },
+    "Code: Aggregate Results": {
       "main": [[{"node": "Respond: Success", "type": "main", "index": 0}]]
     },
     "Set: No Alerts": {
