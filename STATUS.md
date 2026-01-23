@@ -6,22 +6,30 @@
 
 ---
 
-## This Session: Claude Code Best Practices Audit ✅
+## This Session: Claude Code Documentation Deep Dive ✅
 
 **Completed**: 23 January 2026
 
-Audited Claude Code setup against official best practices (~85% adoption). Implemented:
+Comprehensive review of ALL Claude Code documentation pages (code.claude.com + platform.claude.com). Created detailed gap analysis and implemented quick wins.
 
-| Item | Status |
-|------|--------|
-| `.claude/MCP-SERVERS.md` | ✅ Created — documents all MCP integrations |
-| `.claude/BEST-PRACTICES.md` | ✅ Created — writer-reviewer, headless, Chrome patterns |
-| `CLAUDE.md` plan mode guidance | ✅ Added to session protocol |
-| `/prep-spec --interview` mode | ✅ Added to command |
-| `scripts/pre-commit-review.sh` | ✅ Created — Claude reviews staged changes |
-| Chrome/Playwright verification | ✅ Tested — dashboard.peelplatforms.co.uk works |
+### Documentation Reviewed
+- Desktop, Web, Features Overview, Common Workflows
+- How Claude Code Works, Sub-agents, Agent SDK
+- Hooks, MCP, Settings (full reference)
 
-**Commits**: 4 commits pushed to `pedantic-cerf` branch
+### Files Created
+| File | Purpose |
+|------|---------|
+| `docs/audits/2026-01-23-documentation-deep-dive.md` | Full gap analysis (85% score) |
+| `.claude/ENVIRONMENT-RULES.md` | CLI vs Desktop vs Web selection guide |
+| `.worktreeinclude` | Env file copying to worktrees |
+
+### Key Findings
+- Current setup scores **85%** against best practices
+- Main gaps: Agent SDK for CI/CD, session management, sandbox mode
+- CLI/Desktop/Web rules now documented
+
+**Commits**: 5 commits pushed to `pedantic-cerf` branch
 
 ---
 
@@ -49,9 +57,15 @@ Both specs complete. See `specs/IMPL-010.md` and `specs/IMPL-011.md` for details
 
 ## Next Actions
 
+### Phase 1d (Priority)
 1. **Refactor WF5 HubSpot integration** — implement hybrid approach
 2. **Monitor for 1 week** — verify classification quality
 3. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
+
+### Claude Code Enhancements (Optional — from docs deep dive)
+1. **Fix serena MCP server** — plugin-provided, may need disabling in `~/.claude/settings.json` (set `serena@claude-plugins-official: false` in enabledPlugins)
+2. **Agent SDK for pre-commit review** — Use claude-agent-sdk for automated code review in CI/CD pipelines (see `docs/audits/2026-01-23-documentation-deep-dive.md`)
+3. **Custom statusline.sh** — Create `.claude/hooks/statusline.sh` to show project context in Claude Code status bar
 
 ---
 
