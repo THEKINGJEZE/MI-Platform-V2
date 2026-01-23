@@ -41,7 +41,7 @@
 |-----------|--------|-------|
 | Dashboard | ✅ Live | https://dashboard.peelplatforms.co.uk/review |
 | WF3 (Classification) | ✅ Updated | v2.1 prompt deployed |
-| WF5 (Agent Enrichment) | ✅ Deployed | ID: eizYYOK4vjrzRfJQ (needs activation) |
+| WF5 (Agent Enrichment) | ✅ Rebuilt | ID: 761WZpy9idhBPLpf (proper AI Agents) |
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
@@ -54,17 +54,18 @@
 
 ### Implementation Summary
 
-**Approach**: Hybrid architecture
-- Contact Research: Deterministic JS scoring (problem owner logic per G-014)
-- Outreach Drafting: GPT-4o with Hook → Bridge → Value → CTA structure (G-015)
+**Approach**: Proper n8n AI Agents with tool-calling
+- Contact Research Agent: 4 tools (HubSpot search, contact history, org structure, fit evaluation)
+- Outreach Drafting Agent: 5 tools (signals, previous outreach, force context, Peel services, self-critique)
+- Both agents use `@n8n/n8n-nodes-langchain.agent` with GPT-4o
 
-**Key Files Created**:
-- `n8n/workflows/wf5-agent-enrichment.json` — Main workflow
+**Key Files**:
+- `n8n/workflows/wf5-agent-enrichment.json` — 31-node workflow with AI Agents
 - `n8n/workflows/opportunity-enricher-backup.json` — Backup of original
 - `reference-data/peel-services.json` — Service reference data
 
-**n8n Workflow**: `MI: Agent Enrichment (SPEC-011)` (ID: `eizYYOK4vjrzRfJQ`)
-**Status**: Deployed (inactive — activate after live testing)
+**n8n Workflow**: `MI: Agent Enrichment (SPEC-011)` (ID: `761WZpy9idhBPLpf`)
+**Status**: Rebuilt and deployed (inactive — activate after live testing)
 
 ### Acceptance Criteria (9/9 Verified)
 

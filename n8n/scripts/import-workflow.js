@@ -97,9 +97,11 @@ async function main() {
 
   if (existingWorkflow) {
     console.log(`Found existing workflow (ID: ${existingWorkflow.id})`);
-    console.log('Updating workflow...');
-    await updateWorkflow(existingWorkflow.id, workflowData);
-    console.log(`Workflow updated: ${existingWorkflow.id}`);
+    console.log('Deleting existing workflow...');
+    await deleteWorkflow(existingWorkflow.id);
+    console.log('Creating new workflow...');
+    const created = await createWorkflow(workflowData);
+    console.log(`Workflow recreated: ${created.id}`);
   } else {
     console.log('No existing workflow found. Creating new...');
     const created = await createWorkflow(workflowData);
@@ -156,17 +158,9 @@ async function createWorkflow(workflowData) {
   });
 }
 
-async function updateWorkflow(id, workflowData) {
-  const payload = {
-    name: workflowData.name,
-    nodes: workflowData.nodes,
-    connections: workflowData.connections,
-    settings: workflowData.settings || {},
-  };
-
+async function deleteWorkflow(id) {
   return apiRequest(`/workflows/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload),
+    method: 'DELETE',
   });
 }
 

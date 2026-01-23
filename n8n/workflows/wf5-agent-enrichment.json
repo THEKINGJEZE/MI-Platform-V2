@@ -1,7 +1,13 @@
 {
   "name": "MI: Agent Enrichment (SPEC-011)",
-  "id": "agent-enrichment-v1",
+  "id": "agent-enrichment-v2",
   "active": false,
+  "meta": {
+    "spec": "SPEC-011",
+    "version": "2.0",
+    "description": "Two-stage AI Agent workflow with tool-calling",
+    "guardrails": ["G-002", "G-007", "G-011", "G-012", "G-013", "G-014", "G-015"]
+  },
   "nodes": [
     {
       "parameters": {
@@ -13,7 +19,7 @@
       "name": "Schedule: Every 15 Minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [100, 300]
+      "position": [100, 400]
     },
     {
       "parameters": {},
@@ -21,7 +27,7 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [100, 500]
+      "position": [100, 600]
     },
     {
       "parameters": {
@@ -43,7 +49,7 @@
       "name": "Fetch: Researching Opportunities",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [300, 400],
+      "position": [300, 500],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
@@ -61,7 +67,7 @@
       "name": "IF: Has Opportunities",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [500, 400]
+      "position": [500, 500]
     },
     {
       "parameters": {
@@ -71,7 +77,7 @@
       "name": "Code: Split Records",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 300]
+      "position": [700, 400]
     },
     {
       "parameters": {"options": {}},
@@ -79,17 +85,17 @@
       "name": "Loop: Each Opportunity",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [900, 300]
+      "position": [900, 400]
     },
     {
       "parameters": {
-        "jsCode": "// Extract context from opportunity record\nconst opp = $input.first().json;\nconst fields = opp.fields || {};\nreturn [{ json: {\n  opportunity_id: opp.id,\n  force_id: fields.force?.[0] || null,\n  signal_ids: fields.signals || [],\n  existing_contact_id: fields.contact?.[0] || null,\n  role_category: fields.role_category || 'investigation',\n  role_detail: fields.role_detail || '',\n  is_competitor_intercept: fields.is_competitor_intercept === true,\n  existing_fields: fields\n}}];"
+        "jsCode": "// Extract context from opportunity record for AI Agent\nconst opp = $input.first().json;\nconst fields = opp.fields || {};\nreturn [{ json: {\n  opportunity_id: opp.id,\n  force_id: fields.force?.[0] || null,\n  force_name: null,\n  force_hubspot_id: null,\n  signal_ids: fields.signals || [],\n  existing_contact_id: fields.contact?.[0] || null,\n  role_category: fields.role_category || 'investigation',\n  role_detail: fields.role_detail || '',\n  is_competitor_intercept: fields.is_competitor_intercept === true,\n  signal_count: (fields.signals || []).length\n}}];"
       },
-      "id": "extract-context",
-      "name": "Code: Extract Context",
+      "id": "extract-opp-context",
+      "name": "Code: Extract Opp Context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 300]
+      "position": [1100, 400]
     },
     {
       "parameters": {
@@ -98,154 +104,149 @@
         "nodeCredentialType": "airtableTokenApi",
         "options": {}
       },
-      "id": "fetch-force",
+      "id": "fetch-force-details",
       "name": "Fetch: Force Details",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1300, 300],
+      "position": [1300, 400],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Merge force data\nconst ctx = $('Code: Extract Context').first().json;\nconst force = $input.first().json;\nconst f = force.fields || force;\nreturn [{ json: { ...ctx, force_name: f.name || 'Unknown', force_region: f.region || '', force_size: f.size || '', hubspot_company_id: f.hubspot_company_id || null }}];"
+        "jsCode": "// Merge force details into context\nconst ctx = $('Code: Extract Opp Context').first().json;\nconst force = $input.first().json;\nconst fields = force.fields || {};\nreturn [{ json: {\n  ...ctx,\n  force_name: fields.name || 'Unknown Force',\n  force_hubspot_id: fields.hubspot_company_id || null,\n  force_region: fields.region || null,\n  force_size: fields.size || null\n}}];"
       },
-      "id": "merge-force",
-      "name": "Code: Merge Force",
+      "id": "merge-force-context",
+      "name": "Code: Merge Force Context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 300]
+      "position": [1500, 400]
     },
     {
       "parameters": {
-        "jsCode": "// Build signal filter formula\nconst ctx = $input.first().json;\nconst signalIds = ctx.signal_ids || [];\nif (signalIds.length === 0) return [{ json: { ...ctx, signal_filter: '', has_signals: false }}];\nconst orClauses = signalIds.map(id => `RECORD_ID()='${id}'`).join(',');\nreturn [{ json: { ...ctx, signal_filter: `OR(${orClauses})`, has_signals: true }}];"
+        "jsCode": "// Build input prompt for Contact Research Agent\nconst ctx = $input.first().json;\n\nconst userPrompt = `Find the best contact for this sales opportunity.\n\nOPPORTUNITY:\n- Opportunity ID: ${ctx.opportunity_id}\n- Force: ${ctx.force_name}\n- Force ID (Airtable): ${ctx.force_id}\n- Force HubSpot ID: ${ctx.force_hubspot_id || 'Unknown - search by name'}\n- Role Category: ${ctx.role_category}\n- Role Detail: ${ctx.role_detail}\n- Is Competitor Intercept: ${ctx.is_competitor_intercept}\n- Signal Count: ${ctx.signal_count}\n\nUse your tools to:\n1. Search HubSpot for contacts at this force\n2. Evaluate each contact's fit for this role category\n3. Check contact history to ensure safe to contact (not emailed <7 days ago)\n4. Select the best contact and explain your reasoning\n\nReturn your recommendation as JSON matching the output schema.`;\n\nreturn [{ json: {\n  ...ctx,\n  contact_research_prompt: userPrompt\n}}];"
       },
-      "id": "build-signal-filter",
-      "name": "Code: Build Signal Filter",
+      "id": "build-contact-prompt",
+      "name": "Code: Build Contact Research Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1700, 300]
+      "position": [1700, 400]
     },
     {
       "parameters": {
-        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblez9trodMzKKqXq",
+        "model": {"__rl": true, "mode": "id", "value": "gpt-4o"},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "openai-contact-model",
+      "name": "OpenAI: Contact Research Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [1900, 200],
+      "credentials": {
+        "openAiApi": {"id": "KPeEyy20q5aUrUtM", "name": "OpenAi account"}
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [{\n    \"filters\": [{\n      \"propertyName\": \"associatedcompanyid\",\n      \"operator\": \"EQ\",\n      \"value\": \"{{ $fromAI('hubspot_company_id', 'HubSpot company ID for the police force', 'string') }}\"\n    }]\n  }],\n  \"properties\": [\"firstname\", \"lastname\", \"email\", \"jobtitle\", \"phone\", \"hs_object_id\"],\n  \"limit\": 20\n}",
+        "options": {},
+        "toolDescription": "Search HubSpot CRM for contacts at a police force. Use this to find all known contacts at that force. Returns contact names, roles, emails. Requires the force's HubSpot company ID."
+      },
+      "id": "tool-search-hubspot",
+      "name": "Tool: Search HubSpot Contacts",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1900, 500],
+      "credentials": {
+        "httpHeaderAuth": {"id": "6u9JM1Nkeo6jn3e6", "name": "HubSpot API"}
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1/{{ $fromAI('contact_id', 'Airtable record ID of the contact (starts with rec)', 'string') }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "airtableTokenApi",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {"name": "filterByFormula", "value": "={{ $json.signal_filter }}"},
-            {"name": "fields[]", "value": "title"},
-            {"name": "fields[]", "value": "type"},
-            {"name": "fields[]", "value": "source"},
-            {"name": "fields[]", "value": "detected_at"},
-            {"name": "fields[]", "value": "role_category"},
-            {"name": "fields[]", "value": "role_detail"}
-          ]
-        },
-        "options": {}
+        "options": {},
+        "toolDescription": "Get interaction history for a specific contact from Airtable. Returns last_interaction date, relationship_status, and notes. Use this after finding contacts to check when we last contacted them."
       },
-      "id": "fetch-signals",
-      "name": "Fetch: Signal Details",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1900, 300],
+      "id": "tool-get-contact-history",
+      "name": "Tool: Get Contact History",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1900, 600],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Merge signal details\nconst ctx = $('Code: Build Signal Filter').first().json;\nconst response = $input.first().json;\nconst records = response.records || [];\nconst signalDetails = records.map(r => ({\n  id: r.id,\n  title: r.fields?.title || 'Unknown',\n  type: r.fields?.type || 'unknown',\n  source: r.fields?.source || 'unknown',\n  detected_at: r.fields?.detected_at || null,\n  role_category: r.fields?.role_category || null,\n  role_detail: r.fields?.role_detail || null\n}));\nconst hasCompetitorSignal = signalDetails.some(s => s.type === 'competitor_job');\nconst signalSummary = signalDetails.map(s => `${s.title} (${s.role_category || s.type}, ${s.source})`).join('; ');\nreturn [{ json: { ...ctx, signal_details: signalDetails, signal_summary: signalSummary, has_competitor_signal: hasCompetitorSignal || ctx.is_competitor_intercept }}];"
-      },
-      "id": "merge-signals",
-      "name": "Code: Merge Signals",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2100, 300]
-    },
-    {
-      "parameters": {
-        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tbl0u9vy71jmyaDx1",
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblbAjBEdpv42Smpw/{{ $fromAI('force_id', 'Airtable record ID of the force (starts with rec)', 'string') }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "airtableTokenApi",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {"name": "filterByFormula", "value": "=FIND(\"{{ $json.force_id }}\", ARRAYJOIN({force}))"},
-            {"name": "maxRecords", "value": "10"}
-          ]
-        },
-        "options": {}
+        "options": {},
+        "toolDescription": "Get organizational structure and metadata for a police force. Returns known departments, competitor incumbents, notes. Use this to understand the force context when selecting a contact."
       },
-      "id": "fetch-airtable-contacts",
-      "name": "Fetch: Airtable Contacts",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2300, 300],
+      "id": "tool-get-force-org",
+      "name": "Tool: Get Force Org Structure",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1900, 700],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Merge Airtable contacts into context\nconst ctx = $('Code: Merge Signals').first().json;\nconst response = $input.first().json;\nconst records = response.records || [];\nconst contacts = records.map(r => ({\n  contact_id: r.id,\n  name: r.fields?.name || '',\n  role: r.fields?.role || '',\n  department: r.fields?.department || '',\n  seniority: r.fields?.seniority || '',\n  email: r.fields?.email || '',\n  verified: r.fields?.verified || false,\n  relationship_status: r.fields?.relationship_status || 'unknown',\n  last_interaction: r.fields?.last_interaction || null,\n  interaction_count: r.fields?.interaction_count || 0,\n  hubspot_id: r.fields?.hubspot_id || null\n}));\nreturn [{ json: { ...ctx, airtable_contacts: contacts, contact_count: contacts.length }}];"
+        "name": "evaluate_contact_fit",
+        "description": "Evaluate whether a contact is a good fit for this opportunity based on their role vs the role category being hired. Returns fit_score, fit_assessment, and reasoning. Use the Problem Owner Principle: prefer operational leaders (Head of Crime) over HR.",
+        "language": "javaScript",
+        "jsCode": "// G-014 Problem owner logic\nconst problemOwnerRoles = {\n  investigation: ['head of crime', 'head of investigations', 'det supt', 'detective superintendent', 'acc crime', 'dci'],\n  criminal_justice: ['head of cj', 'head of criminal justice', 'cj manager', 'disclosure lead', 'custody manager'],\n  intelligence: ['head of intelligence', 'intelligence manager', 'intel manager', 'det supt intelligence'],\n  forensics: ['head of forensics', 'digital forensics manager', 'dfu manager', 'head of digital'],\n  specialist: ['head of psd', 'vetting manager', 'economic crime lead', 'fraud lead', 'financial investigation'],\n  support: ['head of hr', 'head of resourcing', 'hr manager', 'recruitment manager']\n};\nconst hrRoles = ['hr', 'resourcing', 'recruitment', 'people', 'talent'];\n\nconst roleLower = (query.contact_role || '').toLowerCase();\nconst category = query.role_category || 'investigation';\nconst targetRoles = problemOwnerRoles[category] || problemOwnerRoles.investigation;\n\nlet score = 30;\nlet isProblemOwner = false;\nlet isHR = false;\n\nif (targetRoles.some(r => roleLower.includes(r))) {\n  score = 90;\n  isProblemOwner = true;\n} else if (hrRoles.some(r => roleLower.includes(r))) {\n  score = 60;\n  isHR = true;\n}\n\nconst assessment = score >= 80 ? 'high' : score >= 50 ? 'medium' : 'low';\nconst reasoning = isProblemOwner \n  ? `This contact is a problem owner for ${category} - ideal choice.`\n  : isHR \n    ? `This contact is HR/Resourcing - acceptable fallback. Problem owner (${targetRoles[0]}) would be better.`\n    : `This contact may not be the right person for ${category} opportunities.`;\n\nreturn {\n  fit_score: score,\n  fit_assessment: assessment,\n  is_problem_owner: isProblemOwner,\n  is_hr_fallback: isHR,\n  reasoning: reasoning,\n  ideal_contact_profile: isProblemOwner ? null : targetRoles[0]\n};",
+        "specifyInputSchema": true,
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"contact_role\": {\"type\": \"string\", \"description\": \"The contact's job title/role\"},\n    \"role_category\": {\"type\": \"string\", \"description\": \"The category of role being hired: investigation, criminal_justice, intelligence, forensics, specialist, support\"}\n  },\n  \"required\": [\"contact_role\", \"role_category\"]\n}"
       },
-      "id": "merge-airtable-contacts",
-      "name": "Code: Merge Airtable Contacts",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2500, 300]
+      "id": "tool-evaluate-fit",
+      "name": "Tool: Evaluate Contact Fit",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [1900, 800]
     },
     {
       "parameters": {
-        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "airtableTokenApi",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {"name": "filterByFormula", "value": "=AND(FIND(\"{{ $json.force_id }}\", ARRAYJOIN({force})), {status}=\"sent\")"},
-            {"name": "maxRecords", "value": "5"},
-            {"name": "sort[0][field]", "value": "sent_at"},
-            {"name": "sort[0][direction]", "value": "desc"},
-            {"name": "fields[]", "value": "contact"},
-            {"name": "fields[]", "value": "sent_at"},
-            {"name": "fields[]", "value": "outreach_angle"},
-            {"name": "fields[]", "value": "outreach_draft"}
-          ]
-        },
-        "options": {}
+        "promptType": "define",
+        "text": "={{ $json.contact_research_prompt }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are a Contact Research Agent for Peel Solutions. Your job is to find the BEST contact for a sales opportunity at a UK police force.\n\nTHE PROBLEM OWNER PRINCIPLE:\nThe ideal contact is the 'problem owner' - the person whose team is understaffed. This is usually NOT HR.\n- Investigation roles → Head of Crime, Head of Investigations\n- Criminal Justice roles → Head of CJ, Disclosure Lead\n- Intelligence roles → Head of Intelligence\n- HR is the FALLBACK, not the first choice\n\nYOUR PROCESS:\n1. Use search_hubspot_contacts to find contacts at the force\n2. Use evaluate_contact_fit to assess each contact's fit\n3. Use get_contact_history to check if we've contacted them recently (< 7 days = too soon)\n4. Select the best contact based on fit and timing\n\nRULES:\n- Problem owner > HR - Always prefer operational leaders\n- Never recommend someone we emailed < 7 days ago - set safe_to_contact: false\n- Explain your reasoning clearly\n- If no contacts exist, return null with ideal_contact_profile\n\nOUTPUT FORMAT (JSON):\n{\n  \"contact_id\": \"rec_xxx or null\",\n  \"contact_name\": \"Name or null\",\n  \"contact_role\": \"Role or null\",\n  \"contact_email\": \"email or null\",\n  \"contact_confidence\": \"high/medium/low/none\",\n  \"is_problem_owner\": true/false,\n  \"selection_reasoning\": \"Why this contact was chosen\",\n  \"days_since_last_contact\": 30,\n  \"safe_to_contact\": true/false,\n  \"backup_contacts\": [{\"contact_id\": \"rec_yyy\", \"name\": \"...\", \"role\": \"...\", \"why_backup\": \"...\"}],\n  \"ideal_contact_profile\": \"If no good contact, who to look for\",\n  \"research_notes\": \"Useful context about the force/contacts\"\n}",
+          "maxIterations": 5,
+          "returnIntermediateSteps": true
+        }
       },
-      "id": "fetch-previous-outreach",
-      "name": "Fetch: Previous Outreach",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2700, 300],
-      "credentials": {
-        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Merge previous outreach context\nconst ctx = $('Code: Merge Airtable Contacts').first().json;\nconst response = $input.first().json;\nconst records = response.records || [];\nconst previousOutreach = records.map(r => ({\n  contact_id: r.fields?.contact?.[0] || null,\n  sent_at: r.fields?.sent_at || null,\n  angle: r.fields?.outreach_angle || null,\n  preview: (r.fields?.outreach_draft || '').substring(0, 100)\n}));\n\n// Calculate days since last outreach to any contact at this force\nlet daysSinceLastOutreach = null;\nif (records.length > 0 && records[0].fields?.sent_at) {\n  const lastSent = new Date(records[0].fields.sent_at);\n  const now = new Date();\n  daysSinceLastOutreach = Math.floor((now - lastSent) / (1000 * 60 * 60 * 24));\n}\n\n// Identify contacts we've emailed recently (within 7 days)\nconst recentlyContactedIds = previousOutreach\n  .filter(o => {\n    if (!o.sent_at) return false;\n    const sentDate = new Date(o.sent_at);\n    const daysSince = Math.floor((new Date() - sentDate) / (1000 * 60 * 60 * 24));\n    return daysSince < 7;\n  })\n  .map(o => o.contact_id)\n  .filter(Boolean);\n\nreturn [{ json: { ...ctx, previous_outreach: previousOutreach, days_since_last_outreach: daysSinceLastOutreach, recently_contacted_ids: recentlyContactedIds, angles_used: [...new Set(previousOutreach.map(o => o.angle).filter(Boolean))] }}];"
-      },
-      "id": "merge-previous-outreach",
-      "name": "Code: Merge Previous Outreach",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2900, 300]
-    },
-    {
-      "parameters": {
-        "jsCode": "// CONTACT RESEARCH AGENT: Select the best contact using problem owner logic (G-014)\nconst ctx = $input.first().json;\nconst contacts = ctx.airtable_contacts || [];\nconst recentlyContactedIds = ctx.recently_contacted_ids || [];\nconst roleCategory = ctx.role_category || 'investigation';\n\n// Problem owner mapping per G-014\nconst problemOwnerRoles = {\n  investigation: ['head of crime', 'head of investigations', 'det supt', 'detective superintendent', 'acc crime'],\n  criminal_justice: ['head of cj', 'head of criminal justice', 'cj manager', 'disclosure lead'],\n  intelligence: ['head of intelligence', 'intelligence manager', 'intel manager'],\n  forensics: ['head of forensics', 'digital forensics manager', 'dfu manager'],\n  specialist: ['head of psd', 'vetting manager', 'economic crime lead', 'fraud lead'],\n  support: ['head of hr', 'head of resourcing', 'hr manager']\n};\n\nconst hrRoles = ['hr', 'resourcing', 'recruitment', 'people'];\n\n// Score each contact\nconst scoredContacts = contacts.map(c => {\n  const roleLower = (c.role || '').toLowerCase();\n  const deptLower = (c.department || '').toLowerCase();\n  \n  let score = 0;\n  let isProblemOwner = false;\n  let isHR = false;\n  \n  // Check if problem owner for this role category\n  const targetRoles = problemOwnerRoles[roleCategory] || problemOwnerRoles.investigation;\n  if (targetRoles.some(r => roleLower.includes(r))) {\n    score += 50;\n    isProblemOwner = true;\n  }\n  \n  // Check if HR (fallback)\n  if (hrRoles.some(r => roleLower.includes(r) || deptLower.includes(r))) {\n    score += 20;\n    isHR = true;\n  }\n  \n  // Bonus for seniority\n  if (c.seniority === 'Director') score += 15;\n  else if (c.seniority === 'Head') score += 10;\n  else if (c.seniority === 'Manager') score += 5;\n  \n  // Bonus for verified email\n  if (c.verified && c.email) score += 10;\n  \n  // Bonus for warm relationship\n  if (c.relationship_status === 'warm') score += 10;\n  else if (c.relationship_status === 'active') score += 15;\n  else if (c.relationship_status === 'champion') score += 20;\n  \n  // PENALTY: Recently contacted (within 7 days) - G-014\n  const safeToContact = !recentlyContactedIds.includes(c.contact_id);\n  if (!safeToContact) score -= 100;\n  \n  return { ...c, score, isProblemOwner, isHR, safeToContact };\n});\n\n// Sort by score (highest first)\nscoredContacts.sort((a, b) => b.score - a.score);\n\n// Select best contact\nlet selectedContact = null;\nlet selectionReasoning = '';\nlet contactConfidence = 'none';\nlet contactType = null;\nlet backupContacts = [];\n\nconst safeContacts = scoredContacts.filter(c => c.safeToContact);\n\nif (safeContacts.length > 0) {\n  selectedContact = safeContacts[0];\n  backupContacts = safeContacts.slice(1, 3);\n  \n  if (selectedContact.isProblemOwner) {\n    contactConfidence = 'high';\n    contactType = 'Problem Owner';\n    selectionReasoning = `${selectedContact.name} is ${selectedContact.role} - directly responsible for ${roleCategory} capacity. ${selectedContact.verified ? 'Email verified.' : ''} ${selectedContact.relationship_status !== 'unknown' ? `Relationship: ${selectedContact.relationship_status}.` : ''}`;\n  } else if (selectedContact.isHR) {\n    contactConfidence = 'medium';\n    contactType = 'HR Fallback';\n    selectionReasoning = `${selectedContact.name} (${selectedContact.role}) is HR/Resourcing - can route to problem owner. Ideal contact would be ${problemOwnerRoles[roleCategory]?.[0] || 'Head of relevant department'}.`;\n  } else {\n    contactConfidence = 'low';\n    contactType = 'Deputy';\n    selectionReasoning = `${selectedContact.name} (${selectedContact.role}) is best available contact. May need to find problem owner for ${roleCategory}.`;\n  }\n} else if (scoredContacts.length > 0) {\n  selectionReasoning = `All known contacts were contacted within last 7 days. Recommend waiting or finding new contact.`;\n} else {\n  selectionReasoning = `No contacts found at ${ctx.force_name}. Ideal contact: ${problemOwnerRoles[roleCategory]?.[0] || 'Head of Crime/Investigations'}.`;\n}\n\nreturn [{ json: {\n  ...ctx,\n  selected_contact: selectedContact,\n  contact_confidence: contactConfidence,\n  contact_type: contactType,\n  selection_reasoning: selectionReasoning,\n  backup_contacts: backupContacts,\n  has_contact: !!selectedContact\n}}];"
-      },
-      "id": "contact-research-agent",
+      "id": "agent-contact-research",
       "name": "Agent: Contact Research",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [2100, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Contact Research Agent output\nconst ctx = $('Code: Build Contact Research Prompt').first().json;\nconst agentOutput = $input.first().json;\n\nlet contactResult = {\n  contact_id: null,\n  contact_name: null,\n  contact_role: null,\n  contact_email: null,\n  contact_confidence: 'none',\n  is_problem_owner: false,\n  selection_reasoning: 'Agent did not return structured output',\n  safe_to_contact: false,\n  backup_contacts: [],\n  ideal_contact_profile: null,\n  research_notes: null\n};\n\ntry {\n  const output = agentOutput.output || '';\n  // Try to extract JSON from agent output\n  const jsonMatch = output.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    contactResult = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  contactResult.research_notes = `Parse error: ${e.message}`;\n}\n\nreturn [{\n  json: {\n    ...ctx,\n    contact_id: contactResult.contact_id,\n    contact_name: contactResult.contact_name,\n    contact_role: contactResult.contact_role,\n    contact_email: contactResult.contact_email,\n    contact_confidence: contactResult.contact_confidence || 'none',\n    is_problem_owner: contactResult.is_problem_owner || false,\n    selection_reasoning: contactResult.selection_reasoning,\n    safe_to_contact: contactResult.safe_to_contact !== false,\n    backup_contacts: contactResult.backup_contacts || [],\n    ideal_contact_profile: contactResult.ideal_contact_profile,\n    research_notes: contactResult.research_notes,\n    has_contact: !!contactResult.contact_id && contactResult.safe_to_contact !== false,\n    agent_intermediate_steps: agentOutput.intermediateSteps || []\n  }\n}];"
+      },
+      "id": "parse-contact-result",
+      "name": "Code: Parse Contact Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3100, 300]
+      "position": [2300, 400]
     },
     {
       "parameters": {
@@ -260,7 +261,7 @@
       "name": "IF: Contact Found",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [3300, 300]
+      "position": [2500, 400]
     },
     {
       "parameters": {
@@ -277,50 +278,170 @@
       "name": "Update: Needs Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [3500, 500],
+      "position": [2700, 600],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// OUTREACH DRAFTING AGENT: Build comprehensive AI context\nconst ctx = $input.first().json;\nconst contact = ctx.selected_contact || {};\nconst signals = ctx.signal_details || [];\nconst previousOutreach = ctx.previous_outreach || [];\nconst anglesUsed = ctx.angles_used || [];\n\n// Determine outreach angle\nlet angle = 'direct_hiring';\nif (ctx.has_competitor_signal || ctx.is_competitor_intercept) {\n  angle = 'competitor_intercept';\n} else if (signals.length > 2) {\n  angle = 'multi_signal';\n}\n\n// Build signal summary for AI\nconst signalList = signals.map(s => `- ${s.title} (${s.role_category || s.type}, via ${s.source})`).join('\\n');\n\n// Build previous outreach context\nlet outreachContext = 'No previous outreach to this force.';\nif (previousOutreach.length > 0) {\n  const recent = previousOutreach[0];\n  outreachContext = `Last outreach: ${recent.sent_at ? new Date(recent.sent_at).toLocaleDateString() : 'unknown'}, angle: ${recent.angle || 'unknown'}. ${anglesUsed.length > 0 ? `Angles used before: ${anglesUsed.join(', ')}.` : ''}`;\n}\n\nconst systemPrompt = `You are an Outreach Drafting Agent for Peel Solutions. Write a compelling, ready-to-send outreach message.\n\nCRITICAL RULES:\n1. Under 100 words - HARD LIMIT\n2. Follow Hook → Bridge → Value → CTA structure\n3. Reference specific signals (not generic)\n4. NEVER mention competitor names (Red Snapper, Investigo, etc.) even if that's how we know\n5. Problem owner language - outcomes, not 'candidates' or 'temps'\n6. Sign as just \"James\"\n7. Self-critique before returning\n\nMESSAGE STRUCTURE:\n- Hook (1-2 sentences): Reference their specific situation\n- Bridge (1 sentence): Acknowledge the challenge\n- Value (2-3 sentences): Position Peel's outcome-based approach\n- CTA (1 sentence): Request conversation (low friction)\n\nPEEL'S VALUE PROPOSITION:\n- Managed investigation teams under Statement of Works\n- We take accountability for outcomes, not just filling seats\n- We handle recruitment, management, and quality assurance\n- You direct the work, we deliver results`;\n\nconst userPrompt = `Write an outreach message for this opportunity.\n\nFORCE: ${ctx.force_name} (${ctx.force_region || ''}, ${ctx.force_size || ''})\n\nCONTACT:\n- Name: ${contact.name || 'Unknown'}\n- Role: ${contact.role || 'Unknown'}\n- Contact Type: ${ctx.contact_type || 'Unknown'} ${ctx.contact_type === 'HR Fallback' ? '(route to problem owner)' : ''}\n\nSIGNALS DETECTED:\n${signalList || 'No specific signals'}\n\nROLE CATEGORY: ${ctx.role_category || 'investigation'}\nROLE DETAIL: ${ctx.role_detail || 'General'}\nCOMPETITOR INTERCEPT: ${ctx.has_competitor_signal ? 'Yes - DO NOT mention competitor name' : 'No'}\n\nOUTREACH ANGLE: ${angle}\nPREVIOUS OUTREACH: ${outreachContext}\n\nReturn JSON:\n{\n  \"subject\": \"Email subject line\",\n  \"body\": \"Full message (under 100 words)\",\n  \"word_count\": number,\n  \"outreach_angle\": \"${angle}\",\n  \"why_now\": \"2-3 sentence summary for dashboard (cite specific signals)\",\n  \"key_points\": [\"point1\", \"point2\"]\n}`;\n\nreturn [{ json: { ...ctx, outreach_angle: angle, ai_system_prompt: systemPrompt, ai_user_prompt: userPrompt }}];"
+        "jsCode": "// Build input prompt for Outreach Drafting Agent\nconst ctx = $input.first().json;\n\nconst userPrompt = `Draft an outreach message for this opportunity.\n\nOPPORTUNITY:\n- Opportunity ID: ${ctx.opportunity_id}\n- Force: ${ctx.force_name}\n- Force ID: ${ctx.force_id}\n\nCONTACT:\n- Name: ${ctx.contact_name}\n- Role: ${ctx.contact_role}\n- Email: ${ctx.contact_email}\n- Is Problem Owner: ${ctx.is_problem_owner}\n- Selection Reasoning: ${ctx.selection_reasoning}\n\nCONTEXT:\n- Role Category: ${ctx.role_category}\n- Role Detail: ${ctx.role_detail}\n- Is Competitor Intercept: ${ctx.is_competitor_intercept}\n- Signal Count: ${ctx.signal_count}\n\nUse your tools to:\n1. Get opportunity signals to understand what triggered this\n2. Get previous outreach to avoid repetition\n3. Get force context for personalisation\n4. Get relevant Peel services to position\n5. Draft a message following Hook → Bridge → Value → CTA\n6. Critique the draft before finalizing\n\nReturn your final message as JSON matching the output schema.`;\n\nreturn [{ json: {\n  ...ctx,\n  outreach_drafting_prompt: userPrompt\n}}];"
       },
-      "id": "build-drafting-context",
-      "name": "Agent: Build Drafting Context",
+      "id": "build-drafting-prompt",
+      "name": "Code: Build Drafting Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3500, 200]
+      "position": [2700, 300]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.openai.com/v1/chat/completions",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "openAiApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": {{ JSON.stringify($json.ai_system_prompt) }}},\n    {\"role\": \"user\", \"content\": {{ JSON.stringify($json.ai_user_prompt) }}}\n  ],\n  \"response_format\": {\"type\": \"json_object\"},\n  \"temperature\": 0.4,\n  \"max_tokens\": 800\n}",
-        "options": {}
+        "model": {"__rl": true, "mode": "id", "value": "gpt-4o"},
+        "options": {
+          "temperature": 0.4
+        }
       },
-      "id": "call-drafting-ai",
-      "name": "AI: Draft Message",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3700, 200],
+      "id": "openai-drafting-model",
+      "name": "OpenAI: Drafting Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [2900, 100],
       "credentials": {
         "openAiApi": {"id": "KPeEyy20q5aUrUtM", "name": "OpenAi account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Parse AI response and apply guardrails\nconst ctx = $('Agent: Build Drafting Context').first().json;\nconst response = $input.first().json;\nlet draft = {};\n\ntry {\n  const content = response.choices?.[0]?.message?.content || '{}';\n  draft = JSON.parse(content);\n} catch (e) {\n  draft = {\n    subject: 'Peel Solutions - Capacity Support',\n    body: 'AI generation failed - manual review needed.',\n    word_count: 0,\n    outreach_angle: ctx.outreach_angle,\n    why_now: 'Unable to generate - please review manually',\n    key_points: ['AI error']\n  };\n}\n\n// GUARDRAIL G-013: Competitor intercepts ALWAYS P1\nlet priorityTier = 'medium';\nlet priorityScore = 50;\n\nif (ctx.has_competitor_signal || ctx.is_competitor_intercept) {\n  priorityTier = 'hot';\n  priorityScore = 95;\n} else if (ctx.signal_details?.length > 2) {\n  priorityTier = 'high';\n  priorityScore = 75;\n} else if (ctx.contact_confidence === 'high') {\n  priorityTier = 'high';\n  priorityScore = 70;\n}\n\nreturn [{ json: {\n  opportunity_id: ctx.opportunity_id,\n  contact_id: ctx.selected_contact?.contact_id || null,\n  contact_confidence: ctx.contact_confidence,\n  contact_type: ctx.contact_type,\n  outreach_draft: draft.body || '',\n  subject_line: draft.subject || '',\n  outreach_angle: draft.outreach_angle || ctx.outreach_angle,\n  why_now: draft.why_now || '',\n  priority_tier: priorityTier,\n  priority_score: priorityScore,\n  selection_reasoning: ctx.selection_reasoning,\n  is_competitor_intercept: ctx.has_competitor_signal || ctx.is_competitor_intercept\n}}];"
+        "method": "GET",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblez9trodMzKKqXq",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "filterByFormula", "value": "={{ $fromAI('filter_formula', 'Airtable filter formula to find signals, e.g. SEARCH(RECORD_ID(),\"recXXX,recYYY\")', 'string') }}"},
+            {"name": "fields[]", "value": "title"},
+            {"name": "fields[]", "value": "type"},
+            {"name": "fields[]", "value": "source"},
+            {"name": "fields[]", "value": "role_category"},
+            {"name": "fields[]", "value": "detected_at"}
+          ]
+        },
+        "options": {},
+        "toolDescription": "Get all signals linked to an opportunity from Airtable. Use a filter formula like SEARCH(RECORD_ID(),\"recXXX,recYYY\") with the signal IDs. Returns signal titles, types, sources."
       },
-      "id": "parse-draft-response",
-      "name": "Code: Parse Draft Response",
+      "id": "tool-get-signals",
+      "name": "Tool: Get Opportunity Signals",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [2900, 400],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "filterByFormula", "value": "={{ $fromAI('filter_formula', 'Airtable filter formula for previous outreach, e.g. AND({force}=\"recXXX\",{status}=\"sent\")', 'string') }}"},
+            {"name": "fields[]", "value": "outreach_draft"},
+            {"name": "fields[]", "value": "outreach_angle"},
+            {"name": "fields[]", "value": "sent_at"},
+            {"name": "maxRecords", "value": "5"},
+            {"name": "sort[0][field]", "value": "sent_at"},
+            {"name": "sort[0][direction]", "value": "desc"}
+          ]
+        },
+        "options": {},
+        "toolDescription": "Get previous outreach messages sent to this force. Use a filter like AND({force}=\"recXXX\",{status}=\"sent\"). Returns recent messages to avoid repetition."
+      },
+      "id": "tool-get-previous-outreach",
+      "name": "Tool: Get Previous Outreach",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [2900, 500],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblbAjBEdpv42Smpw/{{ $fromAI('force_id', 'Airtable record ID of the force', 'string') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "options": {},
+        "toolDescription": "Get background context about a police force - size, region, relationship status, competitor incumbents, notes. Use for personalisation."
+      },
+      "id": "tool-get-force-context",
+      "name": "Tool: Get Force Context",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [2900, 600],
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "parameters": {
+        "name": "get_peel_services",
+        "description": "Get Peel Solutions service descriptions relevant to the role category. Returns service names, descriptions, and positioning guidance for use in the message.",
+        "language": "javaScript",
+        "jsCode": "// Static Peel services reference data\nconst services = {\n  managed_teams: {\n    name: 'Managed Investigation Teams',\n    short_name: 'Peel Teams',\n    description: 'Outcome-based investigator teams under Statement of Works. We recruit, manage, and quality assure - you direct the work.',\n    differentiator: 'Unlike traditional agencies, we take accountability for outcomes - not just filling seats.'\n  },\n  staffing_solutions: {\n    name: 'Staffing Solutions',\n    short_name: 'Individual Placements',\n    description: 'Experienced professionals placed into your team structure for direct management.',\n    differentiator: 'When you want to augment your existing team with experienced individuals.'\n  }\n};\n\nconst categoryMapping = {\n  investigation: { primary: 'managed_teams', positioning: 'For investigation capacity, we recommend our managed teams model - outcome-based delivery where we take accountability for results.' },\n  criminal_justice: { primary: 'managed_teams', positioning: 'Disclosure and case progression are critical to successful outcomes. Our managed teams can clear backlogs while maintaining quality.' },\n  intelligence: { primary: 'staffing_solutions', positioning: 'Intelligence analysts require specific skills. We can provide experienced individuals to integrate with your team.' },\n  forensics: { primary: 'managed_teams', positioning: 'Digital forensics backlogs are common. Our managed teams can process volume while you focus on complex cases.' },\n  specialist: { primary: 'staffing_solutions', positioning: 'Specialist roles require the right fit. We can help source experienced individuals.' },\n  support: { primary: 'staffing_solutions', positioning: 'For support roles, individual placements provide flexibility.' }\n};\n\nconst category = query.role_category || 'investigation';\nconst mapping = categoryMapping[category] || categoryMapping.investigation;\nconst primaryService = services[mapping.primary];\n\nreturn {\n  recommended_service: primaryService.name,\n  service_description: primaryService.description,\n  differentiator: primaryService.differentiator,\n  positioning: mapping.positioning,\n  messaging_note: 'Never lead with \"we have candidates\" - always position outcomes and accountability first.'\n};",
+        "specifyInputSchema": true,
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"role_category\": {\"type\": \"string\", \"description\": \"The category: investigation, criminal_justice, intelligence, forensics, specialist, support\"}\n  },\n  \"required\": [\"role_category\"]\n}"
+      },
+      "id": "tool-get-peel-services",
+      "name": "Tool: Get Peel Services",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [2900, 700]
+    },
+    {
+      "parameters": {
+        "name": "critique_draft",
+        "description": "Self-critique a message draft against quality criteria. ALWAYS call this before finalizing. Returns pass/fail for each criterion and identifies issues to fix.",
+        "language": "javaScript",
+        "jsCode": "// G-015 validation - Hook → Bridge → Value → CTA\nconst body = query.body || '';\nconst isCompetitor = query.is_competitor_intercept || false;\n\nconst competitors = ['red snapper', 'investigo', 'reed', 'adecco', 'service care', 'matrix', 'hays'];\nconst wordCount = body.split(/\\s+/).filter(w => w.length > 0).length;\n\nconst criteria = [];\n\n// Word count\ncriteria.push({\n  criterion: 'Under 100 words',\n  pass: wordCount <= 100,\n  note: `${wordCount} words${wordCount > 100 ? ' - MUST SHORTEN' : ''}`\n});\n\n// Structure check\nconst hasHook = body.toLowerCase().includes('notice') || body.toLowerCase().includes('understand') || body.toLowerCase().includes('saw') || body.toLowerCase().includes('looking');\nconst hasCTA = body.toLowerCase().includes('conversation') || body.toLowerCase().includes('call') || body.toLowerCase().includes('time') || body.toLowerCase().includes('chat');\ncriteria.push({\n  criterion: 'Hook → Bridge → Value → CTA structure',\n  pass: hasHook && hasCTA,\n  note: hasHook && hasCTA ? 'Structure detected' : `Missing: ${!hasHook ? 'hook ' : ''}${!hasCTA ? 'CTA' : ''}`\n});\n\n// Competitor names\nconst mentionsCompetitor = competitors.some(c => body.toLowerCase().includes(c));\ncriteria.push({\n  criterion: 'No competitor names',\n  pass: !mentionsCompetitor,\n  note: mentionsCompetitor ? 'FAIL: Competitor name found - MUST REMOVE' : 'Good'\n});\n\n// Signature\nconst endsWithJames = body.trim().endsWith('James');\ncriteria.push({\n  criterion: 'Signed as James',\n  pass: endsWithJames,\n  note: endsWithJames ? 'Good' : 'Add \"James\" at end'\n});\n\n// Value proposition first\nconst badStart = body.toLowerCase().includes('we have') && (body.toLowerCase().includes('candidate') || body.toLowerCase().includes('investigator available'));\ncriteria.push({\n  criterion: 'Value proposition first (not \"we have candidates\")',\n  pass: !badStart,\n  note: badStart ? 'FAIL: Rewrite to lead with outcomes, not candidates' : 'Good'\n});\n\nconst allPass = criteria.every(c => c.pass);\nconst failedCriteria = criteria.filter(c => !c.pass).map(c => c.criterion);\n\nreturn {\n  criteria: criteria,\n  overall_pass: allPass,\n  word_count: wordCount,\n  needs_revision: !allPass,\n  issues_to_fix: failedCriteria,\n  guidance: allPass ? 'Draft is ready to finalize.' : `Fix these issues: ${failedCriteria.join(', ')}`\n};",
+        "specifyInputSchema": true,
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"body\": {\"type\": \"string\", \"description\": \"The message body to critique\"},\n    \"is_competitor_intercept\": {\"type\": \"boolean\", \"description\": \"Is this a competitor intercept opportunity?\"}\n  },\n  \"required\": [\"body\"]\n}"
+      },
+      "id": "tool-critique-draft",
+      "name": "Tool: Critique Draft",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [2900, 800]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.outreach_drafting_prompt }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are an Outreach Drafting Agent for Peel Solutions. Write a compelling, personalised outreach message that James can review and send.\n\nMESSAGE STRUCTURE (Hook → Bridge → Value → CTA):\n- Hook (1-2 sentences): Reference their specific situation\n- Bridge (1 sentence): Acknowledge the challenge\n- Value (2-3 sentences): Position Peel's outcome-based approach\n- CTA (1 sentence): Request conversation (low friction)\n\nTOTAL: UNDER 100 WORDS. This is a hard limit.\n\nOUTREACH ANGLES:\n- competitor_intercept: We know competitor is recruiting for them. NEVER mention competitor name. Say \"I understand you're looking at [capability] capacity\"\n- direct_hiring: They're posting jobs directly. Reference the specific roles.\n- multi_signal: Multiple signals. Synthesize, don't list.\n\nYOUR PROCESS:\n1. Get opportunity signals to understand what triggered this\n2. Get previous outreach to avoid repetition\n3. Get force context for personalisation\n4. Get Peel services for positioning\n5. Draft the message\n6. ALWAYS call critique_draft before finalizing\n7. If critique fails, revise and critique again\n\nRULES:\n1. Under 100 words - NO EXCEPTIONS\n2. Never mention competitors by name\n3. Hook → Bridge → Value → CTA - every message\n4. Problem owner language - outcomes, not candidates\n5. Sign as just \"James\"\n6. Self-critique before returning\n\nOUTPUT FORMAT (JSON):\n{\n  \"subject\": \"Email subject line\",\n  \"body\": \"Full message body\",\n  \"word_count\": 67,\n  \"outreach_angle\": \"competitor_intercept\",\n  \"signals_referenced\": [\"Signal 1\", \"Signal 2\"],\n  \"why_now_summary\": \"2-3 sentence summary for dashboard\",\n  \"previous_outreach_considered\": \"What we checked\",\n  \"critique_notes\": \"Result of self-critique\",\n  \"confidence\": \"high/medium/low\"\n}",
+          "maxIterations": 5,
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "agent-outreach-drafting",
+      "name": "Agent: Outreach Drafting",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [3100, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Outreach Drafting Agent output and apply guardrails\nconst ctx = $('Code: Build Drafting Prompt').first().json;\nconst agentOutput = $input.first().json;\n\nlet draftResult = {\n  subject: 'Peel Solutions - Capacity Support',\n  body: 'Unable to generate message - manual review needed.',\n  word_count: 0,\n  outreach_angle: 'direct_hiring',\n  signals_referenced: [],\n  why_now_summary: 'Unable to generate - please review manually',\n  critique_notes: 'Agent did not return structured output',\n  confidence: 'low'\n};\n\ntry {\n  const output = agentOutput.output || '';\n  const jsonMatch = output.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    draftResult = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  draftResult.critique_notes = `Parse error: ${e.message}`;\n}\n\n// G-013: Competitor intercepts ALWAYS P1\nlet priorityTier = 'medium';\nlet priorityScore = 50;\n\nif (ctx.is_competitor_intercept) {\n  priorityTier = 'hot';\n  priorityScore = 95;\n} else if (ctx.signal_count > 2) {\n  priorityTier = 'high';\n  priorityScore = 75;\n} else if (ctx.is_problem_owner && ctx.contact_confidence === 'high') {\n  priorityTier = 'high';\n  priorityScore = 70;\n}\n\nreturn [{\n  json: {\n    opportunity_id: ctx.opportunity_id,\n    contact_id: ctx.contact_id,\n    contact_confidence: ctx.contact_confidence,\n    contact_type: ctx.is_problem_owner ? 'Problem Owner' : 'HR Fallback',\n    outreach_draft: draftResult.body || '',\n    subject_line: draftResult.subject || '',\n    outreach_angle: draftResult.outreach_angle || '',\n    why_now: draftResult.why_now_summary || '',\n    priority_tier: priorityTier,\n    priority_score: priorityScore,\n    selection_reasoning: ctx.selection_reasoning,\n    is_competitor_intercept: ctx.is_competitor_intercept,\n    word_count: draftResult.word_count || 0,\n    critique_notes: draftResult.critique_notes || '',\n    agent_intermediate_steps: agentOutput.intermediateSteps || []\n  }\n}];"
+      },
+      "id": "parse-draft-result",
+      "name": "Code: Parse Draft Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3900, 200]
+      "position": [3300, 300]
     },
     {
       "parameters": {
@@ -333,59 +454,141 @@
         "jsonBody": "={\n  \"fields\": {\n    \"contact\": {{ $json.contact_id ? '[\"' + $json.contact_id + '\"]' : '[]' }},\n    \"contact_confidence\": \"{{ $json.contact_confidence || '' }}\",\n    \"contact_type\": \"{{ $json.contact_type || '' }}\",\n    \"outreach_draft\": {{ JSON.stringify($json.outreach_draft || '') }},\n    \"subject_line\": {{ JSON.stringify($json.subject_line || '') }},\n    \"outreach_angle\": \"{{ $json.outreach_angle || '' }}\",\n    \"why_now\": {{ JSON.stringify($json.why_now || '') }},\n    \"priority_tier\": \"{{ $json.priority_tier || 'medium' }}\",\n    \"priority_score\": {{ $json.priority_score || 50 }},\n    \"is_competitor_intercept\": {{ $json.is_competitor_intercept || false }},\n    \"status\": \"ready\"\n  }\n}",
         "options": {}
       },
-      "id": "update-opportunity",
+      "id": "update-opportunity-ready",
       "name": "Update: Opportunity Ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [4100, 200],
+      "position": [3500, 300],
       "credentials": {
         "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
       }
     },
     {
       "parameters": {
-        "jsCode": "// Log completion and return to loop\nconst result = $input.first().json;\nconsole.log(`Enriched opportunity: ${result.id || 'unknown'}`);\nreturn [{ json: { enriched: true, opportunity_id: result.id }}];"
+        "jsCode": "// Log completion and continue loop\nconst result = $input.first().json;\nconsole.log(`Enriched opportunity: ${result.id || 'unknown'}`);\nreturn [{ json: { enriched: true, opportunity_id: result.id }}];"
       },
       "id": "log-completion",
       "name": "Code: Log Completion",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [4300, 200]
+      "position": [3700, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log needs_contact and continue loop\nconst result = $input.first().json;\nconsole.log(`Opportunity needs contact: ${result.id || 'unknown'}`);\nreturn [{ json: { needs_contact: true, opportunity_id: result.id }}];"
+      },
+      "id": "log-needs-contact",
+      "name": "Code: Log Needs Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2900, 600]
     }
   ],
   "connections": {
-    "Schedule: Every 15 Minutes": {"main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]},
-    "Manual Trigger": {"main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]},
-    "Fetch: Researching Opportunities": {"main": [[{"node": "IF: Has Opportunities", "type": "main", "index": 0}]]},
-    "IF: Has Opportunities": {"main": [[{"node": "Code: Split Records", "type": "main", "index": 0}], []]},
-    "Code: Split Records": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]},
-    "Loop: Each Opportunity": {"main": [[], [{"node": "Code: Extract Context", "type": "main", "index": 0}]]},
-    "Code: Extract Context": {"main": [[{"node": "Fetch: Force Details", "type": "main", "index": 0}]]},
-    "Fetch: Force Details": {"main": [[{"node": "Code: Merge Force", "type": "main", "index": 0}]]},
-    "Code: Merge Force": {"main": [[{"node": "Code: Build Signal Filter", "type": "main", "index": 0}]]},
-    "Code: Build Signal Filter": {"main": [[{"node": "Fetch: Signal Details", "type": "main", "index": 0}]]},
-    "Fetch: Signal Details": {"main": [[{"node": "Code: Merge Signals", "type": "main", "index": 0}]]},
-    "Code: Merge Signals": {"main": [[{"node": "Fetch: Airtable Contacts", "type": "main", "index": 0}]]},
-    "Fetch: Airtable Contacts": {"main": [[{"node": "Code: Merge Airtable Contacts", "type": "main", "index": 0}]]},
-    "Code: Merge Airtable Contacts": {"main": [[{"node": "Fetch: Previous Outreach", "type": "main", "index": 0}]]},
-    "Fetch: Previous Outreach": {"main": [[{"node": "Code: Merge Previous Outreach", "type": "main", "index": 0}]]},
-    "Code: Merge Previous Outreach": {"main": [[{"node": "Agent: Contact Research", "type": "main", "index": 0}]]},
-    "Agent: Contact Research": {"main": [[{"node": "IF: Contact Found", "type": "main", "index": 0}]]},
-    "IF: Contact Found": {"main": [[{"node": "Agent: Build Drafting Context", "type": "main", "index": 0}], [{"node": "Update: Needs Contact", "type": "main", "index": 0}]]},
-    "Update: Needs Contact": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]},
-    "Agent: Build Drafting Context": {"main": [[{"node": "AI: Draft Message", "type": "main", "index": 0}]]},
-    "AI: Draft Message": {"main": [[{"node": "Code: Parse Draft Response", "type": "main", "index": 0}]]},
-    "Code: Parse Draft Response": {"main": [[{"node": "Update: Opportunity Ready", "type": "main", "index": 0}]]},
-    "Update: Opportunity Ready": {"main": [[{"node": "Code: Log Completion", "type": "main", "index": 0}]]},
-    "Code: Log Completion": {"main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]}
+    "Schedule: Every 15 Minutes": {
+      "main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]
+    },
+    "Manual Trigger": {
+      "main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]
+    },
+    "Fetch: Researching Opportunities": {
+      "main": [[{"node": "IF: Has Opportunities", "type": "main", "index": 0}]]
+    },
+    "IF: Has Opportunities": {
+      "main": [
+        [{"node": "Code: Split Records", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Code: Split Records": {
+      "main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]
+    },
+    "Loop: Each Opportunity": {
+      "main": [
+        [],
+        [{"node": "Code: Extract Opp Context", "type": "main", "index": 0}]
+      ]
+    },
+    "Code: Extract Opp Context": {
+      "main": [[{"node": "Fetch: Force Details", "type": "main", "index": 0}]]
+    },
+    "Fetch: Force Details": {
+      "main": [[{"node": "Code: Merge Force Context", "type": "main", "index": 0}]]
+    },
+    "Code: Merge Force Context": {
+      "main": [[{"node": "Code: Build Contact Research Prompt", "type": "main", "index": 0}]]
+    },
+    "Code: Build Contact Research Prompt": {
+      "main": [[{"node": "Agent: Contact Research", "type": "main", "index": 0}]]
+    },
+    "OpenAI: Contact Research Model": {
+      "ai_languageModel": [[{"node": "Agent: Contact Research", "type": "ai_languageModel", "index": 0}]]
+    },
+    "Tool: Search HubSpot Contacts": {
+      "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Get Contact History": {
+      "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Get Force Org Structure": {
+      "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Evaluate Contact Fit": {
+      "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
+    },
+    "Agent: Contact Research": {
+      "main": [[{"node": "Code: Parse Contact Result", "type": "main", "index": 0}]]
+    },
+    "Code: Parse Contact Result": {
+      "main": [[{"node": "IF: Contact Found", "type": "main", "index": 0}]]
+    },
+    "IF: Contact Found": {
+      "main": [
+        [{"node": "Code: Build Drafting Prompt", "type": "main", "index": 0}],
+        [{"node": "Update: Needs Contact", "type": "main", "index": 0}]
+      ]
+    },
+    "Update: Needs Contact": {
+      "main": [[{"node": "Code: Log Needs Contact", "type": "main", "index": 0}]]
+    },
+    "Code: Log Needs Contact": {
+      "main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]
+    },
+    "Code: Build Drafting Prompt": {
+      "main": [[{"node": "Agent: Outreach Drafting", "type": "main", "index": 0}]]
+    },
+    "OpenAI: Drafting Model": {
+      "ai_languageModel": [[{"node": "Agent: Outreach Drafting", "type": "ai_languageModel", "index": 0}]]
+    },
+    "Tool: Get Opportunity Signals": {
+      "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Get Previous Outreach": {
+      "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Get Force Context": {
+      "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Get Peel Services": {
+      "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
+    },
+    "Tool: Critique Draft": {
+      "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
+    },
+    "Agent: Outreach Drafting": {
+      "main": [[{"node": "Code: Parse Draft Result", "type": "main", "index": 0}]]
+    },
+    "Code: Parse Draft Result": {
+      "main": [[{"node": "Update: Opportunity Ready", "type": "main", "index": 0}]]
+    },
+    "Update: Opportunity Ready": {
+      "main": [[{"node": "Code: Log Completion", "type": "main", "index": 0}]]
+    },
+    "Code: Log Completion": {
+      "main": [[{"node": "Loop: Each Opportunity", "type": "main", "index": 0}]]
+    }
   },
   "settings": {
     "executionOrder": "v1"
-  },
-  "meta": {
-    "spec": "SPEC-011",
-    "version": "1.0",
-    "description": "Agent-based opportunity enrichment with problem owner selection (G-014) and contextual message drafting",
-    "guardrails": ["G-002", "G-007", "G-011", "G-012", "G-013", "G-014", "G-015"]
   }
 }

@@ -304,7 +304,7 @@ Deployed via:
 ```bash
 node n8n/scripts/import-workflow.js wf5-agent-enrichment
 ```
-**n8n Workflow ID**: `eizYYOK4vjrzRfJQ`
+**n8n Workflow ID**: `761WZpy9idhBPLpf` (rebuilt)
 **Status**: Created (inactive - needs activation after testing)
 
 ### Stage 5: Verify
@@ -358,7 +358,7 @@ node n8n/scripts/import-workflow.js wf5-agent-enrichment
 | New Workflow | `n8n/workflows/wf5-agent-enrichment.json` |
 | Backup Workflow | `n8n/workflows/opportunity-enricher-backup.json` |
 | Service Reference | `reference-data/peel-services.json` |
-| n8n Workflow ID | `eizYYOK4vjrzRfJQ` |
+| n8n Workflow ID | `761WZpy9idhBPLpf` |
 
 **Rollback Instructions**:
 If issues occur, revert to original workflow:
@@ -374,3 +374,86 @@ node n8n/scripts/import-workflow.js opportunity-enricher-backup
 3. Run manually with test opportunity
 4. Verify output meets acceptance criteria
 5. Enable "Schedule: Every 15 Minutes" trigger
+
+---
+
+## Rebuild: Proper AI Agent Architecture
+
+**Date**: 2026-01-23
+**Reason**: Original implementation used Code nodes to simulate agent behaviour. Rebuilt with proper n8n LangChain AI Agent nodes per G-007.
+
+### What Changed
+
+| Aspect | Original | Rebuilt |
+|--------|----------|---------|
+| Agent implementation | Code nodes with JavaScript | `@n8n/n8n-nodes-langchain.agent` |
+| Tool calling | Pre-fetched data passed to AI | Agent selects and calls tools as needed |
+| Model nodes | Inline HTTP to OpenAI | `@n8n/n8n-nodes-langchain.lmChatOpenAi` |
+| Iteration | Single-pass | Up to 5 iterations per agent |
+| Node count | 24 | 31 |
+| n8n Workflow ID | `761WZpy9idhBPLpf` | `761WZpy9idhBPLpf` |
+
+### Architecture
+
+```
+[Trigger] → [Fetch Opps] → [Loop]
+                             │
+              ┌──────────────┴──────────────┐
+              │  CONTACT RESEARCH AGENT     │
+              │  - Tool: Search HubSpot     │
+              │  - Tool: Get Contact History│
+              │  - Tool: Get Force Org      │
+              │  - Tool: Evaluate Fit       │
+              └──────────────┬──────────────┘
+                             │
+                    [IF: Contact Found?]
+                      │            │
+                      ▼            ▼
+            ┌──────────────┐   [Update: needs_contact]
+            │  OUTREACH    │
+            │  DRAFTING    │
+            │  AGENT       │
+            │  - Tool: Get Signals         │
+            │  - Tool: Get Prev Outreach   │
+            │  - Tool: Get Force Context   │
+            │  - Tool: Get Peel Services   │
+            │  - Tool: Critique Draft      │
+            └──────┬───────┘
+                   │
+            [Update: ready]
+```
+
+### Tool Specifications
+
+**Contact Research Agent (4 tools)**:
+| Tool | Type | Purpose |
+|------|------|---------|
+| Search HubSpot Contacts | HTTP Request Tool | Find contacts at force's company |
+| Get Contact History | HTTP Request Tool | Get Airtable interaction history |
+| Get Force Org Structure | HTTP Request Tool | Get force metadata |
+| Evaluate Contact Fit | Code Tool | Score problem owner vs HR (G-014) |
+
+**Outreach Drafting Agent (5 tools)**:
+| Tool | Type | Purpose |
+|------|------|---------|
+| Get Opportunity Signals | HTTP Request Tool | Fetch linked signals |
+| Get Previous Outreach | HTTP Request Tool | Check recent messages to force |
+| Get Force Context | HTTP Request Tool | Get force background |
+| Get Peel Services | Code Tool | Return service descriptions |
+| Critique Draft | Code Tool | Validate against G-015 rules |
+
+### Deployment
+
+```bash
+node n8n/scripts/import-workflow.js wf5-agent-enrichment
+```
+
+**Result**: Workflow recreated with ID `761WZpy9idhBPLpf`
+
+### Testing Required
+
+Same as Stage 5 verification — run with real opportunity to confirm:
+1. Agents select appropriate tools
+2. Contact Research selects problem owner over HR
+3. Outreach Drafting produces properly structured message
+4. Self-critique catches issues before finalizing
