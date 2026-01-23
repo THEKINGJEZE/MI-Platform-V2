@@ -122,7 +122,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 - WF5: opportunity-enricher.json (signal fetch, P1 guardrail)
 
 **Schema additions** ✅:
-- Signals: role_type, seniority, ai_confidence, force_source, first_seen, last_seen, scrape_count
+- Signals: role_category, role_detail, seniority, ai_confidence, force_source, first_seen, last_seen, scrape_count
 
 **Cleanup scripts created** ✅:
 - `scripts/cleanup-signals.js`
@@ -323,9 +323,9 @@ Phase 1: Core Jobs Pipeline
     │
     ├──→ Phase 1c: Dashboard V1 Migration (SPEC-009) ✅
     │
-    ├──→ Phase 1d: Quality Improvement 🔄 ← CURRENT
+    ├──→ Phase 1d: Quality Improvement ✅ (monitoring)
     │         │
-    │         └──→ Phase 1e: Agentic Enrichment (SPEC-010/011)
+    │         └──→ Phase 1e: Agent Enrichment (SPEC-011) ✅
     │                   │
     │                   └──→ Dashboard Enhancement: Morning Brief (SPEC-008)
     │
