@@ -1,7 +1,8 @@
 #!/bin/bash
 # Pre-edit enforcement hook
 # 1. BLOCKS spec creation without /prep-spec context (hard gate)
-# 2. Warns if critical cross-document issues exist
+# 2. Warns about workflow/schema/prompt edits (agent reminders)
+# 3. Warns if critical cross-document issues exist
 
 WARNINGS_LOG=".claude/warnings.log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -46,6 +47,60 @@ if [[ "$FILE_PATH" =~ specs/SPEC-.*\.md ]]; then
         echo "Consider re-running /prep-spec <topic> for fresh context." >&2
         # Warning only, don't block
     fi
+fi
+
+# ============================================
+# WORKFLOW EDIT REMINDER (H1 - Warning only)
+# ============================================
+# Remind to use workflow-builder agent for n8n workflow changes
+if [[ "$FILE_PATH" =~ n8n/workflows/.*\.json ]]; then
+    echo "" >&2
+    echo "⚠️  WORKFLOW EDIT DETECTED" >&2
+    echo "" >&2
+    echo "You are editing an n8n workflow file." >&2
+    echo "Remember: Use the workflow-builder agent for workflow changes." >&2
+    echo "" >&2
+    echo "Agent provides: validation, error handling, logging patterns" >&2
+    echo "See: CLAUDE.md — Mandatory Agent Usage" >&2
+    echo "" >&2
+    # Warning only, don't block
+fi
+
+# ============================================
+# AIRTABLE SCHEMA REMINDER (H2 - Warning only)
+# ============================================
+# Remind to use airtable-architect agent for schema changes
+if [[ "$FILE_PATH" =~ airtable/.*\.json ]]; then
+    echo "" >&2
+    echo "⚠️  AIRTABLE SCHEMA EDIT DETECTED" >&2
+    echo "" >&2
+    echo "You are editing Airtable schema/seed files." >&2
+    echo "Remember: Use the airtable-architect agent for schema changes." >&2
+    echo "" >&2
+    echo "Agent provides: G-011 upsert enforcement, batch patterns" >&2
+    echo "See: CLAUDE.md — Mandatory Agent Usage" >&2
+    echo "" >&2
+    # Warning only, don't block
+fi
+
+# ============================================
+# PROMPT EDIT REMINDER (H3 - Warning only)
+# ============================================
+# Remind about messaging structure guardrails (G-012, G-015)
+if [[ "$FILE_PATH" =~ prompts/.*\.md ]]; then
+    echo "" >&2
+    echo "⚠️  PROMPT EDIT DETECTED" >&2
+    echo "" >&2
+    echo "Ensure sales prompts follow structure (G-015):" >&2
+    echo "  1. Hook (reference the signal)" >&2
+    echo "  2. Bridge (acknowledge challenge)" >&2
+    echo "  3. Value (Peel's outcome-based approach)" >&2
+    echo "  4. CTA (request conversation)" >&2
+    echo "" >&2
+    echo "Never lead with 'we have candidates' (G-012)" >&2
+    echo "See: docs/SALES-STRATEGY.md — Messaging Framework" >&2
+    echo "" >&2
+    # Warning only, don't block
 fi
 
 # ============================================

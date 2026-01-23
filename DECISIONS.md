@@ -173,6 +173,23 @@ Track decisions that **actively affect current work**. Not a historical record �
 - `CLAUDE.md` — Added spec creation to session protocol
 **Why**: Maximum drift prevention. Hooks are the strongest enforcement mechanism available in Claude Code. This ensures specs are always created with proper strategic context.
 
+#### A14: Hook Enforcement Expansion
+**Date**: 23 January 2026
+**Decision**: Expand hook-based enforcement beyond spec creation to cover more documented processes
+**Context**: Audit found 46 documented processes but only 3 enforced by hooks (89% relied on voluntary compliance). Key gaps: mandatory agent usage, guardrail compliance, phase completion.
+**Implementation** (all warnings, not blocks):
+1. **H1: Workflow edit reminder** — Detects edits to `n8n/workflows/*.json`, reminds to use workflow-builder agent
+2. **H2: Airtable schema reminder** — Detects edits to `airtable/*.json`, reminds to use airtable-architect agent
+3. **H3: Prompt edit reminder** — Detects edits to `prompts/*.md`, reminds about messaging structure (G-012, G-015)
+4. **H4: ROADMAP phase completion guard** — PostToolUse hook warns when phases appear marked complete
+5. **M1: Git uncommitted changes** — PreCompact hook warns about uncommitted changes before context compression
+**Files affected**:
+- `.claude/hooks/pre-edit-check.sh` — Added H1, H2, H3 detection blocks
+- `.claude/hooks/pre-compact.sh` — Added M1 git status check
+- `.claude/hooks/post-roadmap-edit.sh` — **NEW** H4 phase completion hook
+- `.claude/settings.json` — Added PostToolUse hook for ROADMAP.md
+**Why warnings not blocks**: Avoid excessive friction. Spec creation (A13) remains the only hard block because that was the original critical gap. Other hooks surface reminders while allowing work to continue.
+
 ---
 
 ### Tier 2 — Phase-Level (Current Phase Only)

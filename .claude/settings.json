@@ -80,6 +80,15 @@
             "command": "bash .claude/hooks/post-status-edit.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit.*ROADMAP\\.md|Write.*ROADMAP\\.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-roadmap-edit.sh"
+          }
+        ]
       }
     ],
     "Stop": [
