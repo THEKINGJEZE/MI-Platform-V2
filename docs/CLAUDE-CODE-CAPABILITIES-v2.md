@@ -2050,7 +2050,6 @@ git stash pop  # If you want changes back
 |-------|----------|
 | Git commit conventions | [docs/GIT-WORKFLOW.md](GIT-WORKFLOW.md) |
 | Document maintenance | [docs/DOCUMENT-HYGIENE.md](DOCUMENT-HYGIENE.md) |
-| Chat↔Code handoffs | [docs/SYNC-PROTOCOL.md](SYNC-PROTOCOL.md) |
 | Dependency tracking | [docs/DEPENDENCY-MAP.md](DEPENDENCY-MAP.md) |
 
 ### Project State

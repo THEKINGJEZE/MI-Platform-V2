@@ -19,7 +19,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Phase definitions & acceptance criteria | ROADMAP.md | README, STATUS, specs |
 | Current session state | STATUS.md | Anywhere |
 | Claude Code instructions | CLAUDE.md | README |
-| Claude Chat instructions | docs/CHAT-INSTRUCTIONS.md | README |
+| Spec creation rules | .claude/rules/spec-creation.md | specs/ |
 | Decisions | DECISIONS.md | Anywhere |
 | Commands list | CLAUDE.md | README |
 | Document limits | docs/DOCUMENT-HYGIENE.md | Anywhere |
@@ -63,11 +63,6 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Check | Why |
 |-------|-----|
 | Relevant specs | If decision affects a spec, note it there |
-
-### When You Change docs/CHAT-INSTRUCTIONS.md
-| Check | Why |
-|-------|-----|
-| Nothing | Strategy docs now on filesystem, no Project Knowledge to update |
 
 ### When You Change docs/architecture.md
 | Check | Why |
@@ -128,8 +123,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 ### When You Add a New Document
 | Check | Why |
 |-------|-----|
-| CLAUDE.md | Add to "Load On-Demand" table if Claude Code needs it |
-| docs/CHAT-INSTRUCTIONS.md | Add to "Key Process Docs" if Claude Chat needs it |
+| CLAUDE.md | Add to "Load On-Demand" table if needed |
 | This file | Add to dependency map |
 
 ### When You Add a New Folder
@@ -195,7 +189,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Command list in multiple places | One gets stale | Single source in CLAUDE.md |
 | Acceptance criteria in multiple places | They'll diverge | Single source in ROADMAP.md |
 | Instructions repeated | Maintenance burden | Link to source doc |
-| Strategy docs referenced as local files | They're Project Knowledge, not in repo | Note they're in Claude Chat |
+| Strategy docs referenced incorrectly | Ensure referencing docs/STRATEGY*.md | Link to actual files |
 
 ---
 
@@ -221,8 +215,7 @@ All documents that contain project information:
 | CLAUDE.md | Claude Code config | → all detail docs |
 | DECISIONS.md | Decision log | → relevant specs |
 | README.md | Entry point | → all key docs (links only) |
-| docs/CHAT-INSTRUCTIONS.md | Claude Chat config | → strategy docs (filesystem) |
-| docs/SYNC-PROTOCOL.md | Process doc | None |
+| .claude/rules/spec-creation.md | Spec drafting rules | None |
 | docs/DOCUMENT-HYGIENE.md | Process doc | None |
 | docs/DEPENDENCY-MAP.md | This file | Updated when dependencies change |
 | docs/GIT-WORKFLOW.md | Process doc | None |

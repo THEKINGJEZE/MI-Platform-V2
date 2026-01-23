@@ -76,9 +76,9 @@ See [ROADMAP.md](../ROADMAP.md) for current phases and acceptance criteria.
 
 ## Full Strategy Documentation
 
-The complete strategy specifications are stored as **Claude Chat Project Knowledge files**:
-- `peel-solutions-mi-platform-strategy.md` — Full platform strategy
-- `mi-platform-monitoring-and-agents.md` — Monitoring + agentic design
-- `mi-platform-agentic-deep-dive.md` — n8n AI agent implementation
+The complete strategy specifications are stored in the `docs/` folder:
+- `docs/STRATEGY.md` — Full platform strategy
+- `docs/STRATEGY-N8N.md` — Monitoring + agentic design
+- `docs/STRATEGY-AGENTS.md` — n8n AI agent implementation
 
-These are uploaded to Claude Chat (desktop app) and provide strategic context for architecture decisions. They are not stored in this repository.
+These provide strategic context for architecture decisions.

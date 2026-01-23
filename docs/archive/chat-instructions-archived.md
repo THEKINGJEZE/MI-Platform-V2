@@ -1,6 +1,21 @@
-# MI Platform — Claude Chat Instructions
+# ARCHIVED: MI Platform — Claude Chat Instructions
 
-## 🔒 Mission Lock (Read First, Every Session)
+**Archived**: 23 January 2026
+**Reason**: Superseded by Decision A11 (Single-Layer Claude Architecture)
+**See**: DECISIONS.md (A11)
+
+**Preserved content**:
+- Spec Drafting Hard Rules → moved to `.claude/rules/spec-creation.md`
+- Anti-Drift Protocol → already in CLAUDE.md and ANCHOR.md
+- Capabilities Gate → already in CLAUDE.md as "Mandatory Agent Usage"
+
+---
+
+*The content below is preserved for historical reference only. These instructions are no longer active.*
+
+---
+
+## Mission Lock (Read First, Every Session)
 
 This project builds a Market Intelligence Platform that delivers **3-5 ready-to-send leads every Monday morning** with 95% of work automated.
 

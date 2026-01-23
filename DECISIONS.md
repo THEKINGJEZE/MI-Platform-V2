@@ -43,10 +43,29 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Why**: Claude API integration, complex workflows, no per-execution costs
 
 #### A4: Two-Layer Claude Architecture
-**Date**: 16 January 2025  
-**Decision**: Claude Chat for strategy, Claude Code for execution  
-**Why**: Clear roles prevent drift, handoff patterns ensure sync  
-**Files**: `docs/CHAT-INSTRUCTIONS.md`, `docs/SYNC-PROTOCOL.md`
+**Date**: 16 January 2025
+**Status**: ⚠️ SUPERSEDED by A11 (23 January 2026)
+**Decision**: Claude Chat for strategy, Claude Code for execution
+**Why**: Clear roles prevent drift, handoff patterns ensure sync
+**Files**: `docs/archive/chat-instructions-archived.md`, `docs/archive/sync-protocol-archived.md`
+
+#### A11: Single-Layer Claude Architecture (Code-Only)
+**Date**: 23 January 2026
+**Decision**: Consolidate from two-layer (Chat + Code) to single-layer (Code-only) architecture
+**Supersedes**: A4 (Two-Layer Claude Architecture)
+**Context**:
+- Strategy documents now on filesystem (`docs/STRATEGY*.md`), not Chat Project Knowledge
+- Code has Plan mode for strategic thinking
+- Code has specialized agents (alignment-checker, signal-triage, workflow-builder)
+- Manual handoffs created friction without preventing drift
+**Why**:
+- Reduced fragmentation — no copy-paste between interfaces
+- Better document awareness — Code always knows project state
+- Less drift risk — single source of context
+- Lower coordination overhead — James not needed as sync layer
+**Mitigation for strategic thinking**: Plan mode, alignment-checker agent, ANCHOR.md checkpoints
+**Files archived**: `docs/archive/sync-protocol-archived.md`, `docs/archive/chat-instructions-archived.md`
+**New file**: `.claude/rules/spec-creation.md` (spec drafting rules preserved from Chat instructions)
 
 #### A5: Hook-Based Session Management
 **Date**: January 2025  
