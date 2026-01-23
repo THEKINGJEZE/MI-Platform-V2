@@ -2,7 +2,47 @@
 
 **Updated**: 23 January 2026
 **Phase**: 1d + 2a (Parallel)
-**Status**: Jobs monitoring + Email integration starting
+**Status**: Email integration complete (monitoring), Relationship decay spec ready
+
+---
+
+## Session Handoff Summary (23 Jan 2026)
+
+### What Was Completed This Session
+
+| Task | Status | Evidence |
+|------|--------|----------|
+| Email sync (Make.com → Airtable) | ✅ | 21 emails synced |
+| Email classifier workflow | ✅ | `n8n/workflows/email-classifier.json` deployed |
+| Email dashboard (`/email`) | ✅ | Three-zone layout with J/K/E/S/D keys |
+| Live end-to-end test | ✅ | Draft created in Outlook, email archived |
+| SPEC-012 refinements | ✅ | Two-tier decay, UK public sector contacts, client tracking |
+| DECISIONS.md updated | ✅ | I1 (HubSpot data source), I2 (LLM Chain) |
+
+### Next Session Should Start With
+
+1. **Merge PR to main** — Branch `stupefied-williams` is ready
+2. **Daily email quality check** — 5 min spot-check per monitoring protocol
+3. **Build remaining Phase 2a features**:
+   - WF4: Relationship Decay Scanner (two-tier: deals + orgs)
+   - WF5: Contact Auto-Creator (UK public sector domains)
+   - Dashboard sections for decay alerts
+
+### Key Decisions Made This Session
+
+| Decision | Reference |
+|----------|-----------|
+| HubSpot as primary data source for engagement | DECISIONS.md I1 |
+| Two-tier decay: Deal-level (8/15/30d) + Org-level (30/60/90d) | SPEC-012 §6 |
+| Include Closed Won contacts (clients need check-ins) | SPEC-012 §6 |
+| UK public sector contact auto-creation (not just police) | SPEC-012 §10 Phase 2a-8 |
+
+### Branch State
+
+- **Branch**: `stupefied-williams`
+- **Ahead of main**: Yes (email integration changes)
+- **All changes committed**: ✅
+- **Pushed to origin**: ✅
 
 ---
 
@@ -321,7 +361,9 @@ Daily (5 min):
 1. **Merge PR to main** — Email integration branch ready at `stupefied-williams`
 2. **Continue Phase 1d monitoring** — track daily signal quality (background)
 3. **Daily email quality check** — 5 min spot-check per protocol above
-4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+4. **Build Phase 2a-7**: Relationship Decay Scanner workflow
+5. **Build Phase 2a-8**: Contact Auto-Creator workflow
+6. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 
