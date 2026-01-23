@@ -77,7 +77,7 @@
 | Agent returns structured JSON | ✅ |
 | Airtable update succeeds | ✅ |
 | Graceful error handling | ✅ |
-| Execution time | ~56 seconds |
+| Execution time | ~9 seconds |
 
 ### HubSpot Data Validation (23 Jan 2026) ✅
 
@@ -85,15 +85,28 @@
 |-------|--------|
 | Company IDs valid | ✅ 48/48 (100%) |
 | Sample contacts (Kent) | ✅ 89 contacts found |
+| Sample contacts (North Wales) | ✅ 30 contacts found |
 | Data foundation | ✅ Solid |
 
-**All Airtable `hubspot_company_id` values verified against HubSpot.** The 404 during testing was a test data issue, not a data quality problem.
+### HubSpot Integration Issue Identified
+
+**Problem**: HTTP Request Tool for HubSpot returns 404, despite valid company IDs and contacts existing.
+
+**Root cause**: Used HTTP Request Tool instead of standard HubSpot n8n node. No HubSpot Tool node exists for AI Agents.
+
+**Decision**: Refactor to **hybrid approach**:
+1. Use standard HubSpot node to batch-fetch contact IDs + basic info (reliable auth)
+2. Code node creates summary (name, title - keeps token count low)
+3. Agent evaluates summary, picks top 2-3 candidates
+4. Agent tool fetches full details only for selected candidates
+
+This handles scalability (100+ contacts per force) while using reliable standard nodes.
 
 ---
 
 ## Next Actions
 
-1. **Monitor WF5**: Workflow is active — verify it processes new opportunities
+1. **Refactor WF5 HubSpot integration** — implement hybrid approach (standard node + agent)
 2. **Monitor for 1 week** — verify ongoing classification quality
 3. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
