@@ -283,16 +283,24 @@ After completing Focus Mode (5 emails processed):
 
 ### Micro: Deal-Level Decay (Tight Thresholds)
 
-**Scope**: Contacts associated with deals in active pipeline stages (not Closed Won/Lost)
+**Scope**: Contacts associated with:
+- **Active pipeline deals** — Need momentum to close
+- **Closed Won deals** — Existing clients need relationship maintenance
 
-| Days Since Contact | Status | Action |
-|--------------------|--------|--------|
-| 0-7 | Active | No alert |
-| 8-14 | Warming | Yellow alert — "Deal contact going quiet" |
-| 15-30 | At-Risk | Orange alert — urgent re-engagement |
-| 30+ | Cold | Red alert — "Deal stalling, no contact in 30 days" |
+| Deal Stage | Days Since Contact | Status | Action |
+|------------|-------------------|--------|--------|
+| Active Pipeline | 0-7 | Active | No alert |
+| Active Pipeline | 8-14 | Warming | Yellow — "Deal contact going quiet" |
+| Active Pipeline | 15-30 | At-Risk | Orange — urgent re-engagement |
+| Active Pipeline | 30+ | Cold | Red — "Deal stalling" |
+| **Closed Won** | 0-30 | Active | No alert |
+| **Closed Won** | 31-60 | Warming | Yellow — "Client check-in due" |
+| **Closed Won** | 61-90 | At-Risk | Orange — "Client relationship cooling" |
+| **Closed Won** | 90+ | Cold | Red — "Client at risk of churn" |
 
-**Why tighter**: Active deals need momentum. Silence kills deals.
+**Why different thresholds**:
+- Active deals need tight follow-up (silence kills deals)
+- Clients need regular but less frequent touchpoints (monthly is fine)
 
 ### Macro: Organisation-Level Decay (Looser Thresholds)
 
@@ -340,6 +348,22 @@ After completing Focus Mode (5 emails processed):
 │  🟡 9 days   John Smith (Met) — Active Deal: Disclosure Support │
 │              Last: Initial meeting                              │
 │              [Draft Follow-up] [Snooze 7 days] [Mark Contacted] │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  CLIENT CHECK-INS DUE                                   2 items  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  🟡 45 days  DI Williams (Sussex) — Client: PIP2 Team           │
+│              Contract renewal: 3 months                         │
+│              Suggestion: "Check how the new team is settling"   │
+│              [Draft Check-in] [Snooze 14 days] [Mark Contacted] │
+│                                                                 │
+│  🟠 72 days  DS Patel (Northumbria) — Client: Disclosure        │
+│              Contract renewal: 5 months                         │
+│              Suggestion: "Share case study from similar force"  │
+│              [Draft Check-in] [Snooze 14 days] [Mark Contacted] │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
@@ -524,14 +548,18 @@ filterByFormula: AND(
 **Flow (Two-Tier)**:
 
 **Tier 1: Deal-Level Decay (Micro)**
-1. HubSpot: Get all deals in active pipeline stages
+1. HubSpot: Get deals in active pipeline stages + Closed Won
 2. HubSpot: Get contacts associated with each deal
 3. For each deal-contact:
    - Get `notes_last_contacted`, `hs_last_sales_activity_timestamp`
    - Calculate days since last contact
-   - Apply tight thresholds (8/15/30 days)
+   - Apply thresholds based on deal stage:
+     - Active pipeline: 8/15/30 days (tight)
+     - Closed Won (clients): 30/60/90 days (looser)
    - If decaying: Generate touchpoint suggestion
-   - Surface in dashboard "Deal Contacts Going Cold"
+   - Surface in dashboard:
+     - Active deals → "Deal Contacts Going Cold"
+     - Closed Won → "Client Check-ins Due"
 
 **Tier 2: Organisation-Level Decay (Macro)**
 1. HubSpot: Get all companies linked to Forces
@@ -693,8 +721,10 @@ filterByFormula: AND(
 - [ ] Implement two-tier decay (Deal-Level + Org-Level)
 - [ ] Query HubSpot for engagement data (Decision I1)
 - [ ] AI touchpoint suggestions (non-salesy)
-- [ ] Dashboard "Deal Contacts Going Cold" section
-- [ ] Dashboard "Organisations Going Quiet" section
+- [ ] Dashboard sections:
+  - [ ] "Deal Contacts Going Cold" (active pipeline)
+  - [ ] "Client Check-ins Due" (Closed Won — existing clients)
+  - [ ] "Organisations Going Quiet" (force-level)
 
 ### Phase 2a-8: Contact Auto-Creation
 
