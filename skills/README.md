@@ -1,8 +1,8 @@
 # Skills Reference
 
-**Purpose**: Guide for using skills ported from V1  
-**Created**: 2025-01-19  
-**Updated**: 2025-01-19
+**Purpose**: Guide for using skills ported from V1
+**Created**: 2025-01-19
+**Updated**: 2025-01-23
 
 ---
 
@@ -15,6 +15,40 @@ Skills are codified knowledge from V1 development — patterns, methodologies, a
 - **Progressively implemented** as the system matures
 
 Think of skills as a library, not a checklist.
+
+---
+
+## Skills Architecture
+
+Skills are organised across two locations:
+
+### `.claude/skills/` — Auto-Discovered Skills (Active)
+
+These skills are automatically loaded by Claude Code when relevant to the current task. They have `user-invocable: false` in their frontmatter, meaning Claude uses them proactively without cluttering the `/` command menu.
+
+| Skill | Purpose | When Claude Uses It |
+|-------|---------|---------------------|
+| `uk-police-market-domain` | Domain expertise for signal interpretation | Police workforce, PIP levels, vetting, HMICFRS context |
+| `uk-police-design-system` | Visual design system (tokens, components) | Any UI/frontend work |
+| `adhd-interface-design` | Cognitive load patterns, focus modes | UX decisions, interface design |
+| `action-oriented-ux` | Queue/action interface patterns | Building review flows, keyboard nav |
+| `technical-architecture` | React/n8n/Airtable stack patterns | Architecture decisions, data layer |
+| `force-matching` | UK police force pattern matching (G-005) | Force identification in workflows |
+
+### `skills/` — Reference Skills (Deferred)
+
+These skills remain as reference documentation for future phases. They contain valuable patterns but require infrastructure that doesn't exist yet.
+
+| Skill | Purpose | Prerequisite |
+|-------|---------|--------------|
+| `b2b-visualisation` | Score displays, trends, charts | Scoring model implemented |
+| `board-dashboard-design` | Kanban layouts | Pipeline view feature |
+| `competitive-analysis` | Competitor signal interpretation | Already covered by domain skill |
+| `hubspot-integration` | CRM sync patterns | Phase 2a |
+| `intelligence-source-grading` | Signal reliability scoring | Phase 2+ |
+| `lead-scoring-methodology` | Dual-track scoring | Schema expansion |
+| `notification-system` | Alerts, digests, batched delivery | Overnight tracking |
+| `uk-public-sector-procurement` | Tender/framework knowledge | Phase 2b |
 
 ---
 
@@ -88,7 +122,26 @@ Think of skills as a library, not a checklist.
 
 ## Skill File Structure
 
-Each skill follows this structure:
+### Auto-Discovered Skills (`.claude/skills/`)
+
+```
+.claude/skills/
+└── {skill-name}/
+    └── SKILL.md           # Main documentation with frontmatter
+```
+
+**Required frontmatter:**
+```yaml
+---
+name: skill-name
+description: Brief description for Claude to match against tasks
+user-invocable: false
+---
+```
+
+Setting `user-invocable: false` means Claude loads the skill automatically when the task matches the description — no `/skill-name` command needed.
+
+### Reference Skills (`skills/`)
 
 ```
 skills/
@@ -145,13 +198,21 @@ Skills inform specs. Specs don't need to implement everything a skill describes.
 
 ## Adding New Skills
 
-If you develop a new pattern worth preserving:
+### For Active Skills (Claude should auto-use)
+
+1. Create `.claude/skills/{skill-name}/SKILL.md`
+2. Add frontmatter with `user-invocable: false`
+3. Write a clear `description` that helps Claude match tasks
+4. Document patterns and principles
+5. Update the "Auto-Discovered Skills" table in this README
+
+### For Reference Skills (Future/deferred)
 
 1. Create `skills/{skill-name}/SKILL.md`
 2. Document the pattern with examples
 3. Add supporting files to `references/` if needed
-4. Add to this README's skill table
-5. Note which phase the skill applies to
+4. Update the "Reference Skills" table in this README
+5. Note the prerequisite for activation
 
 ---
 
@@ -178,21 +239,29 @@ technical-architecture (foundation)
 
 ## Current Skill Inventory
 
-| Skill | Description | Status |
-|-------|-------------|--------|
-| `action-oriented-ux` | Three-Zone Model, 2-minute loops | Ready for 1c |
-| `adhd-interface-design` | ADHD-optimised patterns | Ready for 1c |
-| `b2b-visualisation` | Score displays, trends | Deferred |
-| `board-dashboard-design` | Kanban layouts | Deferred |
-| `competitive-analysis` | Competitor signal interpretation | Ready for 1b |
-| `hubspot-integration` | CRM patterns | Deferred |
-| `intelligence-source-grading` | Signal reliability | Deferred |
-| `lead-scoring-methodology` | Dual-track scoring | Deferred |
-| `notification-system` | Alerts, digests | Deferred |
-| `technical-architecture` | Data layer patterns | Active |
-| `uk-police-design-system` | Design tokens, components | Active |
-| `uk-police-market-domain` | Domain knowledge | Active |
-| `uk-public-sector-procurement` | Tender/framework knowledge | Deferred |
+### Active (Auto-Discovered by Claude)
+
+| Skill | Location | Description |
+|-------|----------|-------------|
+| `action-oriented-ux` | `.claude/skills/` | Three-Zone Model, 2-minute loops |
+| `adhd-interface-design` | `.claude/skills/` | ADHD-optimised patterns |
+| `force-matching` | `.claude/skills/` | UK police force pattern matching |
+| `technical-architecture` | `.claude/skills/` | Data layer patterns |
+| `uk-police-design-system` | `.claude/skills/` | Design tokens, components |
+| `uk-police-market-domain` | `.claude/skills/` | Domain knowledge |
+
+### Deferred (Reference Only)
+
+| Skill | Location | Description | Prerequisite |
+|-------|----------|-------------|--------------|
+| `b2b-visualisation` | `skills/` | Score displays, trends | Scoring model |
+| `board-dashboard-design` | `skills/` | Kanban layouts | Pipeline view |
+| `competitive-analysis` | `skills/` | Competitor signal interpretation | Covered by domain skill |
+| `hubspot-integration` | `skills/` | CRM patterns | Phase 2a |
+| `intelligence-source-grading` | `skills/` | Signal reliability | Phase 2+ |
+| `lead-scoring-methodology` | `skills/` | Dual-track scoring | Schema expansion |
+| `notification-system` | `skills/` | Alerts, digests | Overnight tracking |
+| `uk-public-sector-procurement` | `skills/` | Tender/framework knowledge | Phase 2b |
 
 ---
 
@@ -204,4 +273,4 @@ Don't try to implement every skill pattern immediately. Use skills to inform goo
 
 ---
 
-*Last updated: 19 January 2025*
+*Last updated: 23 January 2026*
