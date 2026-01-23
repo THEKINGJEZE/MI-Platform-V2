@@ -33,6 +33,15 @@ if ! command -v claude &> /dev/null; then
     exit 0
 fi
 
+# Skip if running inside a Claude session (nested invocation)
+if [ -n "$CLAUDE_SESSION" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+    # Check if we're in an interactive Claude session
+    if pgrep -f "claude" > /dev/null 2>&1; then
+        echo "⚠️  Inside Claude session, skipping nested review"
+        exit 0
+    fi
+fi
+
 # Get the diff
 DIFF=$(git diff --cached)
 
@@ -46,7 +55,8 @@ fi
 echo "🔍 Running Claude pre-commit review..."
 
 # Run Claude review in headless mode with timeout
-REVIEW=$(timeout 30 claude -p "Quick pre-commit review. Report ONLY critical issues.
+# Use 45s timeout to allow for API latency
+REVIEW=$(timeout 45 claude -p "Quick pre-commit review. Report ONLY critical issues.
 
 Files changed: $STAGED
 
