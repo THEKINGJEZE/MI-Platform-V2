@@ -1,15 +1,56 @@
 #!/bin/bash
 # Pre-edit enforcement hook
-# Warns if critical cross-document issues exist
-# Does not block (hooks can't do interactive prompts)
+# 1. BLOCKS spec creation without /prep-spec context (hard gate)
+# 2. Warns if critical cross-document issues exist
 
 WARNINGS_LOG=".claude/warnings.log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CONSISTENCY_CHECK="$PROJECT_ROOT/scripts/consistency-check.cjs"
+CONTEXT_FILE="$PROJECT_ROOT/specs/NEXT-CONTEXT.md"
 
 cd "$PROJECT_ROOT"
 
+# Read JSON from stdin (Claude Code passes hook input as JSON)
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))" 2>/dev/null)
+
+# ============================================
+# SPEC CREATION GATE (Hard enforcement)
+# ============================================
+# Block creation of new specs without running /prep-spec first
+if [[ "$FILE_PATH" =~ specs/SPEC-.*\.md ]]; then
+    if [ ! -f "$CONTEXT_FILE" ]; then
+        echo "SPEC CREATION BLOCKED" >&2
+        echo "" >&2
+        echo "No context brief found at: specs/NEXT-CONTEXT.md" >&2
+        echo "" >&2
+        echo "Before creating a spec, you MUST:" >&2
+        echo "1. Run: /prep-spec <topic>" >&2
+        echo "2. Review the generated NEXT-CONTEXT.md" >&2
+        echo "3. Then create the spec" >&2
+        echo "" >&2
+        echo "See: .claude/rules/spec-creation.md" >&2
+        exit 2  # Exit code 2 blocks and shows stderr to Claude
+    fi
+
+    # Check if context is stale (>24h old)
+    if [ "$(uname)" = "Darwin" ]; then
+        CONTEXT_AGE=$(($(date +%s) - $(stat -f%m "$CONTEXT_FILE")))
+    else
+        CONTEXT_AGE=$(($(date +%s) - $(stat -c%Y "$CONTEXT_FILE")))
+    fi
+
+    if [ "$CONTEXT_AGE" -gt 86400 ]; then
+        echo "WARNING: Context brief is $(($CONTEXT_AGE / 3600)) hours old." >&2
+        echo "Consider re-running /prep-spec <topic> for fresh context." >&2
+        # Warning only, don't block
+    fi
+fi
+
+# ============================================
+# EXISTING CONSISTENCY CHECK (Soft warning)
+# ============================================
 # Only run facts check (not file references - too noisy)
 if [ -f "$CONSISTENCY_CHECK" ]; then
     # Run consistency check with facts-only mode
@@ -33,5 +74,5 @@ if [ -f "$CONSISTENCY_CHECK" ]; then
     fi
 fi
 
-# Always exit 0 - we warn but don't block
+# Always exit 0 for non-spec files - we warn but don't block
 exit 0

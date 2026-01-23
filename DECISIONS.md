@@ -154,6 +154,25 @@ Track decisions that **actively affect current work**. Not a historical record �
 - `docs/UNIFIED-COMMAND-VISION.md` — Reference document (in main repo)
 **Rationale**: V1 features with highest ADHD value (preventing forgotten follow-ups, maintaining social presence) should come earlier. Features requiring less frequent interaction (pre-call briefs, weekly planning) can wait.
 
+#### A13: Hook-Enforced Spec Creation Process
+**Date**: 23 January 2026
+**Decision**: Enforce spec creation process via Claude Code hooks, not voluntary compliance
+**Context**: After moving from two-layer (Chat + Code) to single-layer (Code-only) architecture (A11), spec creation had good documentation but no enforcement. Evidence showed `/prep-spec` was never run before creating SPEC-012 or SPEC-013.
+**Problem Solved**: Without Chat's "strategic layer" review, there was no hard gate preventing specs from being created without proper context gathering, acceptance criteria copying, or guardrail review.
+**Implementation**:
+1. **Hook enforcement**: `.claude/hooks/pre-edit-check.sh` now blocks writes to `specs/SPEC-*.md` if `specs/NEXT-CONTEXT.md` doesn't exist (exit code 2)
+2. **Staleness warning**: Warns (but doesn't block) if context brief is >24h old
+3. **Pre-flight checklist**: Every spec requires a visible checklist section documenting compliance
+4. **Automated audit**: `consistency-check.cjs` now validates specs have checklists
+5. **Session protocol**: CLAUDE.md updated to include spec creation step
+**Files affected**:
+- `.claude/hooks/pre-edit-check.sh` — Added spec creation gate
+- `.claude/rules/spec-creation.md` — Documented hook enforcement
+- `specs/README.md` — Added pre-flight checklist template
+- `scripts/consistency-check.cjs` — Added spec validation
+- `CLAUDE.md` — Added spec creation to session protocol
+**Why**: Maximum drift prevention. Hooks are the strongest enforcement mechanism available in Claude Code. This ensures specs are always created with proper strategic context.
+
 ---
 
 ### Tier 2 — Phase-Level (Current Phase Only)

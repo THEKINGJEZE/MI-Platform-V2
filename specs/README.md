@@ -8,14 +8,37 @@ Phase implementation specifications. Each phase from [ROADMAP.md](../ROADMAP.md)
 
 Each spec should include:
 
-1. **Overview** — Goal and expected outcome
-2. **Architecture** — Data flow diagram
-3. **Tables** — Airtable schema requirements
-4. **Workflows** — n8n workflows to build (with guardrail references)
-5. **Testing Plan** — How to verify it works
-6. **Acceptance Criteria** — Copied from ROADMAP.md (source of truth)
-7. **Build Sequence** — Order of operations
-8. **Dependencies** — What's needed before building
+1. **Pre-Flight Checklist** — Compliance evidence (see template below)
+2. **Overview** — Goal and expected outcome
+3. **Architecture** — Data flow diagram
+4. **Tables** — Airtable schema requirements
+5. **Workflows** — n8n workflows to build (with guardrail references)
+6. **Testing Plan** — How to verify it works (5+ specific scenarios)
+7. **Acceptance Criteria** — Copied from ROADMAP.md (source of truth)
+8. **Build Sequence** — Order of operations
+9. **Dependencies** — What's needed before building
+
+### Pre-Flight Checklist Template
+
+Every new spec MUST include this section at the top (after status/metadata):
+
+```markdown
+## Pre-Flight Checklist
+
+Before this spec can be considered complete:
+
+- [ ] `/prep-spec <topic>` was run before drafting
+- [ ] `specs/NEXT-CONTEXT.md` was reviewed
+- [ ] Acceptance criteria copied verbatim from ROADMAP.md
+- [ ] Guardrails reviewed; applicable ones cited inline (G-XXX)
+- [ ] Strategy divergence check completed (see table below if diverging)
+- [ ] Testing plan includes 5+ specific test scenarios
+- [ ] Build sequence defines implementation order
+
+**Specs missing this checklist are incomplete.**
+```
+
+**Note**: The spec creation hook (`.claude/hooks/pre-edit-check.sh`) will block creation of new specs if `specs/NEXT-CONTEXT.md` doesn't exist. Run `/prep-spec <topic>` first.
 
 ## Strategy Divergence Check
 

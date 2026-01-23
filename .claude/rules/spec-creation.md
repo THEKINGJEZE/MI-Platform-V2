@@ -23,6 +23,19 @@ Before writing ANY spec content, you MUST have:
 
 ## Hard Gates
 
+### 0. Context Brief Must Exist (Hook Enforced)
+
+**This gate is enforced by `.claude/hooks/pre-edit-check.sh`.** Attempting to create a spec without a context brief will be blocked automatically.
+
+Before writing ANY content to a spec file:
+
+1. Check if `specs/NEXT-CONTEXT.md` exists
+2. If it doesn't exist → run `/prep-spec <topic>` first
+3. If it exists but is >24h old → re-run `/prep-spec` for fresh context
+4. Read and review the context brief before proceeding
+
+**Violation results in blocked Write/Edit operation with exit code 2.**
+
 ### 1. No Context = No Spec
 
 If asked to write a spec without running `/prep-spec`:

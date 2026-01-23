@@ -400,6 +400,36 @@ function checkCommands() {
 }
 
 /**
+ * Check specs have pre-flight checklist
+ * Returns array of specs missing checklists
+ */
+function checkSpecChecklists() {
+  const specsDir = path.join(PROJECT_ROOT, 'specs');
+  const warnings = [];
+
+  if (!fs.existsSync(specsDir)) {
+    return warnings;
+  }
+
+  const specFiles = fs.readdirSync(specsDir).filter(f => f.match(/^SPEC-.*\.md$/));
+
+  specFiles.forEach(file => {
+    const filePath = path.join(specsDir, file);
+    const content = fs.readFileSync(filePath, 'utf8');
+
+    // Check for pre-flight checklist section
+    if (!content.includes('## Pre-Flight Checklist')) {
+      warnings.push({
+        spec: file,
+        issue: 'Missing Pre-Flight Checklist section'
+      });
+    }
+  });
+
+  return warnings;
+}
+
+/**
  * Main function
  */
 function main() {
@@ -442,6 +472,20 @@ function main() {
       commandMissing.forEach(m => console.log(`   - ${m.command} → ${m.ref} (NOT FOUND)`));
     } else {
       console.log('✅ Commands: all dependencies exist');
+    }
+
+    console.log('');
+  }
+
+  // Check spec checklists (unless --facts-only)
+  if (!factsOnly) {
+    const specWarnings = checkSpecChecklists();
+    if (specWarnings.length > 0) {
+      // Warnings, not errors - existing specs may pre-date the checklist requirement
+      console.log(`⚠️  Specs: ${specWarnings.length} missing Pre-Flight Checklist`);
+      specWarnings.forEach(w => console.log(`   - ${w.spec}: ${w.issue}`));
+    } else {
+      console.log('✅ Specs: all have Pre-Flight Checklists');
     }
 
     console.log('');

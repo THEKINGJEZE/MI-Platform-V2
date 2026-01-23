@@ -150,7 +150,11 @@ Design system and domain skills available in `/skills/`. Read `@skills/README.md
 2. **Plan First**: For non-trivial tasks, use plan mode (automatic in worktrees). Research before execution.
 3. **Checkpoint**: Before risky edits (workflow changes, schema changes), note state for `/rewind`.
 4. **Work**: Use @references, not paste. `/compact` every 3-4 turns.
-5. **End**: Update STATUS.md. Define next action. git commit && git push.
+5. **Spec Creation**: Before writing to `specs/SPEC-*.md`:
+   - Run `/prep-spec <topic>` first
+   - Review `specs/NEXT-CONTEXT.md`
+   - Hook will block if context brief missing (exit code 2)
+6. **End**: Update STATUS.md. Define next action. git commit && git push.
 
 ### When to Use Plan Mode
 - New feature implementation (not bug fixes)
