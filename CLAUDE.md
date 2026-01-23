@@ -80,6 +80,8 @@ Use alignment-checker to verify: [proposed change]
 | Reference data | @reference-data/ (forces, competitors, capabilities) |
 | Patterns | @patterns/ (force-matching, keywords, filters) |
 | AI prompts | @prompts/ (job-classification, email-triage) |
+| MCP servers | @.claude/MCP-SERVERS.md (Airtable, HubSpot, n8n, Make) |
+| Best practices | @.claude/BEST-PRACTICES.md (writer-reviewer, headless mode) |
 
 ## Project Skills
 
@@ -114,9 +116,18 @@ Design system and domain skills available in `/skills/`. Read `@skills/README.md
 
 ## Session Protocol
 1. **Start**: Hooks inject context. Read STATUS.md.
-2. **Checkpoint**: Before risky edits (workflow changes, schema changes), note the state so `/rewind` is effective.
-3. **Work**: Use @references, not paste. /compact every 3-4 turns.
-4. **End**: Update STATUS.md. Define next action. git commit && git push.
+2. **Plan First**: For non-trivial tasks, use plan mode (automatic in worktrees). Research before execution.
+3. **Checkpoint**: Before risky edits (workflow changes, schema changes), note state for `/rewind`.
+4. **Work**: Use @references, not paste. `/compact` every 3-4 turns.
+5. **End**: Update STATUS.md. Define next action. git commit && git push.
+
+### When to Use Plan Mode
+- New feature implementation (not bug fixes)
+- Changes affecting multiple files
+- Architectural decisions
+- Unclear requirements needing exploration
+
+Plan mode separates research from execution — explore first, then implement.
 
 ## Git Commit Protocol
 After completing any task that modifies files:

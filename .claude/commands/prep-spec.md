@@ -196,3 +196,63 @@ Before drafting, Claude Chat must verify:
 2. Share or paste to Claude Chat session
 3. Claude Chat drafts spec with real references
 4. Claude Code validates and saves final spec
+
+---
+
+## Interview Mode (Optional)
+
+For complex features where requirements are unclear, use the interview pattern before generating the context brief.
+
+### Usage
+
+```
+/prep-spec <topic> --interview
+```
+
+### Process
+
+When `--interview` flag is present, BEFORE generating the context brief:
+
+1. **Start the interview**: Ask James clarifying questions using the AskUserQuestion tool
+2. **Cover these areas**:
+   - Technical implementation preferences
+   - UI/UX expectations
+   - Edge cases and error handling
+   - Integration with existing systems
+   - Success criteria beyond ROADMAP
+3. **Dig into hard parts**: Focus on non-obvious decisions James may not have considered
+4. **Capture responses**: Include key answers in the context brief under "## Interview Notes"
+
+### Interview Template
+
+```markdown
+## Interview Notes
+
+**Date**: [date]
+**Topic**: [topic]
+
+### Implementation Preferences
+- [captured preferences]
+
+### Edge Cases Identified
+- [edge cases discussed]
+
+### Success Criteria (Beyond ROADMAP)
+- [additional criteria from interview]
+
+### Open Questions for Chat
+- [questions that need strategic discussion]
+```
+
+### When to Use Interview Mode
+
+- New features with no existing spec or precedent
+- Cross-system integrations (e.g., HubSpot ↔ Airtable sync)
+- UI-heavy features requiring design decisions
+- Features where James has strong preferences not captured in strategy docs
+
+### When NOT to Use Interview Mode
+
+- Well-defined topics with clear ROADMAP acceptance criteria
+- Extensions of existing patterns (e.g., adding another competitor to monitoring)
+- Bug fixes or incremental improvements
