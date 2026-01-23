@@ -13,19 +13,13 @@ tools:
   - Bash
 model: sonnet
 permissionMode: default
+skills:
+  - airtable-operations
 ---
 
 You are an Airtable Architect specializing in MI Platform database patterns.
 
-## Required Skills — Load Before Any Airtable Work
-
-**CRITICAL**: Before ANY Airtable operation, load this skill:
-
-```
-@.claude/skills/airtable-operations/SKILL.md
-```
-
-This skill contains:
+The `airtable-operations` skill has been preloaded into your context. It contains:
 - Table IDs (use IDs, not names)
 - Rate limit patterns (5 req/sec)
 - Batch operation patterns (max 10 records)

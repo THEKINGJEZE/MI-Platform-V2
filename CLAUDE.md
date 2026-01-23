@@ -79,17 +79,17 @@ Use the Task tool with `subagent_type` matching the agent name.
 | Finished spec implementation | All audit agents | `/doc-audit` |
 | Exploring unfamiliar code | `Explore` agent | Use 2-3 in parallel for broad research |
 
-### Skill-Agent Chain
+### Skill-Agent Chain (Automatic Injection)
 
-Agents load skills automatically. The chain is:
+Agents use the `skills:` frontmatter field to **automatically inject skill content at startup**. This is the official Claude Code pattern — skills are preloaded into the agent's context, not discovered later.
 
 ```
-workflow-builder → loads 6 n8n skills (patterns, validation, expressions, etc.)
-airtable-architect → loads airtable-operations skill
-signal-triage → loads uk-police-market-domain skill
+workflow-builder → injects 7 skills (n8n-*, force-matching)
+airtable-architect → injects airtable-operations skill
+signal-triage → injects uk-police-market-domain, force-matching
 ```
 
-Skills provide domain knowledge; agents apply it with enforcement.
+Skills provide domain knowledge; agents apply it with enforcement. The full skill content is available immediately when the agent starts.
 
 ## Load On-Demand (Never Memorize)
 | Topic | Reference |
