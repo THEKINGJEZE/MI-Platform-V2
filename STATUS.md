@@ -46,12 +46,28 @@
 
 ---
 
+## SPEC-011 Agent Enrichment — In Progress
+
+**Tracker**: `specs/IMPL-011.md`
+**Current Stage**: 1 (Parse) — ✅ Complete, awaiting gate confirmation
+
+### Stage 1 Parse Summary
+
+- Extracted 9 acceptance criteria
+- Identified 7 applicable guardrails (G-002, G-007, G-011, G-012, G-013, G-014, G-015)
+- Dependencies: SPEC-010 ✅, schema additions needed, HubSpot/n8n verification needed
+- Files to create: 2 prompts + 1 n8n workflow
+
+**Next Action**: User confirms "y" to proceed to Stage 2 (Audit)
+
+---
+
 ## Next Actions
 
-1. **Add OPENAI_API_KEY** to `.env.local` for backfill script
-2. **Monitor for 1 week** — verify ongoing classification quality
-3. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
-4. **If targets met**: Mark Phase 1d complete, proceed to Phase 1e
+1. **SPEC-011**: Confirm Stage 1 gate to proceed to Audit
+2. **Add OPENAI_API_KEY** to `.env.local` for backfill script
+3. **Monitor for 1 week** — verify ongoing classification quality
+4. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 
