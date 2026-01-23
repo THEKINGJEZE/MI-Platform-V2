@@ -248,13 +248,71 @@ node scripts/data-quality-audit.cjs
 | Move Email webhook | ✅ Pass | Email moved to Archive |
 | Airtable status update | ✅ Pass | Records updated to approved/done |
 
-**Draft Reply Test**:
-- Input: `email_id` + `draft_body`
-- Output: `{"success": true, "draft_id": "AAMk...", "draft_link": "https://outlook.office365.com/..."}`
+---
 
-**Move Email Test**:
-- Input: `email_id` + `target_folder: "archive"`
-- Output: `{"success": true, "moved_to": "archive", "new_email_id": "AAMk..."}`
+## Phase 2a-6: Email Quality Monitoring Period
+
+**Started**: 23 January 2026
+**Target End**: 30 January 2026 (1 week)
+**Purpose**: Validate email pipeline quality before considering Phase 2a complete
+
+### Daily Checks
+
+| Day | Date | New Emails | Classification Accuracy | Contact Match Rate | Draft Quality | Notes |
+|-----|------|------------|------------------------|-------------------|---------------|-------|
+| 1 | 23 Jan | 21 | TBD | TBD | TBD | Initial sync |
+| 2 | 24 Jan | | | | | |
+| 3 | 25 Jan | | | | | |
+| 4 | 26 Jan | | | | | |
+| 5 | 27 Jan | | | | | |
+| 6 | 28 Jan | | | | | |
+| 7 | 29 Jan | | | | | |
+
+### Success Criteria
+
+**Data Completeness**:
+- [ ] All synced emails have matching Emails record (no orphans in Email_Raw)
+- [ ] No duplicate email_ids in Emails table
+- [ ] `processed` flag correctly set in Email_Raw after classification
+
+**Classification Quality**:
+- [ ] Classification accuracy >80% (spot-check 10 emails/day)
+- [ ] Urgent emails correctly identified (no false negatives)
+- [ ] FYI emails don't include actionable items (no false positives)
+- [ ] `ai_confidence` scores correlate with actual accuracy
+
+**Contact Identification**:
+- [ ] Police sender emails linked to correct Force (>90%)
+- [ ] HubSpot contact matches where contact exists (>80%)
+- [ ] `has_open_deal` correctly populated when deals exist
+
+**Draft Response Quality**:
+- [ ] Drafts follow Peel voice/tone
+- [ ] Drafts reference correct context from email
+- [ ] No hallucinated information in drafts
+- [ ] Drafts are appropriate length (not too long/short)
+
+### Quality Check Commands
+
+```bash
+# Count emails by status
+# Run in Airtable or via script
+
+# Check for duplicates
+# filterByFormula: COUNT(email_id) > 1
+
+# Check orphaned Email_Raw records
+# filterByFormula: AND({processed} = TRUE(), FIND(email_id, Emails) = 0)
+```
+
+### Manual Review Protocol
+
+Daily (5 min):
+1. Open Airtable Emails table
+2. Filter to emails classified today
+3. Spot-check 5 random classifications — are they correct?
+4. Check 2 draft responses — are they appropriate?
+5. Log any issues in Notes column above
 
 ---
 
@@ -262,7 +320,8 @@ node scripts/data-quality-audit.cjs
 
 1. **Merge PR to main** — Email integration branch ready at `stupefied-williams`
 2. **Continue Phase 1d monitoring** — track daily signal quality (background)
-3. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+3. **Daily email quality check** — 5 min spot-check per protocol above
+4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 
