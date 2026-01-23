@@ -1,0 +1,134 @@
+{
+  "services": {
+    "managed_teams": {
+      "name": "Managed Investigation Teams",
+      "short_name": "Peel Teams",
+      "description": "Outcome-based investigator teams under Statement of Works. We recruit, manage, and quality assure - you direct the work.",
+      "key_benefits": [
+        "Outcome accountability, not just filling seats",
+        "We handle recruitment and retention",
+        "Scales up/down with demand",
+        "Quality assured delivery"
+      ],
+      "typical_use_cases": [
+        "Investigation backlog clearance",
+        "Volume crime capacity",
+        "Specialist investigation surge",
+        "Major incident support"
+      ],
+      "differentiator": "Unlike traditional agencies, we take accountability for outcomes - not just filling seats."
+    },
+    "staffing_solutions": {
+      "name": "Staffing Solutions",
+      "short_name": "Individual Placements",
+      "description": "Experienced professionals placed into your team structure for direct management.",
+      "key_benefits": [
+        "Fast access to experienced staff",
+        "You retain direct management",
+        "Flexible duration",
+        "Pre-vetted candidates"
+      ],
+      "typical_use_cases": [
+        "Backfill for secondments",
+        "Specialist skill gaps",
+        "Project-based support",
+        "Interim cover"
+      ],
+      "differentiator": "When you want to augment your existing team with experienced individuals."
+    },
+    "l_and_d": {
+      "name": "Learning & Development",
+      "short_name": "L&D",
+      "description": "Specialist training, development programmes, and capability transfer.",
+      "key_benefits": [
+        "Build internal capability",
+        "Reduce long-term reliance on external support",
+        "Accredited programmes",
+        "Train-the-trainer options"
+      ],
+      "typical_use_cases": [
+        "PIP2 development",
+        "Disclosure training",
+        "Investigation skills uplift",
+        "Leadership development"
+      ],
+      "differentiator": "We help build your own capability, not just provide temporary staff."
+    },
+    "consultancy": {
+      "name": "Consultancy & Advisory",
+      "short_name": "Consultancy",
+      "description": "Expert review, process improvement, and strategic advice.",
+      "key_benefits": [
+        "Independent expert perspective",
+        "Evidence-based recommendations",
+        "Implementation support",
+        "HMICFRS preparation"
+      ],
+      "typical_use_cases": [
+        "Investigation quality review",
+        "Process efficiency analysis",
+        "HMICFRS improvement planning",
+        "Capability assessment"
+      ],
+      "differentiator": "Strategic support to improve performance and compliance."
+    }
+  },
+  "role_category_mapping": {
+    "investigation": {
+      "primary_service": "managed_teams",
+      "secondary_service": "staffing_solutions",
+      "tertiary_service": "l_and_d",
+      "positioning": "For investigation capacity, we recommend our managed teams model - outcome-based delivery where we take accountability for results.",
+      "typical_roles": ["PIP2 Investigator", "Detective Constable", "Fraud Investigator", "Major Crime Investigator"]
+    },
+    "criminal_justice": {
+      "primary_service": "managed_teams",
+      "secondary_service": "staffing_solutions",
+      "tertiary_service": "l_and_d",
+      "positioning": "Disclosure and case progression are critical to successful outcomes. Our managed teams can clear backlogs while maintaining quality.",
+      "typical_roles": ["Disclosure Officer", "Case File Builder", "Case Progression Officer"]
+    },
+    "intelligence": {
+      "primary_service": "staffing_solutions",
+      "secondary_service": "managed_teams",
+      "tertiary_service": null,
+      "positioning": "Intelligence analysts require specific skills. We can provide experienced individuals to integrate with your team.",
+      "typical_roles": ["Intelligence Analyst", "Intelligence Officer", "OSINT Analyst"]
+    },
+    "forensics": {
+      "primary_service": "managed_teams",
+      "secondary_service": "staffing_solutions",
+      "tertiary_service": null,
+      "positioning": "Digital forensics backlogs are common. Our managed teams can process volume while you focus on complex cases.",
+      "typical_roles": ["Digital Forensic Examiner", "Mobile Phone Analyst", "Kiosk Operator"]
+    },
+    "specialist": {
+      "primary_service": "staffing_solutions",
+      "secondary_service": "managed_teams",
+      "tertiary_service": "consultancy",
+      "positioning": "Specialist roles require the right fit. We can help source experienced individuals or design a managed solution.",
+      "typical_roles": ["Vetting Officer", "PSD Investigator", "Financial Investigator"]
+    },
+    "support": {
+      "primary_service": "staffing_solutions",
+      "secondary_service": null,
+      "tertiary_service": null,
+      "positioning": "For support roles, individual placements provide flexibility to match your team needs.",
+      "typical_roles": ["Administrative Officer", "Data Entry", "Project Support"]
+    }
+  },
+  "messaging_guidance": {
+    "volume_indicator": {
+      "threshold": 3,
+      "message_adjustment": "When multiple similar roles are being recruited, emphasize the managed teams model - it's more effective for scale."
+    },
+    "competitor_intercept": {
+      "never_mention": ["Red Snapper", "Investigo", "Reed", "Adecco", "Service Care", "Matrix SCM", "Hays"],
+      "positioning": "Position as 'making sure Peel is on your radar' or 'offering a different approach' - never criticize existing suppliers."
+    },
+    "problem_owner_language": {
+      "focus_on": ["outcomes", "results", "accountability", "capacity", "capability"],
+      "avoid": ["candidates", "temps", "agency staff", "CVs", "fill roles"]
+    }
+  }
+}
