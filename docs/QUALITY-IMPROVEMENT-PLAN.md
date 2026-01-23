@@ -15,7 +15,7 @@
 | 2: Opportunity Creator | ✅ Complete | Competitor flag now set correctly |
 | 3: Enrichment | ✅ Complete | Signal fetch + P1 guardrail added |
 | 4: Data Cleanup | ✅ Scripts created | Ready for dry-run |
-| 5: Agentic Enrichment | ✅ Spec written | `specs/SPEC-010-agentic-enrichment.md` |
+| 5: Agentic Enrichment | ✅ Spec written | `specs/SPEC-011-agent-enrichment.md` (supersedes SPEC-010) |
 
 **Next steps**: Deploy workflows to n8n, run cleanup scripts, test end-to-end, monitor for 1 week.
 
@@ -397,7 +397,7 @@ After core pipeline is fixed, implement:
 - `scripts/merge-opportunities.js` — Consolidate duplicates
 
 ### Specs (New)
-- `specs/SPEC-010-agentic-enrichment.md` — Agentic workflow specification
+- `specs/SPEC-011-agent-enrichment.md` — Agentic workflow specification (supersedes SPEC-010)
 
 ---
 

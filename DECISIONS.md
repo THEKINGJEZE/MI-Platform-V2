@@ -152,7 +152,7 @@ Track decisions that **actively affect current work**. Not a historical record �
 - `ROADMAP.md` — Updated phase structure, added Phase 3 and Phase 7
 - `specs/SPEC-013-social-engagement.md` — Created
 - `docs/UNIFIED-COMMAND-VISION.md` — Reference document (in main repo)
-**Reference**: Analysis in `/Users/jamesjeram/.claude/plans/luminous-swimming-pizza.md`
+**Rationale**: V1 features with highest ADHD value (preventing forgotten follow-ups, maintaining social presence) should come earlier. Features requiring less frequent interaction (pre-call briefs, weekly planning) can wait.
 
 ---
 

@@ -4,7 +4,7 @@
 
 This roadmap breaks the MI Platform build into sequential phases. Each phase has clear acceptance criteria — it's either done or it isn't.
 
-**Current Phase**: 1d — Quality Improvement (implementation complete, pending deployment)
+**Current Phase**: 1d + 2a (Parallel) — Quality monitoring + Email integration
 
 ---
 
@@ -131,11 +131,11 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Duration**: ~1 week
 
-**Status**: ✅ Implementation complete — pending deployment & 1-week validation
+**Status**: ✅ Implementation complete — monitoring until 30 Jan 2026
 
 ---
 
-### Phase 1e: Agentic Enrichment (SPEC-010)
+### Phase 1e: Agentic Enrichment (SPEC-011)
 **Goal**: Intelligent contact research and message drafting
 
 **Acceptance Criteria**:
@@ -146,7 +146,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1d complete (quality issues fixed)
 
-**Spec**: `specs/SPEC-010-agentic-enrichment.md` (to be created)
+**Spec**: `specs/SPEC-011-agent-enrichment.md` ✅ Complete
 
 **Duration**: ~1 week
 
@@ -167,7 +167,7 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1e complete
 
-**Spec**: `specs/SPEC-012-email-integration.md` (to be created)
+**Spec**: `specs/SPEC-012-email-integration.md` ✅ Spec Written
 
 **Skills used**: `hubspot-integration`
 
@@ -358,16 +358,16 @@ The Airtable schema grows incrementally to support features:
 
 ### Phase 1c Additions
 
-**Add to Opportunities**:
-- `draft_subject` (Single Line Text)
-- `draft_body` (Long Text)
-- `actioned_at` (DateTime)
-- `skip_reason` (Single Select: Not police sector, Wrong force, Not our service area, Already contacted, Duplicate, Other)
+**Note**: Phase 1c is dashboard UI migration. Schema fields already defined in SPEC-001:
+- `outreach_draft` (Long Text) — Message body for outreach
+- `outreach_subject` (Single Line Text) — Subject line for email outreach (added in SPEC-011)
+- `status` (Single Select) — Includes sent/skipped states
 
 ### Phase 1d Additions (Quality Improvement)
 
 **Add to Signals** (for classification quality):
-- `role_type` (Single Select) — `investigator`, `forensic`, `intelligence`, `disclosure`, `other`
+- `role_category` (Single Select) — `investigation`, `criminal_justice`, `intelligence`, `forensics`, `specialist`, `support`
+- `role_detail` (Single Line Text) — Specific role description from AI
 - `seniority` (Single Select) — `senior`, `mid`, `junior`, `unknown`
 - `ai_confidence` (Number 0-100) — Classification confidence score
 - `force_source` (Single Select) — `matched`, `inferred`, `manual`
@@ -543,12 +543,12 @@ A phase is complete when:
 | SPEC-001: Airtable Schema | 1 | ✅ Complete |
 | SPEC-002: Jobs Ingestion | 1 | ✅ Built |
 | SPEC-003: Signal Classification | 1 | ✅ Built |
-| SPEC-004: Opportunity Creator | 1 | 🔄 In Progress |
+| SPEC-004: Opportunity Creator | 1 | ✅ Built (fixed in Phase 1d) |
 | SPEC-005: Opportunity Enricher | 1 | ✅ Built |
 | SPEC-006: Monday Review | 1 | 🔀 Absorbed into SPEC-009 |
 | SPEC-008: Morning Brief | Future | ⏸️ Deferred |
 | SPEC-009: Dashboard V1 Migration | 1c | ✅ Complete |
-| SPEC-010: Agentic Enrichment | 1e | ✅ Spec written (pending 1d validation) |
+| SPEC-010: Pipeline Remediation | 1d | ✅ Complete |
 | SPEC-011: Agent Enrichment | 1e | ✅ Complete |
 | SPEC-012: Email + Relationship Decay | 2a | ✅ Spec Written |
 | SPEC-013: Social Engagement | 3 | 📋 Planned |
@@ -566,4 +566,4 @@ A phase is complete when:
 
 ---
 
-*Last updated: 20 January 2025*
+*Last updated: 23 January 2026*

@@ -1,9 +1,10 @@
 # SPEC-011: Agent-Based Opportunity Enrichment
 
-**Status**: Ready for Implementation  
-**Phase**: 1 (Enhancement)  
-**Priority**: P1 — After SPEC-010 pipeline fixes  
+**Status**: ✅ Complete
+**Phase**: 1e (Agentic Enrichment)
+**Priority**: P1 — After SPEC-010 pipeline fixes
 **Depends On**: SPEC-010 (classification must work first)
+**Implementation**: WF5 v2.2 deployed and live
 
 ---
 

@@ -59,7 +59,8 @@ Raw intelligence as it arrives from all sources.
 **Phase 1d Additions** (Quality Improvement):
 | Field | Type | Description |
 |-------|------|-------------|
-| `role_type` | Single Select | `investigator`, `forensic`, `intelligence`, `disclosure`, `other` |
+| `role_category` | Single Select | `investigation`, `criminal_justice`, `intelligence`, `forensics`, `specialist`, `support` |
+| `role_detail` | Single Line Text | Specific role description from AI classification |
 | `seniority` | Single Select | `senior`, `mid`, `junior`, `unknown` |
 | `ai_confidence` | Number (0-100) | Classification confidence score |
 | `force_source` | Single Select | `matched`, `inferred`, `manual` — how force was identified |
@@ -87,7 +88,8 @@ One record per police force with active signals.
 | `status` | Single Select | `researching`, `ready`, `sent`, `replied`, `meeting`, `proposal`, `won`, `lost`, `dormant` |
 | `contact` | Link → Contacts | Primary contact |
 | `contact_confidence` | Single Select | `verified`, `likely`, `guess` |
-| `outreach_draft` | Long Text | Message to send |
+| `outreach_subject` | Single Line Text | Subject line for email outreach |
+| `outreach_draft` | Long Text | Message body to send |
 | `outreach_channel` | Single Select | `email`, `linkedin` |
 | `outreach_angle` | Single Select | `direct_hiring`, `competitor_intercept`, `tender`, `regulatory`, `proactive` |
 | `last_contact_date` | DateTime | When we last reached out |
