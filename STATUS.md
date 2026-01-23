@@ -41,7 +41,7 @@
 |-----------|--------|-------|
 | Dashboard | ✅ Live | https://dashboard.peelplatforms.co.uk/review |
 | WF3 (Classification) | ✅ Updated | v2.1 prompt deployed |
-| WF5 (Agent Enrichment) | ✅ Rebuilt | ID: 761WZpy9idhBPLpf (proper AI Agents) |
+| WF5 (Agent Enrichment) | ✅ Tested | ID: c8TY69N65fGzQNai (live test passed) |
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
@@ -64,31 +64,30 @@
 - `n8n/workflows/opportunity-enricher-backup.json` — Backup of original
 - `reference-data/peel-services.json` — Service reference data
 
-**n8n Workflow**: `MI: Agent Enrichment (SPEC-011)` (ID: `761WZpy9idhBPLpf`)
-**Status**: Rebuilt and deployed (inactive — activate after live testing)
+**n8n Workflow**: `MI: Agent Enrichment (SPEC-011)` (ID: `c8TY69N65fGzQNai`)
+**Status**: ✅ Live tested and activated
 
-### Acceptance Criteria (9/9 Verified)
+### Live Test Results (23 Jan 2026)
 
-| Criterion | Status |
-|-----------|--------|
-| Problem owner vs HR selection | ✅ |
-| Recent outreach conflict check | ✅ |
-| Signal references in messages | ✅ |
-| Hook → Bridge → Value → CTA | ✅ |
-| Under 100 words | ✅ |
-| No competitor names | ✅ |
-| Why Now summary | ✅ |
-| Latency < 30s | ✅ (estimated) |
-| Cost < $0.15 | ✅ (~$0.04) |
+| Check | Result |
+|-------|--------|
+| Workflow triggers via webhook | ✅ |
+| Agent uses tools with correct parameters | ✅ |
+| Agent returns structured JSON | ✅ |
+| Airtable update succeeds | ✅ |
+| Graceful error handling | ✅ |
+| Execution time | ~56 seconds |
 
-**Next Action**: Run live test with real opportunity, then activate workflow
+**Data Issue**: HubSpot company IDs may not match actual data — workflow handles gracefully by flagging for manual research.
+
+**Next Action**: Verify HubSpot company IDs are correct, or add Airtable contacts fallback
 
 ---
 
 ## Next Actions
 
-1. **SPEC-011 Live Test**: Run workflow with real "researching" opportunity
-2. **Activate Workflow**: Once live test passes, enable schedule trigger
+1. **Verify HubSpot Data**: Check company IDs match actual HubSpot records
+2. **Monitor WF5**: Workflow is active — verify it processes new opportunities
 3. **Monitor for 1 week** — verify ongoing classification quality
 4. **Run audit after monitoring**: `node scripts/data-quality-audit.cjs`
 

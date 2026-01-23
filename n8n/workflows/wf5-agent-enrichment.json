@@ -31,6 +31,20 @@
     },
     {
       "parameters": {
+        "path": "wf5-agent-test",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Test Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [100, 800],
+      "webhookId": "wf5-agent-test-webhook"
+    },
+    {
+      "parameters": {
         "url": "https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblJgZuI3LM2Az5id",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "airtableTokenApi",
@@ -151,18 +165,15 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "method": "GET",
+        "url": "=https://api.hubapi.com/crm/v4/objects/company/{{ $fromAI('hubspot_company_id', 'HubSpot company ID for the police force', 'string') }}/associations/contact",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"filterGroups\": [{\n    \"filters\": [{\n      \"propertyName\": \"associatedcompanyid\",\n      \"operator\": \"EQ\",\n      \"value\": \"{{ $fromAI('hubspot_company_id', 'HubSpot company ID for the police force', 'string') }}\"\n    }]\n  }],\n  \"properties\": [\"firstname\", \"lastname\", \"email\", \"jobtitle\", \"phone\", \"hs_object_id\"],\n  \"limit\": 20\n}",
         "options": {},
-        "toolDescription": "Search HubSpot CRM for contacts at a police force. Use this to find all known contacts at that force. Returns contact names, roles, emails. Requires the force's HubSpot company ID."
+        "toolDescription": "Get contacts associated with a HubSpot company. REQUIRED: You MUST provide the hubspot_company_id parameter - use the force_hubspot_id value from the opportunity context (e.g., '12829198580'). Returns list of contact IDs associated with the company. Use these IDs to fetch contact details."
       },
       "id": "tool-search-hubspot",
-      "name": "Tool: Search HubSpot Contacts",
+      "name": "search_hubspot_contacts",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [1900, 500],
@@ -180,7 +191,7 @@
         "toolDescription": "Get interaction history for a specific contact from Airtable. Returns last_interaction date, relationship_status, and notes. Use this after finding contacts to check when we last contacted them."
       },
       "id": "tool-get-contact-history",
-      "name": "Tool: Get Contact History",
+      "name": "get_contact_history",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [1900, 600],
@@ -198,7 +209,7 @@
         "toolDescription": "Get organizational structure and metadata for a police force. Returns known departments, competitor incumbents, notes. Use this to understand the force context when selecting a contact."
       },
       "id": "tool-get-force-org",
-      "name": "Tool: Get Force Org Structure",
+      "name": "get_force_org_structure",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [1900, 700],
@@ -216,7 +227,7 @@
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"contact_role\": {\"type\": \"string\", \"description\": \"The contact's job title/role\"},\n    \"role_category\": {\"type\": \"string\", \"description\": \"The category of role being hired: investigation, criminal_justice, intelligence, forensics, specialist, support\"}\n  },\n  \"required\": [\"contact_role\", \"role_category\"]\n}"
       },
       "id": "tool-evaluate-fit",
-      "name": "Tool: Evaluate Contact Fit",
+      "name": "evaluate_contact_fit",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3,
       "position": [1900, 800]
@@ -227,7 +238,7 @@
         "text": "={{ $json.contact_research_prompt }}",
         "hasOutputParser": false,
         "options": {
-          "systemMessage": "You are a Contact Research Agent for Peel Solutions. Your job is to find the BEST contact for a sales opportunity at a UK police force.\n\nTHE PROBLEM OWNER PRINCIPLE:\nThe ideal contact is the 'problem owner' - the person whose team is understaffed. This is usually NOT HR.\n- Investigation roles → Head of Crime, Head of Investigations\n- Criminal Justice roles → Head of CJ, Disclosure Lead\n- Intelligence roles → Head of Intelligence\n- HR is the FALLBACK, not the first choice\n\nYOUR PROCESS:\n1. Use search_hubspot_contacts to find contacts at the force\n2. Use evaluate_contact_fit to assess each contact's fit\n3. Use get_contact_history to check if we've contacted them recently (< 7 days = too soon)\n4. Select the best contact based on fit and timing\n\nRULES:\n- Problem owner > HR - Always prefer operational leaders\n- Never recommend someone we emailed < 7 days ago - set safe_to_contact: false\n- Explain your reasoning clearly\n- If no contacts exist, return null with ideal_contact_profile\n\nOUTPUT FORMAT (JSON):\n{\n  \"contact_id\": \"rec_xxx or null\",\n  \"contact_name\": \"Name or null\",\n  \"contact_role\": \"Role or null\",\n  \"contact_email\": \"email or null\",\n  \"contact_confidence\": \"high/medium/low/none\",\n  \"is_problem_owner\": true/false,\n  \"selection_reasoning\": \"Why this contact was chosen\",\n  \"days_since_last_contact\": 30,\n  \"safe_to_contact\": true/false,\n  \"backup_contacts\": [{\"contact_id\": \"rec_yyy\", \"name\": \"...\", \"role\": \"...\", \"why_backup\": \"...\"}],\n  \"ideal_contact_profile\": \"If no good contact, who to look for\",\n  \"research_notes\": \"Useful context about the force/contacts\"\n}",
+          "systemMessage": "You are a Contact Research Agent for Peel Solutions. Your job is to find the BEST contact for a sales opportunity at a UK police force.\n\nTHE PROBLEM OWNER PRINCIPLE:\nThe ideal contact is the 'problem owner' - the person whose team is understaffed. This is usually NOT HR.\n- Investigation roles → Head of Crime, Head of Investigations\n- Criminal Justice roles → Head of CJ, Disclosure Lead\n- Intelligence roles → Head of Intelligence\n- HR is the FALLBACK, not the first choice\n\nYOUR PROCESS:\n1. Use search_hubspot_contacts with hubspot_company_id parameter (use the Force HubSpot ID from the opportunity context)\n2. Use evaluate_contact_fit to assess each contact's fit\n3. Use get_contact_history to check if we've contacted them recently (< 7 days = too soon)\n4. Select the best contact based on fit and timing\n\nIMPORTANT - TOOL PARAMETERS:\n- search_hubspot_contacts: You MUST pass hubspot_company_id (the Force HubSpot ID from opportunity, e.g. '12829198580')\n- evaluate_contact_fit: Pass contact_role and role_category\n- get_contact_history: Pass contact_id (Airtable record ID starting with 'rec')\n\nRULES:\n- Problem owner > HR - Always prefer operational leaders\n- Never recommend someone we emailed < 7 days ago - set safe_to_contact: false\n- Explain your reasoning clearly\n- If no contacts exist or HubSpot ID is unknown, return null with ideal_contact_profile\n\nOUTPUT FORMAT (JSON):\n{\n  \"contact_id\": \"rec_xxx or null\",\n  \"contact_name\": \"Name or null\",\n  \"contact_role\": \"Role or null\",\n  \"contact_email\": \"email or null\",\n  \"contact_confidence\": \"high/medium/low/none\",\n  \"is_problem_owner\": true/false,\n  \"selection_reasoning\": \"Why this contact was chosen\",\n  \"days_since_last_contact\": 30,\n  \"safe_to_contact\": true/false,\n  \"backup_contacts\": [{\"contact_id\": \"rec_yyy\", \"name\": \"...\", \"role\": \"...\", \"why_backup\": \"...\"}],\n  \"ideal_contact_profile\": \"If no good contact, who to look for\",\n  \"research_notes\": \"Useful context about the force/contacts\"\n}",
           "maxIterations": 5,
           "returnIntermediateSteps": true
         }
@@ -271,7 +282,7 @@
         "nodeCredentialType": "airtableTokenApi",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"fields\": {\n    \"status\": \"needs_contact\",\n    \"notes\": {{ JSON.stringify($json.selection_reasoning || 'No suitable contact found') }}\n  }\n}",
+        "jsonBody": "={\n  \"fields\": {\n    \"notes\": {{ JSON.stringify('[NEEDS MANUAL CONTACT RESEARCH] ' + ($json.selection_reasoning || 'No suitable contact found') + '\\n\\nIdeal contact profile: ' + ($json.ideal_contact_profile || 'Problem owner for ' + $json.role_category)) }}\n  }\n}",
         "options": {}
       },
       "id": "update-needs-contact",
@@ -330,7 +341,7 @@
         "toolDescription": "Get all signals linked to an opportunity from Airtable. Use a filter formula like SEARCH(RECORD_ID(),\"recXXX,recYYY\") with the signal IDs. Returns signal titles, types, sources."
       },
       "id": "tool-get-signals",
-      "name": "Tool: Get Opportunity Signals",
+      "name": "get_opportunity_signals",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [2900, 400],
@@ -360,7 +371,7 @@
         "toolDescription": "Get previous outreach messages sent to this force. Use a filter like AND({force}=\"recXXX\",{status}=\"sent\"). Returns recent messages to avoid repetition."
       },
       "id": "tool-get-previous-outreach",
-      "name": "Tool: Get Previous Outreach",
+      "name": "get_previous_outreach",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [2900, 500],
@@ -378,7 +389,7 @@
         "toolDescription": "Get background context about a police force - size, region, relationship status, competitor incumbents, notes. Use for personalisation."
       },
       "id": "tool-get-force-context",
-      "name": "Tool: Get Force Context",
+      "name": "get_force_context",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [2900, 600],
@@ -396,7 +407,7 @@
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"role_category\": {\"type\": \"string\", \"description\": \"The category: investigation, criminal_justice, intelligence, forensics, specialist, support\"}\n  },\n  \"required\": [\"role_category\"]\n}"
       },
       "id": "tool-get-peel-services",
-      "name": "Tool: Get Peel Services",
+      "name": "get_peel_services",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3,
       "position": [2900, 700]
@@ -411,7 +422,7 @@
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"body\": {\"type\": \"string\", \"description\": \"The message body to critique\"},\n    \"is_competitor_intercept\": {\"type\": \"boolean\", \"description\": \"Is this a competitor intercept opportunity?\"}\n  },\n  \"required\": [\"body\"]\n}"
       },
       "id": "tool-critique-draft",
-      "name": "Tool: Critique Draft",
+      "name": "critique_draft",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3,
       "position": [2900, 800]
@@ -491,6 +502,9 @@
     "Manual Trigger": {
       "main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]
     },
+    "Webhook: Test Trigger": {
+      "main": [[{"node": "Fetch: Researching Opportunities", "type": "main", "index": 0}]]
+    },
     "Fetch: Researching Opportunities": {
       "main": [[{"node": "IF: Has Opportunities", "type": "main", "index": 0}]]
     },
@@ -524,16 +538,16 @@
     "OpenAI: Contact Research Model": {
       "ai_languageModel": [[{"node": "Agent: Contact Research", "type": "ai_languageModel", "index": 0}]]
     },
-    "Tool: Search HubSpot Contacts": {
+    "search_hubspot_contacts": {
       "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Get Contact History": {
+    "get_contact_history": {
       "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Get Force Org Structure": {
+    "get_force_org_structure": {
       "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Evaluate Contact Fit": {
+    "evaluate_contact_fit": {
       "ai_tool": [[{"node": "Agent: Contact Research", "type": "ai_tool", "index": 0}]]
     },
     "Agent: Contact Research": {
@@ -560,19 +574,19 @@
     "OpenAI: Drafting Model": {
       "ai_languageModel": [[{"node": "Agent: Outreach Drafting", "type": "ai_languageModel", "index": 0}]]
     },
-    "Tool: Get Opportunity Signals": {
+    "get_opportunity_signals": {
       "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Get Previous Outreach": {
+    "get_previous_outreach": {
       "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Get Force Context": {
+    "get_force_context": {
       "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Get Peel Services": {
+    "get_peel_services": {
       "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
     },
-    "Tool: Critique Draft": {
+    "critique_draft": {
       "ai_tool": [[{"node": "Agent: Outreach Drafting", "type": "ai_tool", "index": 0}]]
     },
     "Agent: Outreach Drafting": {
