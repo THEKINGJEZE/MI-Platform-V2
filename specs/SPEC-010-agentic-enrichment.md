@@ -1,10 +1,17 @@
 # SPEC-010: Agentic Enrichment Workflow
 
-**Status**: Draft
+> ⚠️ **SUPERSEDED**: This spec was drafted but never implemented. The actual agent enrichment
+> was implemented as **SPEC-011** (`specs/SPEC-011-agent-enrichment.md`) with a hybrid HubSpot
+> approach. The SPEC-010 number was reused for Pipeline Remediation (`SPEC-010-pipeline-remediation.md`).
+>
+> **Do not implement this spec** — refer to SPEC-011 for the active agent enrichment workflow.
+
+**Status**: Superseded (never implemented)
 **Created**: 2025-01-21
-**Phase**: Future (Post-Quality Improvement)
-**Depends on**: SPEC-005 (Opportunity Enricher), Quality Improvement Plan completion
-**Supersedes**: None (enhancement to SPEC-005)
+**Superseded by**: SPEC-011 Agent Enrichment (implemented January 2026)
+**Phase**: N/A
+**Depends on**: N/A
+**Supersedes**: None
 
 ---
 

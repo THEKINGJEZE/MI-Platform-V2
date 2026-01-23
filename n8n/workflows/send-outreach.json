@@ -1,5 +1,7 @@
 {
+  "id": "wf-send-outreach",
   "name": "MI: Send Outreach",
+  "active": false,
   "nodes": [
     {
       "parameters": {
