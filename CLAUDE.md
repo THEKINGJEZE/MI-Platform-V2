@@ -82,6 +82,7 @@ Use alignment-checker to verify: [proposed change]
 | AI prompts | @prompts/ (job-classification, email-triage) |
 | MCP servers | @.claude/MCP-SERVERS.md (Airtable, HubSpot, n8n, Make) |
 | Best practices | @.claude/BEST-PRACTICES.md (writer-reviewer, headless mode) |
+| Environment rules | @.claude/ENVIRONMENT-RULES.md (CLI vs Desktop vs Web) |
 
 ## Project Skills
 
