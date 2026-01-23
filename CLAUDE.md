@@ -191,5 +191,6 @@ Run these commands weekly to prevent drift:
 | `/consistency-check` | Verify document references are valid |
 | `/doc-audit` | Comprehensive documentation alignment check |
 | `/prep-spec <topic>` | Generate context brief for spec creation |
+| `/audit-claude-setup` | Audit Claude Code config against current best practices |
 | `git status` | Check uncommitted changes |
 | `git add . && git commit -m "[scope] msg" && git push` | Commit and push |
