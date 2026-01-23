@@ -49,16 +49,18 @@
 ## SPEC-011 Agent Enrichment — In Progress
 
 **Tracker**: `specs/IMPL-011.md`
-**Current Stage**: 1 (Parse) — ✅ Complete, awaiting gate confirmation
+**Current Stage**: 2 (Audit) — ✅ Complete, awaiting gate confirmation
 
-### Stage 1 Parse Summary
+### Stage 2 Audit Summary
 
-- Extracted 9 acceptance criteria
-- Identified 7 applicable guardrails (G-002, G-007, G-011, G-012, G-013, G-014, G-015)
-- Dependencies: SPEC-010 ✅, schema additions needed, HubSpot/n8n verification needed
-- Files to create: 2 prompts + 1 n8n workflow
+- ✅ **Airtable schema**: All 12 required fields already exist
+- ✅ **HubSpot API**: Verified working (contacts.read, companies.read scopes)
+- ✅ **Agent prompts**: Both exist in prompts/ folder
+- ⚠️ **n8n implementation**: Current WF5 uses HTTP→OpenAI, needs migration to AI Agent nodes
 
-**Next Action**: User confirms "y" to proceed to Stage 2 (Audit)
+**Technical Decision**: Recommend hybrid approach — AI Agent for contact research, HTTP for drafting
+
+**Next Action**: User confirms "y" to proceed to Stage 3 (Plan)
 
 ---
 

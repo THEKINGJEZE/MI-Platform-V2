@@ -10,8 +10,8 @@
 
 | Stage | Name | Status | Completed |
 |-------|------|--------|-----------|
-| 1 | Parse | 🔄 | - |
-| 2 | Audit | ⬜ | - |
+| 1 | Parse | ✅ | 2026-01-23 |
+| 2 | Audit | 🔄 | - |
 | 3 | Plan | ⬜ | - |
 | 4 | Build | ⬜ | - |
 | 5 | Verify | ⬜ | - |
@@ -19,9 +19,9 @@
 
 ## Current State
 
-**Working on**: Stage 1 - Parsing acceptance criteria from SPEC-011
+**Working on**: Stage 2 - Auditing preconditions
 **Blockers**: None
-**Next action**: Complete parsing, await gate confirmation
+**Next action**: Confirm audit results, proceed to PLAN stage
 
 ## Stage Outputs
 
@@ -58,13 +58,14 @@
 | SPEC-010 (Pipeline Remediation) | Spec | ✅ Complete |
 | Airtable `role_category` field | Schema | ✅ Exists (from SPEC-010) |
 | Airtable `role_detail` field | Schema | ✅ Exists (from SPEC-010) |
-| Airtable `why_now` field | Schema | ⬜ May need adding |
-| Airtable `outreach_subject` field | Schema | ⬜ May need adding |
-| Airtable `outreach_angle` field | Schema | ⬜ May need adding |
-| Airtable `contact_confidence` field | Schema | ⬜ May need adding |
-| HubSpot API access | External | ⬜ Needs verification |
-| n8n AI Agent capability | Platform | ⬜ Needs verification |
-| Prompts folder | Files | ✅ Exists |
+| Airtable `why_now` field | Schema | ✅ Exists |
+| Airtable `subject_line` field | Schema | ✅ Exists (SPEC calls it outreach_subject) |
+| Airtable `outreach_angle` field | Schema | ✅ Exists |
+| Airtable `contact_confidence` field | Schema | ✅ Exists |
+| Airtable `contact_type` field | Schema | ✅ Exists (Problem Owner/Deputy/HR Fallback) |
+| HubSpot API access | External | ✅ Verified (scopes: contacts.read, companies.read) |
+| n8n AI Agent capability | Platform | ⚠️ Current WF5 uses HTTP→OpenAI, needs migration |
+| Prompts folder | Files | ✅ Exists with both agent prompts |
 
 **Files to Create** (from SPEC-011 Section 9):
 
@@ -109,7 +110,56 @@ Update Opportunity:
 ```
 
 ### Stage 2: Audit
-*Pending Stage 1 completion*
+
+**Airtable Schema Verification**:
+
+| Field | Table | Exists | Notes |
+|-------|-------|--------|-------|
+| why_now | Opportunities | ✅ | multilineText |
+| subject_line | Opportunities | ✅ | singleLineText (spec calls it outreach_subject) |
+| outreach_angle | Opportunities | ✅ | singleSelect (direct_hiring, competitor_intercept, etc.) |
+| outreach_draft | Opportunities | ✅ | multilineText |
+| contact_confidence | Opportunities | ✅ | singleSelect (verified, likely, guess) |
+| contact_type | Opportunities | ✅ | singleSelect (Problem Owner, Deputy, HR Fallback) |
+| is_competitor_intercept | Opportunities | ✅ | checkbox |
+| status | Opportunities | ✅ | includes "researching", "ready" |
+| hubspot_id | Contacts | ✅ | singleLineText |
+| relationship_status | Contacts | ✅ | singleSelect |
+| last_interaction | Contacts | ✅ | dateTime |
+| research_confidence | Contacts | ✅ | number |
+
+**HubSpot API Verification**:
+
+- ✅ Connection verified
+- ✅ Scopes: `crm.objects.contacts.read`, `crm.objects.companies.read`
+- ✅ Hub ID: 144989374
+- ✅ Owner: James Jeram (james@peelsolutions.co.uk)
+
+**Existing Workflow Analysis** (n8n/workflows/opportunity-enricher.json):
+
+- Workflow ID: `Lb5iOr1m93kUXBC0`
+- Current approach: Linear HTTP calls → OpenAI gpt-4o-mini
+- Contact lookup: Airtable → HubSpot fallback (works well)
+- G-013 enforcement: ✅ Already implemented (competitor intercepts → P1)
+- Key limitation: Single AI call, no tool-using agents
+
+**Agent Prompts**:
+
+- ✅ `prompts/contact-research-agent.md` — exists
+- ✅ `prompts/outreach-drafting-agent.md` — exists
+
+**Technical Decision Required**:
+
+SPEC-011 specifies n8n AI Agent nodes with tools. Current WF5 uses HTTP→OpenAI.
+
+**Options**:
+1. **Full n8n AI Agent migration** — Use n8n's native AI Agent node with tool definitions
+2. **Enhanced HTTP approach** — Keep HTTP calls but add multi-step reasoning
+3. **Hybrid** — Use AI Agent for contact research (complex), HTTP for drafting (simpler)
+
+**Recommendation**: Option 3 (Hybrid) — AI Agent node for contact research (needs tool calling for HubSpot/Airtable), standard AI call for drafting (single-shot generation).
+
+**Blockers**: None identified. All schema and API dependencies satisfied.
 
 ### Stage 3: Plan
 *Pending Stage 2 completion*
