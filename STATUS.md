@@ -15,7 +15,7 @@
 | WF5 (Agent Enrichment) | ✅ v2.2 Live | Hybrid HubSpot + GPT-4.1-mini |
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
-| Decay Scanner | ✅ Built | WF4 - needs testing + deployment |
+| Decay Scanner | ✅ Deployed | WF4 ID: j7pvULBq70hKD47j — needs manual test |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
 ---
@@ -38,7 +38,7 @@
 
 ## Next Actions
 
-1. **Deploy Decay Scanner** — Import workflow to n8n, test with real HubSpot data
+1. **Test Decay Scanner** — Run workflow via Manual Trigger in n8n, verify alerts in Airtable
 2. **Build Phase 2a-8**: Contact Auto-Creator workflow (UK public sector domains)
 3. **Daily email quality check** — 5 min spot-check per monitoring protocol
 4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
@@ -65,7 +65,8 @@ None.
 ## Completed This Session
 
 - ✅ **Phase 2a-7**: Relationship Decay Scanner implementation
-  - n8n workflow: `n8n/workflows/relationship-decay-scanner.json`
+  - n8n workflow: `n8n/workflows/relationship-decay-scanner.json` (ID: `j7pvULBq70hKD47j`)
+  - Airtable table: `Decay_Alerts` (ID: `tbluVmya44ap5KqwH`)
   - Dashboard API: `/api/decay-alerts` with grouped and stats endpoints
   - Types: `dashboard/lib/types/decay.ts`
   - Two-tier thresholds (Deal: 8/15/30d, Client: 31/61/90d)
