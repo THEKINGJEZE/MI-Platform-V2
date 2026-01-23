@@ -165,9 +165,111 @@ Take a screenshot of the review panel and verify:
 
 ---
 
+---
+
+## Chrome Extension for UI Verification
+
+Use the Claude Chrome extension to verify UI changes, test interactions, and debug web applications.
+
+### Prerequisites
+
+- **Claude Code**: v2.0.73+ (we have v2.1.17 ✅)
+- **Chrome Extension**: v1.0.36+ ([Install from Chrome Web Store](https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn))
+- **Paid Claude plan**: Required
+
+### Setup
+
+1. Install the Chrome extension from the link above
+2. Start Claude Code with Chrome enabled:
+   ```bash
+   claude --chrome
+   ```
+3. Or enable by default:
+   ```bash
+   /chrome
+   # Select "Enabled by default"
+   ```
+
+**Note**: Enabling by default increases context usage since browser tools are always loaded.
+
+### Usage Examples
+
+**Test Dashboard Changes**:
+```
+Go to localhost:3000/review, verify the priority badges display correctly,
+and check that keyboard navigation (j/k) works for moving between items.
+```
+
+**Verify Error States**:
+```
+Open the dashboard, trigger the error state by disconnecting the network,
+and verify the error message and retry button appear correctly.
+```
+
+**Debug Console Issues**:
+```
+Open https://dashboard.peelplatforms.co.uk/review and check the console
+for any JavaScript errors during page load.
+```
+
+**Record Demo GIF**:
+```
+Record a GIF showing the full review workflow: selecting an opportunity,
+editing the message, and sending it.
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Extension not detected | Run `/chrome` and select "Reconnect extension" |
+| Browser not responding | Check for modal dialogs blocking interaction |
+| Permission denied | Configure site permissions in Chrome extension settings |
+
+---
+
+## Pre-Commit Hooks with Claude
+
+Automatically review code before commits using headless Claude.
+
+### Setup
+
+The pre-commit hook is located at `.git/hooks/pre-commit`. It runs Claude to review staged changes and can block commits with issues.
+
+### Current Hook (Light Review)
+
+Our pre-commit hook performs a light review focused on:
+- Guardrail violations (G-001 through G-015)
+- Obvious bugs or security issues
+- Breaking changes to critical files
+
+### Manual Pre-Commit Review
+
+For more thorough review before important commits:
+```bash
+# Review all staged changes
+git diff --cached | claude -p "Review these changes for issues. Focus on:
+1. Guardrail violations
+2. Security concerns
+3. Breaking changes
+Report as JSON: {issues: [{severity, file, description}]}" --output-format json
+```
+
+### Bypass for Trivial Commits
+
+Skip the hook for trivial changes:
+```bash
+git commit --no-verify -m "fix: typo in README"
+```
+
+**Use sparingly** — the hook exists to catch issues.
+
+---
+
 ## Related Documentation
 
 - Session protocol: @CLAUDE.md
 - Document hygiene: @docs/DOCUMENT-HYGIENE.md
 - MCP servers: @.claude/MCP-SERVERS.md
 - Official best practices: https://code.claude.com/docs/en/best-practices
+- Chrome extension docs: https://code.claude.com/docs/en/chrome
