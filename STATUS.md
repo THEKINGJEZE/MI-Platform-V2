@@ -238,12 +238,31 @@ node scripts/data-quality-audit.cjs
 
 ---
 
+## Phase 2a-5: Live End-to-End Test ✅ COMPLETE
+
+**Tested**: 23 January 2026
+
+| Test | Result | Evidence |
+|------|--------|----------|
+| Draft Reply webhook | ✅ Pass | Draft created in Outlook Drafts folder |
+| Move Email webhook | ✅ Pass | Email moved to Archive |
+| Airtable status update | ✅ Pass | Records updated to approved/done |
+
+**Draft Reply Test**:
+- Input: `email_id` + `draft_body`
+- Output: `{"success": true, "draft_id": "AAMk...", "draft_link": "https://outlook.office365.com/..."}`
+
+**Move Email Test**:
+- Input: `email_id` + `target_folder: "archive"`
+- Output: `{"success": true, "moved_to": "archive", "new_email_id": "AAMk..."}`
+
+---
+
 ## Next Actions
 
-1. **Phase 2a-5: Live end-to-end test** — User approves email → Make.com creates Outlook draft
-2. **Merge PR to main** — Email integration branch ready for review
-3. **Continue Phase 1d monitoring** — track daily signal quality (background)
-4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+1. **Merge PR to main** — Email integration branch ready at `stupefied-williams`
+2. **Continue Phase 1d monitoring** — track daily signal quality (background)
+3. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 
