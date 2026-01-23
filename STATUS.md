@@ -49,9 +49,9 @@
 | Decision | Reference |
 |----------|-----------|
 | HubSpot as primary data source for engagement | DECISIONS.md I1 |
-| Two-tier decay: Deal-level (8/15/30d) + Org-level (30/60/90d) | SPEC-012 §6 |
-| Include Closed Won contacts (clients need check-ins) | SPEC-012 §6 |
-| UK public sector contact auto-creation (not just police) | SPEC-012 §10 Phase 2a-8 |
+| Two-tier decay: Deal-level (8/15/30d) + Org-level (30/60/90d) | DECISIONS.md I4, SPEC-012 §6 |
+| Include Closed Won contacts (clients need check-ins) | DECISIONS.md I4 |
+| UK public sector contact auto-creation (not just police) | DECISIONS.md I3, SPEC-012 §10 |
 
 ---
 

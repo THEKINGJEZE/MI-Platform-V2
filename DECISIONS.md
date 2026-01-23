@@ -230,6 +230,33 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Implementation**: `n8n/workflows/email-classifier.json` uses OpenAI node with gpt-4o-mini, no agent nodes
 **Status**: ✅ Implemented and tested (21 emails classified successfully)
 
+#### I3: UK Public Sector Contact Auto-Creation (Not Just Police)
+**Date**: 23 January 2026
+**Decision**: Contact auto-creation workflow (Phase 2a-8) will create HubSpot contacts for ALL UK public sector domains, not just police
+**Context**: Original scope was police contacts only (`*.police.uk`). Discussion expanded scope to capture all public sector relationships.
+**Domains**:
+- `*.police.uk` — Police forces
+- `*.gov.uk` — Central government
+- `*.nhs.uk` — NHS
+- `*.mod.uk` — Ministry of Defence
+- `*.parliament.uk` — Parliament
+**Why**: James's business relationships extend beyond police to broader public sector. Same workflow logic applies.
+**Affects**: Phase 2a-8 (Contact Auto-Creator workflow), SPEC-012 §10
+
+#### I4: Include Closed Won Contacts in Relationship Decay Tracking
+**Date**: 23 January 2026
+**Decision**: Relationship decay scanner must include contacts associated with Closed Won deals, not just active pipeline
+**Context**: Original design only tracked contacts on active deals. "Closed Won contacts are likely now our clients and we need to ensure regular contact with them."
+**Two-Tier Thresholds**:
+- **Active Pipeline**: 8/15/30 days (tight — silence kills deals)
+- **Closed Won (Clients)**: 30/60/90 days (looser — monthly check-ins are fine)
+**Dashboard Sections**:
+- "Deal Contacts Going Cold" — Active pipeline
+- "Client Check-ins Due" — Closed Won (existing clients)
+- "Organisations Going Quiet" — Force-level (any contact)
+**Why**: Client retention is as important as new business. ADHD risk is forgetting to maintain relationships.
+**Affects**: Phase 2a-7 (Decay Scanner workflow), Dashboard design, SPEC-012 §6
+
 ---
 
 ## Archive Log
