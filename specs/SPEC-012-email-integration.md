@@ -1934,15 +1934,24 @@ export function useWaitingFor() {
 
 ### Phase 2a-7: Relationship Decay Alerts
 
-- [ ] Add schema fields to Contacts
-- [ ] Create `MI: Relationship Decay Scanner` workflow
-- [ ] Implement two-tier decay (Deal-Level + Org-Level)
-- [ ] Query HubSpot for engagement data (Decision I1)
-- [ ] AI touchpoint suggestions (non-salesy)
-- [ ] Dashboard sections:
-  - [ ] "Deal Contacts Going Cold" (active pipeline)
-  - [ ] "Client Check-ins Due" (Closed Won — existing clients)
-  - [ ] "Organisations Going Quiet" (force-level)
+- [x] Add schema fields to Contacts
+- [x] Create `MI: Relationship Decay Scanner` workflow
+- [x] Implement two-tier decay (Deal-Level + Org-Level)
+- [x] Query HubSpot for engagement data (Decision I1)
+- [x] AI touchpoint suggestions (non-salesy)
+- [x] Dashboard sections:
+  - [x] "Deal Contacts Going Cold" (active pipeline)
+  - [x] "Client Check-ins Due" (Closed Won — existing clients)
+  - [ ] "Organisations Going Quiet" (force-level) — Tier 2, deferred
+
+**Implementation Notes (23 Jan 2026)**:
+- Workflow: `n8n/workflows/relationship-decay-scanner.json`
+- Dashboard API: `/api/decay-alerts` with grouped and stats endpoints
+- Types: `dashboard/lib/types/decay.ts`
+- Two-tier thresholds per Decision I4:
+  - Active Pipeline: 8/15/30 days (warming/at-risk/cold)
+  - Closed Won: 31/61/90 days (warming/at-risk/cold)
+- Organisation-level tracking deferred to Tier 2 (needs additional data aggregation)
 
 ### Phase 2a-8: Contact Auto-Creation
 

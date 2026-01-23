@@ -1,0 +1,429 @@
+{
+  "name": "MI: Relationship Decay Scanner",
+  "id": "wf-relationship-decay-scanner",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Daily 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 400],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "cronExpression", "expression": "0 6 * * *"}]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 600],
+      "parameters": {}
+    },
+    {
+      "id": "set-config",
+      "name": "Set: Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 500],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "thresholds",
+              "name": "thresholds",
+              "value": "={{ JSON.stringify({ activePipeline: { warming: 8, atRisk: 15, cold: 30 }, closedWon: { warming: 31, atRisk: 61, cold: 90 }, organisation: { warming: 31, atRisk: 61, cold: 90 } }) }}",
+              "type": "string"
+            },
+            {
+              "id": "start-time",
+              "name": "start_time",
+              "value": "={{ Date.now() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "hubspot-get-deals",
+      "name": "HubSpot: Get All Deals",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [540, 500],
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll",
+        "returnAll": true,
+        "additionalFields": {
+          "properties": ["dealname", "dealstage", "closedate", "amount", "hs_is_closed_won", "hs_is_closed", "pipeline", "notes_last_contacted"]
+        }
+      },
+      "credentials": {
+        "hubspotAppToken": {"id": "hubspot-app-token", "name": "HubSpot App Token"}
+      }
+    },
+    {
+      "id": "filter-relevant-deals",
+      "name": "Filter: Active + Closed Won",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [760, 500],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "loose"},
+          "conditions": [
+            {
+              "id": "is-not-closed-lost",
+              "leftValue": "={{ $json.properties.hs_is_closed }}",
+              "rightValue": "true",
+              "operator": {"type": "string", "operation": "notEquals"}
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "loop-deals",
+      "name": "Loop: Each Deal",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [980, 500],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "hubspot-get-deal-contacts",
+      "name": "HubSpot: Get Deal Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 500],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.hubapi.com/crm/v4/objects/deals/{{ $json.id }}/associations/contacts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "options": {}
+      },
+      "credentials": {
+        "hubspotAppToken": {"id": "hubspot-app-token", "name": "HubSpot App Token"}
+      }
+    },
+    {
+      "id": "if-has-contacts",
+      "name": "IF: Has Contacts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1420, 500],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "has-contacts",
+              "leftValue": "={{ $json.results?.length || 0 }}",
+              "rightValue": 0,
+              "operator": {"type": "number", "operation": "gt"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "extract-contact-ids",
+      "name": "Code: Extract Contact IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1640, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the contact associations and deal data\nconst associations = $input.item.json.results || [];\nconst deal = $('Loop: Each Deal').item.json;\n\n// Extract contact IDs\nconst contactIds = associations.map(a => a.toObjectId);\n\nreturn {\n  contactIds,\n  deal: {\n    id: deal.id,\n    name: deal.properties.dealname,\n    stage: deal.properties.dealstage,\n    isClosedWon: deal.properties.hs_is_closed_won === 'true',\n    lastContacted: deal.properties.notes_last_contacted\n  }\n};"
+      }
+    },
+    {
+      "id": "hubspot-batch-read-contacts",
+      "name": "HubSpot: Batch Read Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1860, 400],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/batch/read",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: ['firstname', 'lastname', 'email', 'jobtitle', 'company', 'notes_last_contacted', 'hs_last_sales_activity_timestamp', 'hs_sales_email_last_replied'], inputs: $json.contactIds.map(id => ({ id: String(id) })) }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "hubspotAppToken": {"id": "hubspot-app-token", "name": "HubSpot App Token"}
+      }
+    },
+    {
+      "id": "calculate-decay-status",
+      "name": "Code: Calculate Decay Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2080, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get config and data\nconst configStr = $('Set: Config').item.json.thresholds;\nconst config = JSON.parse(configStr);\nconst contacts = $input.item.json.results || [];\nconst deal = $('Code: Extract Contact IDs').item.json.deal;\nconst today = new Date();\n\nconst alerts = [];\n\nfor (const contact of contacts) {\n  const props = contact.properties;\n  \n  // Get most recent engagement timestamp\n  const timestamps = [\n    props.notes_last_contacted,\n    props.hs_last_sales_activity_timestamp,\n    props.hs_sales_email_last_replied\n  ].filter(Boolean).map(t => new Date(t).getTime());\n  \n  const lastContactTime = timestamps.length > 0 ? Math.max(...timestamps) : 0;\n  const lastContact = new Date(lastContactTime);\n  const daysSinceContact = Math.floor((today - lastContact) / (1000 * 60 * 60 * 24));\n  \n  // Determine thresholds based on deal stage\n  const thresholds = deal.isClosedWon\n    ? config.closedWon\n    : config.activePipeline;\n  \n  // Determine status\n  let status = 'active';\n  let color = 'green';\n  if (daysSinceContact >= thresholds.cold) {\n    status = 'cold'; color = 'red';\n  } else if (daysSinceContact >= thresholds.atRisk) {\n    status = 'at_risk'; color = 'orange';\n  } else if (daysSinceContact >= thresholds.warming) {\n    status = 'warming'; color = 'yellow';\n  }\n  \n  // Skip if active (no alert needed)\n  if (status === 'active') continue;\n  \n  alerts.push({\n    type: deal.isClosedWon ? 'client_checkin' : 'deal_contact',\n    contact: {\n      id: contact.id,\n      name: `${props.firstname || ''} ${props.lastname || ''}`.trim() || 'Unknown',\n      email: props.email,\n      title: props.jobtitle,\n      company: props.company\n    },\n    deal: {\n      id: deal.id,\n      name: deal.name,\n      stage: deal.stage,\n      isClosedWon: deal.isClosedWon\n    },\n    daysSinceContact,\n    status,\n    color,\n    lastContactDate: lastContact.toISOString(),\n    section: deal.isClosedWon ? 'Client Check-ins Due' : 'Deal Contacts Going Cold'\n  });\n}\n\nreturn { alerts };"
+      }
+    },
+    {
+      "id": "merge-back-to-loop",
+      "name": "Merge: Back to Loop",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [1640, 600],
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      }
+    },
+    {
+      "id": "aggregate-alerts",
+      "name": "Code: Aggregate All Alerts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2300, 500],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Collect all alerts from all iterations\nconst allAlerts = [];\n\nfor (const item of $input.all()) {\n  if (item.json.alerts && Array.isArray(item.json.alerts)) {\n    allAlerts.push(...item.json.alerts);\n  }\n}\n\n// Group by section for dashboard\nconst grouped = {\n  deal_contacts_going_cold: allAlerts.filter(a => a.section === 'Deal Contacts Going Cold'),\n  client_checkins_due: allAlerts.filter(a => a.section === 'Client Check-ins Due'),\n  organisations_going_quiet: [], // Tier 2 - to be implemented\n  generated_at: new Date().toISOString(),\n  total_alerts: allAlerts.length\n};\n\n// Sort each group by severity (red > orange > yellow)\nconst severityOrder = { red: 0, orange: 1, yellow: 2 };\nfor (const key of ['deal_contacts_going_cold', 'client_checkins_due']) {\n  grouped[key].sort((a, b) => severityOrder[a.color] - severityOrder[b.color]);\n}\n\nreturn [{ json: grouped }];"
+      }
+    },
+    {
+      "id": "split-for-ai",
+      "name": "Split: For AI Suggestions",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [2520, 500],
+      "parameters": {
+        "fieldToSplitOut": "={{ [...$json.deal_contacts_going_cold, ...$json.client_checkins_due] }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "if-has-alerts",
+      "name": "IF: Has Alerts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2740, 500],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "has-alerts",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {"type": "number", "operation": "gt"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "openai-touchpoint",
+      "name": "OpenAI: Generate Touchpoint",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [2960, 400],
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "You are helping maintain a professional relationship. Generate a brief, genuine touchpoint suggestion.\n\nContact: {{ $json.contact.name }} ({{ $json.contact.title || 'Unknown role' }})\nCompany: {{ $json.contact.company || $json.deal.name }}\nDays since contact: {{ $json.daysSinceContact }}\nContext: {{ $json.type === 'client_checkin' ? 'Existing client - needs check-in' : 'Active deal - contact going cold' }}\n\nRules:\n- NOT salesy — no pitches, no \"checking in to see if you need our services\"\n- Genuine relationship maintenance\n- Suggest ONE of these approaches:\n  1. Share a relevant industry article or insight\n  2. Congratulate on recent news or achievement (if known)\n  3. Check in on a previous project or conversation\n  4. Reference an industry development that affects them\n  5. Simple \"how are things going\" if long relationship\n\nOutput format: Single sentence suggestion (max 50 words)"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 100,
+          "temperature": 0.7
+        }
+      },
+      "credentials": {
+        "openAiApi": {"id": "openai-api", "name": "OpenAI API"}
+      }
+    },
+    {
+      "id": "merge-with-suggestion",
+      "name": "Code: Add Suggestion to Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3180, 400],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the original alert and AI suggestion\nconst alert = $('Split: For AI Suggestions').item.json;\nconst suggestion = $input.item.json.message?.content || $input.item.json.text || 'Check in on how things are going.';\n\nreturn {\n  ...alert,\n  suggestedTouchpoint: suggestion.trim()\n};"
+      }
+    },
+    {
+      "id": "aggregate-with-suggestions",
+      "name": "Code: Final Aggregation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3400, 500],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Get enriched alerts\nconst enrichedAlerts = $input.all().map(i => i.json);\n\n// Re-group by section\nconst grouped = {\n  deal_contacts_going_cold: enrichedAlerts.filter(a => a.section === 'Deal Contacts Going Cold'),\n  client_checkins_due: enrichedAlerts.filter(a => a.section === 'Client Check-ins Due'),\n  organisations_going_quiet: [],\n  generated_at: new Date().toISOString(),\n  total_alerts: enrichedAlerts.length\n};\n\nreturn [{ json: grouped }];"
+      }
+    },
+    {
+      "id": "airtable-upsert-alerts",
+      "name": "Airtable: Upsert Decay Alerts",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [3620, 500],
+      "parameters": {
+        "operation": "upsert",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "Decay_Alerts", "mode": "name"},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scan_date": "={{ $json.generated_at }}",
+            "total_alerts": "={{ $json.total_alerts }}",
+            "deal_contacts_cold": "={{ JSON.stringify($json.deal_contacts_going_cold) }}",
+            "client_checkins_due": "={{ JSON.stringify($json.client_checkins_due) }}",
+            "orgs_going_quiet": "={{ JSON.stringify($json.organisations_going_quiet) }}"
+          }
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "respond-webhook",
+      "name": "Respond: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [3840, 500],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "no-alerts-response",
+      "name": "Set: No Alerts",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2960, 600],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "No decaying relationships found", "type": "string"},
+            {"id": "total", "name": "total_alerts", "value": 0, "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Daily 06:00": {
+      "main": [[{"node": "Set: Config", "type": "main", "index": 0}]]
+    },
+    "Manual Trigger": {
+      "main": [[{"node": "Set: Config", "type": "main", "index": 0}]]
+    },
+    "Set: Config": {
+      "main": [[{"node": "HubSpot: Get All Deals", "type": "main", "index": 0}]]
+    },
+    "HubSpot: Get All Deals": {
+      "main": [[{"node": "Filter: Active + Closed Won", "type": "main", "index": 0}]]
+    },
+    "Filter: Active + Closed Won": {
+      "main": [[{"node": "Loop: Each Deal", "type": "main", "index": 0}]]
+    },
+    "Loop: Each Deal": {
+      "main": [
+        [{"node": "HubSpot: Get Deal Contacts", "type": "main", "index": 0}],
+        [{"node": "Code: Aggregate All Alerts", "type": "main", "index": 0}]
+      ]
+    },
+    "HubSpot: Get Deal Contacts": {
+      "main": [[{"node": "IF: Has Contacts", "type": "main", "index": 0}]]
+    },
+    "IF: Has Contacts": {
+      "main": [
+        [{"node": "Code: Extract Contact IDs", "type": "main", "index": 0}],
+        [{"node": "Merge: Back to Loop", "type": "main", "index": 1}]
+      ]
+    },
+    "Code: Extract Contact IDs": {
+      "main": [[{"node": "HubSpot: Batch Read Contacts", "type": "main", "index": 0}]]
+    },
+    "HubSpot: Batch Read Contacts": {
+      "main": [[{"node": "Code: Calculate Decay Status", "type": "main", "index": 0}]]
+    },
+    "Code: Calculate Decay Status": {
+      "main": [[{"node": "Merge: Back to Loop", "type": "main", "index": 0}]]
+    },
+    "Merge: Back to Loop": {
+      "main": [[{"node": "Loop: Each Deal", "type": "main", "index": 0}]]
+    },
+    "Code: Aggregate All Alerts": {
+      "main": [[{"node": "Split: For AI Suggestions", "type": "main", "index": 0}]]
+    },
+    "Split: For AI Suggestions": {
+      "main": [[{"node": "IF: Has Alerts", "type": "main", "index": 0}]]
+    },
+    "IF: Has Alerts": {
+      "main": [
+        [{"node": "OpenAI: Generate Touchpoint", "type": "main", "index": 0}],
+        [{"node": "Set: No Alerts", "type": "main", "index": 0}]
+      ]
+    },
+    "OpenAI: Generate Touchpoint": {
+      "main": [[{"node": "Code: Add Suggestion to Alert", "type": "main", "index": 0}]]
+    },
+    "Code: Add Suggestion to Alert": {
+      "main": [[{"node": "Code: Final Aggregation", "type": "main", "index": 0}]]
+    },
+    "Code: Final Aggregation": {
+      "main": [[{"node": "Airtable: Upsert Decay Alerts", "type": "main", "index": 0}]]
+    },
+    "Airtable: Upsert Decay Alerts": {
+      "main": [[{"node": "Respond: Success", "type": "main", "index": 0}]]
+    },
+    "Set: No Alerts": {
+      "main": [[{"node": "Respond: Success", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "timezone": "Europe/London",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": null,
+  "tags": [
+    {"name": "MI Platform"},
+    {"name": "Phase 2a"}
+  ]
+}

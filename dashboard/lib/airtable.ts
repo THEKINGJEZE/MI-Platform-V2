@@ -21,6 +21,13 @@ import type {
   EmailStatus,
   EmailQueueStats,
 } from '@/lib/types/email';
+import type {
+  DecayAlert,
+  DecayAlertsBySection,
+  DecayAlertType,
+  DecayStats,
+  DecayStatus,
+} from '@/lib/types/decay';
 
 // Environment variables
 const API_KEY = process.env.AIRTABLE_API_KEY;
@@ -35,6 +42,8 @@ const TABLES = {
   // Phase 2a email tables
   emailRaw: process.env.AIRTABLE_TABLE_EMAIL_RAW || 'tblYYyNm7yGbX3Ehj',
   emails: process.env.AIRTABLE_TABLE_EMAILS || 'tblaeAuzLbmzW8ktJ',
+  // Phase 2a-7 decay alerts
+  decayAlerts: process.env.AIRTABLE_TABLE_DECAY_ALERTS || 'tblDecayAlerts',
 };
 
 // =============================================================================
@@ -704,5 +713,172 @@ export async function approveEmailDraft(id: string): Promise<void> {
   await airtableUpdate(TABLES.emails, id, {
     status: 'approved',
     actioned_at: new Date().toISOString(),
+  });
+}
+
+// =============================================================================
+// DECAY ALERTS FUNCTIONS (Phase 2a-7)
+// =============================================================================
+
+interface AirtableDecayAlertFields {
+  alert_type?: string;
+  deal_id?: string;
+  deal_name?: string;
+  is_closed_won?: boolean;
+  force?: string[];
+  contact_id?: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_role?: string;
+  status?: string;
+  days_since_contact?: number;
+  last_contact_date?: string;
+  suggested_touchpoint?: string;
+  calculated_at?: string;
+  acknowledged_at?: string;
+}
+
+function mapDecayStatus(status?: string): DecayStatus {
+  const mapping: Record<string, DecayStatus> = {
+    active: 'active',
+    warming: 'warming',
+    at_risk: 'at_risk',
+    cold: 'cold',
+  };
+  return mapping[status?.toLowerCase() || ''] || 'active';
+}
+
+function mapDecayAlertType(alertType?: string): DecayAlertType {
+  const mapping: Record<string, DecayAlertType> = {
+    deal_contact: 'deal_contact',
+    client_checkin: 'client_checkin',
+    organisation: 'organisation',
+  };
+  return mapping[alertType?.toLowerCase() || ''] || 'deal_contact';
+}
+
+/**
+ * Fetch decay alerts from Airtable
+ * Returns alerts grouped by section for dashboard display
+ */
+export async function fetchDecayAlerts(options?: {
+  status?: DecayStatus;
+  alertType?: DecayAlertType;
+  limit?: number;
+}): Promise<DecayAlert[]> {
+  const filters: string[] = [];
+
+  // Filter out acknowledged alerts by default
+  filters.push(`{acknowledged_at} = BLANK()`);
+
+  // Filter by decay status if specified (only show concerning statuses by default)
+  if (options?.status) {
+    filters.push(`{status} = "${options.status}"`);
+  } else {
+    // By default, show warming, at_risk, and cold (not active)
+    filters.push(
+      `OR({status} = "warming", {status} = "at_risk", {status} = "cold")`
+    );
+  }
+
+  // Filter by alert type if specified
+  if (options?.alertType) {
+    filters.push(`{alert_type} = "${options.alertType}"`);
+  }
+
+  const filterFormula =
+    filters.length > 1 ? `AND(${filters.join(', ')})` : filters[0] || '';
+
+  const records = await airtableFetch<AirtableDecayAlertFields>(
+    TABLES.decayAlerts,
+    {
+      filterByFormula: filterFormula,
+      maxRecords: options?.limit || 100,
+      sort: [
+        { field: 'days_since_contact', direction: 'desc' },
+        { field: 'calculated_at', direction: 'desc' },
+      ],
+    }
+  );
+
+  // Get forces for lookup
+  const forces = await getForces();
+
+  // Transform records
+  return records.map((record): DecayAlert => {
+    const fields = record.fields;
+    const forceId = fields.force?.[0];
+    const force = forceId ? forces.get(forceId) : undefined;
+
+    return {
+      id: record.id,
+      alertType: mapDecayAlertType(fields.alert_type),
+      dealId: fields.deal_id,
+      dealName: fields.deal_name,
+      isClosedWon: fields.is_closed_won || false,
+      forceId: force?.id,
+      forceName: force?.name,
+      contactId: fields.contact_id || '',
+      contactName: fields.contact_name || 'Unknown Contact',
+      contactEmail: fields.contact_email,
+      contactRole: fields.contact_role,
+      status: mapDecayStatus(fields.status),
+      daysSinceContact: fields.days_since_contact || 0,
+      lastContactDate: fields.last_contact_date,
+      suggestedTouchpoint: fields.suggested_touchpoint,
+      calculatedAt: fields.calculated_at || record.createdTime,
+      acknowledgedAt: fields.acknowledged_at,
+    };
+  });
+}
+
+/**
+ * Fetch decay alerts grouped by dashboard section
+ * Per Decision I4:
+ * - Deal Contacts Going Cold: Active pipeline deals
+ * - Client Check-ins Due: Closed Won contacts
+ * - Organisations Going Quiet: Force-level
+ */
+export async function fetchDecayAlertsBySection(): Promise<DecayAlertsBySection> {
+  const allAlerts = await fetchDecayAlerts();
+
+  return {
+    dealContacts: allAlerts.filter(
+      (a) => a.alertType === 'deal_contact' && !a.isClosedWon
+    ),
+    clientCheckins: allAlerts.filter(
+      (a) => a.alertType === 'client_checkin' || (a.alertType === 'deal_contact' && a.isClosedWon)
+    ),
+    organisations: allAlerts.filter((a) => a.alertType === 'organisation'),
+  };
+}
+
+/**
+ * Fetch decay alert statistics
+ */
+export async function fetchDecayStats(): Promise<DecayStats> {
+  const allAlerts = await fetchDecayAlerts();
+
+  return {
+    total: allAlerts.length,
+    cold: allAlerts.filter((a) => a.status === 'cold').length,
+    atRisk: allAlerts.filter((a) => a.status === 'at_risk').length,
+    warming: allAlerts.filter((a) => a.status === 'warming').length,
+    dealContacts: allAlerts.filter(
+      (a) => a.alertType === 'deal_contact' && !a.isClosedWon
+    ).length,
+    clientCheckins: allAlerts.filter(
+      (a) => a.alertType === 'client_checkin' || (a.alertType === 'deal_contact' && a.isClosedWon)
+    ).length,
+    organisations: allAlerts.filter((a) => a.alertType === 'organisation').length,
+  };
+}
+
+/**
+ * Acknowledge a decay alert (hide from dashboard)
+ */
+export async function acknowledgeDecayAlert(id: string): Promise<void> {
+  await airtableUpdate(TABLES.decayAlerts, id, {
+    acknowledged_at: new Date().toISOString(),
   });
 }
