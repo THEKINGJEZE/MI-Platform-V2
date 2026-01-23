@@ -1,4 +1,14 @@
-# Claude Chat ↔ Claude Code Synchronization Protocol
+# ARCHIVED: Claude Chat ↔ Claude Code Synchronization Protocol
+
+**Archived**: 23 January 2026
+**Reason**: Superseded by Decision A11 (Single-Layer Claude Architecture)
+**See**: DECISIONS.md (A11)
+
+---
+
+*The content below is preserved for historical reference only. This protocol is no longer active.*
+
+---
 
 ## Overview
 
@@ -80,7 +90,7 @@ When Claude Code encounters something needing strategic decision:
 ## Decision Needed: [Topic]
 
 **Context**: What I was building when this came up
-**Options**: 
+**Options**:
 1. Option A — [tradeoffs]
 2. Option B — [tradeoffs]
 
@@ -118,7 +128,7 @@ What I need to think through:
 Morning: Open Claude Code
          → Hooks inject STATUS.md context
          → Continue building from where left off
-         
+
 Midday:  Hit a design question
          → Create "Decision Needed" in Code
          → Open Claude Chat, paste question

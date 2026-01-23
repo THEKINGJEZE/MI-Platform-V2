@@ -1,5 +1,5 @@
 ---
-description: Generate context brief for Claude Chat before spec creation
+description: Generate context brief before spec creation
 argument-hint: <topic>
 ---
 
@@ -36,7 +36,7 @@ Example: `/prep-spec phase-1b-competitors`
 
 ## Purpose
 
-Generates a context brief file (`specs/NEXT-CONTEXT.md`) containing project assets that Claude Chat needs to reference when writing specifications. This ensures specs reference real patterns, prompts, and guardrails — not imagined ones.
+Generates a context brief file (`specs/NEXT-CONTEXT.md`) containing project assets needed for writing specifications. This ensures specs reference real patterns, prompts, and guardrails — not imagined ones.
 
 ## Process
 
@@ -109,7 +109,7 @@ Create the file with this template:
 # Context Brief: [Topic]
 
 Generated: [date]
-For: Claude Chat spec drafting
+For: Spec drafting (see .claude/rules/spec-creation.md)
 
 ---
 
@@ -165,7 +165,7 @@ For: Claude Chat spec drafting
 
 ## Strategy Alignment Check
 
-Before drafting, Claude Chat must verify:
+Before drafting, verify:
 - Which strategy document section(s) cover this topic?
 - Does the planned approach match the strategy specification?
 - If diverging: document why and get James's approval before drafting
@@ -175,13 +175,14 @@ Before drafting, Claude Chat must verify:
 
 ---
 
-## Notes for Claude Chat
+## Notes for Spec Creation
 
 - Reference assets by path (e.g., `patterns/force-matching.js`)
 - New prompts go in `prompts/`
 - New patterns go in `patterns/`
 - Spec output should go in `specs/`
 - Keep spec under 200 lines
+- Follow `.claude/rules/spec-creation.md` for hard rules
 ```
 
 ## Output Constraints
@@ -193,6 +194,5 @@ Before drafting, Claude Chat must verify:
 ## After Running
 
 1. Review `specs/NEXT-CONTEXT.md`
-2. Share or paste to Claude Chat session
-3. Claude Chat drafts spec with real references
-4. Claude Code validates and saves final spec
+2. Use the context to draft spec following `.claude/rules/spec-creation.md`
+3. Validate spec references exist before saving

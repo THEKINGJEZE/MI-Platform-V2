@@ -76,7 +76,7 @@ Use alignment-checker to verify: [proposed change]
 | Guardrails | @docs/GUARDRAILS.md |
 | Document hygiene | @docs/DOCUMENT-HYGIENE.md |
 | Dependency map | @docs/DEPENDENCY-MAP.md |
-| Chat↔Code sync | @docs/SYNC-PROTOCOL.md |
+| Spec creation rules | @.claude/rules/spec-creation.md |
 | Reference data | @reference-data/ (forces, competitors, capabilities) |
 | Patterns | @patterns/ (force-matching, keywords, filters) |
 | AI prompts | @prompts/ (job-classification, email-triage) |
@@ -151,15 +151,15 @@ When a spec is fully implemented:
 2. Run the testing plan from the spec
 3. If all pass → mark the spec ✅ in ROADMAP.md
 
-### Phase-Level Completion (Requires Chat verification)
-Phases must NOT be marked complete by Code alone.
+### Phase-Level Completion (Requires James confirmation)
+Phases must NOT be marked complete without James's confirmation.
 
 When all specs in a phase are complete:
-1. Output: "Phase [X] specs complete. Ready for strategic verification in Chat."
-2. James verifies in Chat that the phase delivers what the strategy intended
+1. Output: "Phase [X] specs complete. Ready for verification."
+2. James confirms the phase delivers what the strategy intended
 3. Only after James confirms → mark the phase complete in ROADMAP.md
 
-**Why**: Code can verify "did we build what the spec said?" but only Chat can verify "does this phase actually serve the Monday morning experience per the strategy?"
+**Why**: Code can verify "did we build what the spec said?" but only James can verify "does this phase actually serve the Monday morning experience per the strategy?"
 
 ## Weekly Maintenance (Monday before review)
 

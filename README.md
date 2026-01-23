@@ -50,13 +50,10 @@ claude
 | [CLAUDE.md](CLAUDE.md) | Claude Code instructions | Rarely |
 | [DECISIONS.md](DECISIONS.md) | Decision log (max 20 active) | When decisions made |
 
-### For Claude Chat Users
-See [docs/CHAT-INSTRUCTIONS.md](docs/CHAT-INSTRUCTIONS.md) for project instructions.
-
 ### For Process Details
-- [docs/SYNC-PROTOCOL.md](docs/SYNC-PROTOCOL.md) — How Chat and Code stay aligned
 - [docs/DOCUMENT-HYGIENE.md](docs/DOCUMENT-HYGIENE.md) — Preventing document decay
 - [docs/architecture.md](docs/architecture.md) — System architecture
+- [docs/GUARDRAILS.md](docs/GUARDRAILS.md) — Non-negotiable architectural rules
 
 ---
 
@@ -76,7 +73,7 @@ This project uses structured processes to prevent document drift:
 2. **Document limits** — STATUS <100 lines, DECISIONS <20 active, CLAUDE <80 lines
 3. **Archive rotation** — Stale content moves to `docs/archive/`
 4. **Hooks** — Automated context injection and state capture
-5. **Role separation** — Claude Chat thinks, Claude Code builds
+5. **Hooks** — Automated context injection and alignment checks
 
 For details, see [docs/DOCUMENT-HYGIENE.md](docs/DOCUMENT-HYGIENE.md).
 

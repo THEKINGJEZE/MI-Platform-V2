@@ -35,7 +35,7 @@ Each spec should include:
 ### Approval Checklist (all required for any divergence)
 
 - [ ] Divergence documented in table above
-- [ ] Escalated to Claude Chat for strategic review
+- [ ] Reviewed using alignment-checker agent
 - [ ] James explicitly approved the trade-off
 - [ ] Decision logged in DECISIONS.md (Tier 2 minimum)
 
