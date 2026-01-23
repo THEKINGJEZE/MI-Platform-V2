@@ -128,7 +128,7 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Supersedes**: P1c-01 (dashboard MVP approach) — now migrating proven code instead of building minimal version
 **Spec**: SPEC-009 — Created, ready for implementation
 
-#### A11: V1 Vision Reprioritisation
+#### A12: V1 Vision Reprioritisation
 **Date**: 23 January 2026
 **Decision**: Reprioritise two features from V1's UNIFIED-COMMAND-VISION.md into earlier phases
 **Context**: V1 created a comprehensive "Unified Command Vision" document describing ADHD-focused enhancements beyond market intelligence. V2 had deferred most of these to Phase 6+. After review, two features should come earlier.
