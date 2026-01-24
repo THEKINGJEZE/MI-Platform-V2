@@ -1,8 +1,8 @@
 # MI Platform — Session Status
 
-**Updated**: 23 January 2026
+**Updated**: 24 January 2026
 **Phase**: 1d + 2a (Parallel)
-**Status**: Relationship Decay Scanner implemented (Phase 2a-7)
+**Status**: Decay Scanner tested and verified ✅
 
 ---
 
@@ -15,7 +15,7 @@
 | WF5 (Agent Enrichment) | ✅ v2.2 Live | Hybrid HubSpot + GPT-4.1-mini |
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
-| Decay Scanner | ✅ Deployed | WF4 ID: j7pvULBq70hKD47j — needs manual test |
+| Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
 ---
@@ -38,7 +38,7 @@
 
 ## Next Actions
 
-1. **Test Decay Scanner** — Run workflow via Manual Trigger in n8n, verify alerts in Airtable
+1. **Deploy dashboard** — Push latest code to production (decay-alerts API returns 404)
 2. **Build Phase 2a-8**: Contact Auto-Creator workflow (UK public sector domains)
 3. **Daily email quality check** — 5 min spot-check per monitoring protocol
 4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
@@ -64,13 +64,13 @@ None.
 
 ## Completed This Session
 
-- ✅ **Phase 2a-7**: Relationship Decay Scanner implementation
-  - n8n workflow: `n8n/workflows/relationship-decay-scanner.json` (ID: `j7pvULBq70hKD47j`)
-  - Airtable table: `Decay_Alerts` (ID: `tbluVmya44ap5KqwH`)
-  - Dashboard API: `/api/decay-alerts` with grouped and stats endpoints
-  - Types: `dashboard/lib/types/decay.ts`
-  - Two-tier thresholds (Deal: 8/15/30d, Client: 31/61/90d)
-  - AI touchpoint suggestions via OpenAI gpt-4o-mini
+- ✅ **Phase 2a-7**: Relationship Decay Scanner — tested and verified
+  - n8n workflow tested via MCP: Execution 13100 (42.8s)
+  - 15 decay alerts created in Airtable (all "cold" status)
+  - OpenAI credential fixed (ID: `KPeEyy20q5aUrUtM`)
+  - Airtable upsert fixed (added `matchingColumns: ["alert_key"]`)
+  - Dashboard API tested locally: stats, grouped, flat endpoints all work
+  - Production API pending deployment (returns 404)
 
 ---
 
@@ -84,4 +84,4 @@ See `docs/archive/status-2026-01.md` for:
 
 ---
 
-*Last aligned with ANCHOR.md: 23 January 2026*
+*Last aligned with ANCHOR.md: 24 January 2026*
