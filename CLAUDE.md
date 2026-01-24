@@ -107,14 +107,18 @@ When implementing any spec, follow the **6-stage framework**. This is mandatory,
 **Key references:**
 - Full framework: @.claude/rules/implementation-stages.md
 - Workflow testing: @.claude/rules/workflow-testing.md
+- **Verification failures**: @.claude/rules/verification-failures.md
 - Test data injection: `node scripts/inject-test-signal.cjs --type=<type> --force=<force>`
+- **Read-back verification**: `node scripts/verify-airtable-operation.cjs` (MANDATORY)
 
 **Use `/implement <spec-number>`** to start stage-gated implementation with automatic IMPL tracker creation.
 
 **Verification (Stage 5) rules:**
+- **MANDATORY**: Run `/verify-records` after ANY Airtable write operation
 - Every acceptance criterion must be tested or documented why it's pending
 - Use n8n MCP to execute workflows: `n8n_test_workflow id=<workflow_id>`
-- Verify outputs in Airtable via MCP: `search_records`
+- After execution, run `verify-airtable-operation.cjs` to confirm data was written
+- Include verification script output in IMPL tracker — Stage 5 is NOT complete without it
 - If blocked (e.g., "waiting for new signals"), document follow-up trigger
 
 ## Load On-Demand (Never Memorize)
@@ -122,6 +126,7 @@ When implementing any spec, follow the **6-stage framework**. This is mandatory,
 |-------|-----------|
 | **Implementation stages** | @.claude/rules/implementation-stages.md |
 | **Workflow testing** | @.claude/rules/workflow-testing.md |
+| **Verification failures** | @.claude/rules/verification-failures.md |
 | Sales strategy | @docs/SALES-STRATEGY.md |
 | Skills usage guide | @skills/README.md |
 | Roadmap | @ROADMAP.md |
@@ -280,6 +285,7 @@ Run these commands weekly to prevent drift:
 | `/end-session` | Complete session with summary and git commit |
 | `/implement <spec-number>` | Stage-gated spec implementation with progress tracking |
 | `/health-check` | Verify all API connections |
+| `/verify-records` | **MANDATORY** — Verify Airtable records after any write operation |
 | `/check-alignment` | Am I on track? |
 | `/deploy-workflow <name>` | Import workflow to n8n |
 | `/hygiene-check` | Check document sizes, trigger cleanup |

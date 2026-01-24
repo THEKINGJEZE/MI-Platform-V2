@@ -94,9 +94,54 @@ mcp__n8n-mcp__n8n_test_workflow id=<workflow_id>
 - Error: [none / error message]
 ```
 
-### 4. Output Verification
+### 3.5 MANDATORY Read-Back Verification (Cannot Skip)
 
-Check that expected outputs were created:
+**⚠️ THIS STEP IS NON-NEGOTIABLE**
+
+After execution, you MUST run the verification script to confirm results. Do NOT trust the workflow's success status alone.
+
+**Why**: Airtable API can return HTTP 200 success when operations silently fail. Previous implementations marked Stage 5 "Complete" when data was never written.
+
+```bash
+# Verify records were actually created/updated
+node scripts/verify-airtable-operation.cjs \
+  --table=[output_table] \
+  --record=[record_id_from_execution] \
+  --fields="status:expected_value,field2:expected_value2"
+```
+
+**For bulk operations:**
+```bash
+# Verify count and sample records
+node scripts/verify-airtable-operation.cjs \
+  --table=[output_table] \
+  --after="[execution_start_timestamp]" \
+  --expected-count=[number_of_records]
+```
+
+**Document with actual script output:**
+```markdown
+## Read-Back Verification
+
+Command:
+node scripts/verify-airtable-operation.cjs --table=Signals --record=recXXX --fields="status:classified,role_category:investigation"
+
+Output:
+✅ PASS | record_exists - Record ID: recXXX
+✅ PASS | field_value - status: Expected "classified", Actual "classified"
+✅ PASS | field_value - role_category: Expected "investigation", Actual "investigation"
+
+SUMMARY: 3/3 checks passed
+✅ VERIFICATION PASSED
+```
+
+**BLOCKER**: If verification script returns exit code 1 (failed), Stage 5 CANNOT be marked complete.
+
+---
+
+### 4. Output Verification (Supplementary)
+
+In addition to the mandatory read-back verification above, check:
 
 ```bash
 # Query Airtable for output records
@@ -240,15 +285,18 @@ Every workflow must be tested for error handling:
 
 Every test must produce evidence:
 
-### Minimum Evidence
+### Minimum Evidence (ALL REQUIRED)
 1. **Execution ID** from n8n
 2. **Before/After Airtable counts**
-3. **Sample output record** showing correct values
+3. **Read-back verification script output** — `node scripts/verify-airtable-operation.cjs` with PASS/FAIL results
+4. **Sample output record** showing correct values
 
 ### Recommended Evidence
-4. **Screenshot of n8n execution log** (for complex workflows)
-5. **Execution duration breakdown** (for performance-sensitive workflows)
-6. **Cost calculation** (for AI-heavy workflows)
+5. **Screenshot of n8n execution log** (for complex workflows)
+6. **Execution duration breakdown** (for performance-sensitive workflows)
+7. **Cost calculation** (for AI-heavy workflows)
+
+**⚠️ Evidence #3 (read-back verification) is MANDATORY. Without it, Stage 5 cannot be marked complete.**
 
 ---
 
@@ -294,7 +342,46 @@ Records: rec123, rec456, rec789
 - Duration: 42.8 seconds
 - Errors: none
 
-### Output Verification
+### Read-Back Verification (MANDATORY)
+
+Command:
+```bash
+node scripts/verify-airtable-operation.cjs \
+  --table=Decay_Alerts \
+  --after="2026-01-24T10:00:00Z" \
+  --expected-count=15
+```
+
+Output:
+```
+✅ PASS | records_after
+     Expected count: 15
+     Actual count: 15
+     Records: recABC1, recABC2, recABC3, recABC4, recABC5
+
+SUMMARY: 1/1 checks passed
+✅ VERIFICATION PASSED - Safe to proceed
+```
+
+Field Verification (sample 3 records):
+```bash
+node scripts/verify-airtable-operation.cjs \
+  --table=Decay_Alerts \
+  --record=recABC1 \
+  --fields="status:cold,alert_type:decay"
+```
+
+Output:
+```
+✅ PASS | record_exists - Record ID: recABC1
+✅ PASS | field_value - status: Expected "cold", Actual "cold"
+✅ PASS | field_value - alert_type: Expected "decay", Actual "decay"
+
+SUMMARY: 3/3 checks passed
+✅ VERIFICATION PASSED
+```
+
+### Output Verification (Supplementary)
 
 | Expected | Actual | Status |
 |----------|--------|--------|

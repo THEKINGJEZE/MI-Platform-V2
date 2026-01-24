@@ -115,6 +115,41 @@ if [[ "$FILE_PATH" =~ prompts/.*\.md ]]; then
 fi
 
 # ============================================
+# IMPL TRACKER VERIFICATION CHECK (H5 - Warning)
+# ============================================
+# Warn when marking Stage 5 complete without verification evidence
+if [[ "$FILE_PATH" =~ specs/IMPL-.*\.md ]]; then
+    # Check if file exists and we're modifying it
+    if [ -f "$FILE_PATH" ]; then
+        # Check for Stage 5 completion markers being added
+        # This is a heuristic - we check if the file currently lacks read-back verification
+        if ! grep -q "Read-Back Verification" "$FILE_PATH" 2>/dev/null; then
+            if ! grep -q "verify-airtable-operation" "$FILE_PATH" 2>/dev/null; then
+                echo "" >&2
+                echo "⚠️  IMPL TRACKER EDIT DETECTED" >&2
+                echo "" >&2
+                echo "VERIFICATION REQUIREMENT:" >&2
+                echo "Before marking Stage 5 complete, you MUST:" >&2
+                echo "" >&2
+                echo "1. Run the read-back verification script:" >&2
+                echo "   node scripts/verify-airtable-operation.cjs --table=<table> --record=<id> --fields=\"...\"" >&2
+                echo "" >&2
+                echo "2. Include the script output in the 'Read-Back Verification' section" >&2
+                echo "" >&2
+                echo "3. Only mark Stage 5 complete if ALL checks PASS" >&2
+                echo "" >&2
+                echo "This prevents false success reports where workflows appear" >&2
+                echo "to succeed but data is not actually written to Airtable." >&2
+                echo "" >&2
+                echo "See: /verify-records or .claude/rules/workflow-testing.md" >&2
+                echo "" >&2
+            fi
+        fi
+    fi
+    # Warning only, don't block
+fi
+
+# ============================================
 # EXISTING CONSISTENCY CHECK (Soft warning)
 # ============================================
 # Only run facts check (not file references - too noisy)
