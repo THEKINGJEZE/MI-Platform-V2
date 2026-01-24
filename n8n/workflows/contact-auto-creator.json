@@ -1,0 +1,335 @@
+{
+  "name": "MI: Contact Auto-Creator",
+  "id": "wf-contact-auto-creator",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 10 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 10}]
+        }
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 500],
+      "parameters": {}
+    },
+    {
+      "id": "set-start-time",
+      "name": "Set: Start Time",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 400],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "start-time", "name": "start_time", "value": "={{ Date.now() }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-fetch-emails",
+      "name": "Airtable: Fetch Unprocessed Emails",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [540, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {"__rl": true, "value": "appEEWaGtGUwOyOhm", "mode": "id"},
+        "table": {"__rl": true, "value": "tblaeAuzLbmzW8ktJ", "mode": "id"},
+        "filterByFormula": "=AND({is_public_sector_sender}=TRUE(), {hubspot_contact_id}=\"\", {status}=\"new\")",
+        "sort": {"property": [{"field": "received_at", "direction": "asc"}]},
+        "limit": 10,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      }
+    },
+    {
+      "id": "if-has-emails",
+      "name": "IF: Has Emails",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [760, 400],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "has-items", "leftValue": "={{ $input.all().length }}", "rightValue": 0, "operator": {"type": "number", "operation": "gt"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "loop-each-email",
+      "name": "Loop: Process Each Email",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [980, 300],
+      "parameters": {"batchSize": 1, "options": {}}
+    },
+    {
+      "id": "code-check-domain",
+      "name": "Code: Check Public Sector Domain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// G-005: Pattern matching before any external calls\n// Check if email domain is UK public sector\n\nconst PUBLIC_SECTOR_PATTERNS = {\n  police: /\\.police\\.uk$/i,\n  government: /\\.gov\\.uk$/i,\n  nhs: /\\.nhs\\.uk$/i,\n  defence: /\\.mod\\.uk$/i,\n  parliament: /\\.parliament\\.uk$/i\n};\n\n// Police domain to force name mapping (subset for common forces)\nconst POLICE_DOMAIN_TO_FORCE = {\n  kent: 'Kent Police',\n  surrey: 'Surrey Police',\n  sussex: 'Sussex Police',\n  essex: 'Essex Police',\n  hampshire: 'Hampshire Constabulary',\n  met: 'Metropolitan Police Service',\n  gmp: 'Greater Manchester Police',\n  westmidlands: 'West Midlands Police',\n  thamesvalley: 'Thames Valley Police',\n  merseyside: 'Merseyside Police',\n  lancashire: 'Lancashire Constabulary',\n  cheshire: 'Cheshire Constabulary',\n  nottinghamshire: 'Nottinghamshire Police',\n  leicestershire: 'Leicestershire Police',\n  northumbria: 'Northumbria Police',\n  cleveland: 'Cleveland Police',\n  durham: 'Durham Constabulary',\n  bedfordshire: 'Bedfordshire Police',\n  hertfordshire: 'Hertfordshire Constabulary',\n  norfolk: 'Norfolk Constabulary',\n  suffolk: 'Suffolk Constabulary',\n  cambridgeshire: 'Cambridgeshire Constabulary',\n  lincolnshire: 'Lincolnshire Police',\n  northamptonshire: 'Northamptonshire Police',\n  derbyshire: 'Derbyshire Constabulary',\n  warwickshire: 'Warwickshire Police',\n  staffordshire: 'Staffordshire Police',\n  humberside: 'Humberside Police',\n  avon: 'Avon and Somerset Police',\n  devon: 'Devon & Cornwall Police',\n  dorset: 'Dorset Police',\n  gloucestershire: 'Gloucestershire Constabulary',\n  wiltshire: 'Wiltshire Police',\n  cumbria: 'Cumbria Constabulary',\n  westyorkshire: 'West Yorkshire Police',\n  southyorkshire: 'South Yorkshire Police',\n  northyorkshire: 'North Yorkshire Police',\n  westmercia: 'West Mercia Police',\n  gwent: 'Gwent Police',\n  dyfedpowys: 'Dyfed-Powys Police',\n  northwales: 'North Wales Police',\n  southwales: 'South Wales Police',\n  btp: 'British Transport Police',\n  cityoflondon: 'City of London Police'\n};\n\nconst email = $input.item.json;\nconst fromEmail = email.from_email || '';\nconst fromName = email.from_name || '';\n\n// Extract domain\nconst emailLower = fromEmail.toLowerCase();\nconst domainMatch = emailLower.match(/@([^@]+)$/);\n\nif (!domainMatch) {\n  return {\n    json: {\n      ...email,\n      skip: true,\n      skip_reason: 'Invalid email format'\n    }\n  };\n}\n\nconst domain = domainMatch[1];\n\n// Check against public sector patterns\nlet sectorType = null;\nfor (const [type, pattern] of Object.entries(PUBLIC_SECTOR_PATTERNS)) {\n  if (pattern.test(domain)) {\n    sectorType = type;\n    break;\n  }\n}\n\nif (!sectorType) {\n  return {\n    json: {\n      ...email,\n      skip: true,\n      skip_reason: 'Not UK public sector domain'\n    }\n  };\n}\n\n// Extract force name for police domains\nlet forceName = null;\nif (sectorType === 'police') {\n  const subdomainMatch = domain.match(/^([^.]+)\\.police\\.uk$/);\n  if (subdomainMatch) {\n    const subdomain = subdomainMatch[1];\n    forceName = POLICE_DOMAIN_TO_FORCE[subdomain] || null;\n  }\n}\n\n// Parse name into first/last\nconst nameParts = fromName.split(' ');\nconst firstName = nameParts[0] || '';\nconst lastName = nameParts.slice(1).join(' ') || '';\n\nreturn {\n  json: {\n    ...email,\n    skip: false,\n    domain: domain,\n    sector_type: sectorType,\n    force_name: forceName,\n    first_name: firstName,\n    last_name: lastName\n  }\n};"
+      }
+    },
+    {
+      "id": "if-skip",
+      "name": "IF: Skip Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1420, 300],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "not-skip", "leftValue": "={{ $json.skip }}", "rightValue": false, "operator": {"type": "boolean", "operation": "equals"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "hubspot-search-contact",
+      "name": "HubSpot: Search Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1640, 200],
+      "parameters": {
+        "resource": "contact",
+        "operation": "search",
+        "filterGroups": {
+          "values": [
+            {
+              "filters": {
+                "values": [
+                  {
+                    "propertyName": "email",
+                    "operator": "EQ",
+                    "value": "={{ $json.from_email }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {},
+        "options": {}
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "if-contact-exists",
+      "name": "IF: Contact Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1860, 200],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "leftValue": "", "caseSensitive": true, "typeValidation": "strict"},
+          "conditions": [
+            {"id": "has-results", "leftValue": "={{ $json.results && $json.results.length > 0 }}", "rightValue": true, "operator": {"type": "boolean", "operation": "equals"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "code-extract-contact-id",
+      "name": "Code: Extract Contact ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2080, 100],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Extract existing contact ID from HubSpot search results\nconst hubspotResults = $input.item.json;\nconst emailData = $('IF: Skip Check').item.json;\n\nlet contactId = null;\nif (hubspotResults && hubspotResults.results && Array.isArray(hubspotResults.results) && hubspotResults.results.length > 0) {\n  contactId = hubspotResults.results[0].id || hubspotResults.results[0].hs_object_id || null;\n}\n\nreturn {\n  json: {\n    email_record_id: emailData.id,\n    email_id: emailData.email_id,\n    hubspot_contact_id: contactId,\n    action: 'use_existing'\n  }\n};"
+      }
+    },
+    {
+      "id": "hubspot-create-contact",
+      "name": "HubSpot: Create Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [2080, 300],
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "email": "={{ $('IF: Skip Check').item.json.from_email }}",
+        "additionalFields": {
+          "firstname": "={{ $('IF: Skip Check').item.json.first_name }}",
+          "lastname": "={{ $('IF: Skip Check').item.json.last_name }}",
+          "hs_lead_status": "NEW"
+        },
+        "options": {}
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "code-extract-new-contact-id",
+      "name": "Code: Extract New Contact ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2300, 300],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Extract new contact ID from HubSpot create response\nconst hubspotResponse = $input.item.json;\nconst emailData = $('IF: Skip Check').item.json;\n\nlet contactId = null;\nif (hubspotResponse && (hubspotResponse.id || hubspotResponse.hs_object_id)) {\n  contactId = hubspotResponse.id || hubspotResponse.hs_object_id;\n}\n\nreturn {\n  json: {\n    email_record_id: emailData.id,\n    email_id: emailData.email_id,\n    hubspot_contact_id: contactId,\n    action: 'created_new'\n  }\n};"
+      }
+    },
+    {
+      "id": "merge-contact-ids",
+      "name": "Merge: Contact IDs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [2520, 200],
+      "parameters": {
+        "mode": "append",
+        "mergeByFields": {"values": []},
+        "options": {},
+        "combinationMode": "multiplex"
+      }
+    },
+    {
+      "id": "airtable-update-email",
+      "name": "Airtable: Update Email Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2740, 200],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appEEWaGtGUwOyOhm/tblaeAuzLbmzW8ktJ/{{ $json.email_record_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{"name": "Content-Type", "value": "application/json"}]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": {\n    \"hubspot_contact_id\": {{ $json.hubspot_contact_id ? JSON.stringify($json.hubspot_contact_id) : 'null' }}\n  },\n  \"typecast\": true\n}",
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {"id": "RT6YbgGPCR8jmYFl", "name": "Airtable Personal Access Token account"}
+      },
+      "notes": "Using HTTP Request instead of Airtable node due to n8n bug with Resource Locator fields in loops"
+    },
+    {
+      "id": "wait-airtable",
+      "name": "Wait: 200ms",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2960, 200],
+      "parameters": {"resume": "timeInterval", "unit": "seconds", "amount": 1},
+      "webhookId": "wait-contact-auto-creator"
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate: Collect Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [3180, 300],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "processed_contacts",
+        "options": {}
+      }
+    },
+    {
+      "id": "set-log-summary",
+      "name": "Set: Log Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3400, 300],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "workflow-name", "name": "workflow_name", "value": "MI: Contact Auto-Creator", "type": "string"},
+            {"id": "contacts-processed", "name": "contacts_processed", "value": "={{ $json.processed_contacts ? $json.processed_contacts.length : 0 }}", "type": "number"},
+            {"id": "contacts-created", "name": "contacts_created", "value": "={{ $json.processed_contacts ? $json.processed_contacts.filter(c => c.action === 'created_new').length : 0 }}", "type": "number"},
+            {"id": "contacts-existing", "name": "contacts_existing", "value": "={{ $json.processed_contacts ? $json.processed_contacts.filter(c => c.action === 'use_existing').length : 0 }}", "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "set-no-emails",
+      "name": "Set: No Emails",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [980, 500],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "message", "name": "message", "value": "No public sector emails needing contact creation", "type": "string"},
+            {"id": "contacts-processed", "name": "contacts_processed", "value": 0, "type": "number"},
+            {"id": "timestamp", "name": "timestamp", "value": "={{ new Date().toISOString() }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Every 10 Minutes": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Manual Trigger": {"main": [[{"node": "Set: Start Time", "type": "main", "index": 0}]]},
+    "Set: Start Time": {"main": [[{"node": "Airtable: Fetch Unprocessed Emails", "type": "main", "index": 0}]]},
+    "Airtable: Fetch Unprocessed Emails": {"main": [[{"node": "IF: Has Emails", "type": "main", "index": 0}]]},
+    "IF: Has Emails": {"main": [[{"node": "Loop: Process Each Email", "type": "main", "index": 0}], [{"node": "Set: No Emails", "type": "main", "index": 0}]]},
+    "Loop: Process Each Email": {"main": [[{"node": "Aggregate: Collect Results", "type": "main", "index": 0}], [{"node": "Code: Check Public Sector Domain", "type": "main", "index": 0}]]},
+    "Code: Check Public Sector Domain": {"main": [[{"node": "IF: Skip Check", "type": "main", "index": 0}]]},
+    "IF: Skip Check": {"main": [[{"node": "HubSpot: Search Contact", "type": "main", "index": 0}], [{"node": "Loop: Process Each Email", "type": "main", "index": 0}]]},
+    "HubSpot: Search Contact": {"main": [[{"node": "IF: Contact Exists", "type": "main", "index": 0}]]},
+    "IF: Contact Exists": {"main": [[{"node": "Code: Extract Contact ID", "type": "main", "index": 0}], [{"node": "HubSpot: Create Contact", "type": "main", "index": 0}]]},
+    "Code: Extract Contact ID": {"main": [[{"node": "Merge: Contact IDs", "type": "main", "index": 0}]]},
+    "HubSpot: Create Contact": {"main": [[{"node": "Code: Extract New Contact ID", "type": "main", "index": 0}]]},
+    "Code: Extract New Contact ID": {"main": [[{"node": "Merge: Contact IDs", "type": "main", "index": 1}]]},
+    "Merge: Contact IDs": {"main": [[{"node": "Airtable: Update Email Record", "type": "main", "index": 0}]]},
+    "Airtable: Update Email Record": {"main": [[{"node": "Wait: 200ms", "type": "main", "index": 0}]]},
+    "Wait: 200ms": {"main": [[{"node": "Loop: Process Each Email", "type": "main", "index": 0}]]},
+    "Aggregate: Collect Results": {"main": [[{"node": "Set: Log Summary", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "meta": {
+    "spec": "SPEC-012",
+    "phase": "2a-8",
+    "description": "Automatically creates HubSpot contacts for UK public sector email senders (police, government, NHS, defence, parliament). Runs every 10 minutes. Checks Emails table for is_public_sector_sender=true AND hubspot_contact_id empty. Pattern matching (G-005) identifies domain category and force name. Searches HubSpot for existing contact by email. Creates new contact if not found. Updates Emails record with HubSpot contact ID. Prevents duplicates (G-011).",
+    "guardrails": "G-005 (JS pattern matching before any API calls), G-011 (upsert pattern - check before create)",
+    "notes": "Public sector domains: *.police.uk, *.gov.uk, *.nhs.uk, *.mod.uk, *.parliament.uk (per Decision I3). Force name extraction for police domains uses pattern matching. HTTP Request for Airtable update due to n8n Resource Locator bug in loops. Wait node for rate limiting. continueOnFail on HubSpot nodes to handle API errors gracefully."
+  }
+}
