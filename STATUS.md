@@ -39,10 +39,10 @@
 
 ## Next Actions
 
-1. **Activate Contact Auto-Creator** — Enable schedule trigger in n8n
-2. **Daily email quality check** — 5 min spot-check per monitoring protocol
-3. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
-4. **Build Waiting-For Tracker** — Phase 2a-6 gap (WF3)
+1. **Convert session commands to skills** — `/start-session` and `/end-session` need to be skills to work with `/` prefix
+2. **Activate Contact Auto-Creator** — Enable schedule trigger in n8n
+3. **Daily email quality check** — 5 min spot-check per monitoring protocol
+4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
 
 ---
 
@@ -65,25 +65,22 @@ None.
 
 ## Completed This Session
 
-- ✅ **Dashboard Deployment** — Fixed production API 404
-  - Full rebuild with `docker compose up -d --build`
-  - Created `.env` on VPS with Airtable credentials
-  - `/api/decay-alerts` now working: 15 alerts visible
-  - `/api/opportunities` working
-  - Created `dashboard/deploy.sh` for automated deployments
+- ✅ **Implementation Framework Improvements**
+  - Created `.claude/rules/implementation-stages.md` — 6-stage framework reference
+  - Created `.claude/rules/workflow-testing.md` — Standard n8n testing protocol
+  - Created `scripts/inject-test-signal.cjs` — Test data injection utility
+  - Enhanced `/implement` command with ANCHOR.md drift check (Rule 7)
+  - Stage 5 (Verify) now mandatory — cannot be skipped
 
-- ✅ **Phase 2a-8**: Contact Auto-Creator workflow
-  - Added `is_public_sector_sender` field to Emails table (fldXEh9RRJzN5eCTe)
-  - Created `n8n/workflows/contact-auto-creator.json`
-  - Deployed to n8n (ID: YqLYjvJea9zeIy8l)
-  - Covers: *.police.uk, *.gov.uk, *.nhs.uk, *.mod.uk, *.parliament.uk
-  - G-005 compliant: Pattern matching before API calls
-  - G-011 compliant: Check before create (no duplicates)
+- ✅ **Session Management Commands**
+  - Created `/start-session` command — Goal setting, context loading, alignment check
+  - Created `/end-session` command — Structured summary, decision log, git commit
+  - Enhanced Stop hook to reference full end-session protocol
+  - Updated CLAUDE.md session protocol documentation
 
-- ✅ **Phase 2a-7**: Relationship Decay Scanner — tested and verified
-  - n8n workflow tested via MCP: Execution 13100 (42.8s)
-  - 15 decay alerts created in Airtable (all "cold" status)
-  - Dashboard API working: stats, grouped, flat endpoints
+- ✅ **Hook Enforcement Improvements**
+  - Added workflow edit reminder (H1) — Points to 6-stage framework
+  - Added test data injection reference to workflow edit warning
 
 ---
 
