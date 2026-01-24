@@ -40,6 +40,8 @@ Before this spec can be considered complete:
 
 **Note**: The spec creation hook (`.claude/hooks/pre-edit-check.sh`) will block creation of new specs if `specs/NEXT-CONTEXT.md` doesn't exist. Run `/prep-spec <topic>` first.
 
+**Grandfathered Specs**: Specs SPEC-001 through SPEC-011 and SPEC-1b predate this requirement (Decision A13, January 2026). They are exempt as they are already implemented.
+
 ## Strategy Divergence Check
 
 **Every spec must answer this before implementation.**

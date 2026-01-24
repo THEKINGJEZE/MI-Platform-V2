@@ -91,6 +91,17 @@ const SKIP_PATTERNS = [
 
   // Dashboard deploy script (may not exist yet)
   /dashboard\/deploy\.sh$/,
+
+  // Hook name references (prose mentions, not file paths)
+  /^session-start\.sh$/,
+
+  // Audit doc internal references (Claude Code settings)
+  /^settings\.json$/,
+
+  // Status archive command references (in archived status docs)
+  /^docs-fetcher\.md$/,
+  /^config-auditor\.md$/,
+  /^improvement-planner\.md$/,
 ];
 
 /**
@@ -236,6 +247,12 @@ function checkAllReferences() {
   let checkedCount = 0;
 
   files.forEach(file => {
+    // Skip archive documents - they contain historical references that are
+    // intentionally "broken" relative paths from when they were active docs
+    if (file.startsWith('docs/archive/') || file.startsWith('docs\\archive\\')) {
+      return;
+    }
+
     const filePath = path.join(PROJECT_ROOT, file);
     const content = fs.readFileSync(filePath, 'utf8');
     const references = extractReferences(content, file);
@@ -399,9 +416,26 @@ function checkCommands() {
   return missing;
 }
 
+// Specs created before the Pre-Flight Checklist requirement (Decision A13, Jan 2026)
+// These are grandfathered in and don't need retrofitting
+const GRANDFATHERED_SPECS = [
+  'SPEC-001-airtable-schema.md',
+  'SPEC-002-jobs-ingestion.md',
+  'SPEC-003-signal-classification.md',
+  'SPEC-004-opportunity-creator.md',
+  'SPEC-005-opportunity-enricher.md',
+  'SPEC-006-monday-review.md',
+  'SPEC-008-morning-brief.md',
+  'SPEC-009-dashboard-v1-migration.md',
+  'SPEC-010-SUPERSEDED-agentic-enrichment.md',
+  'SPEC-010-pipeline-remediation.md',
+  'SPEC-011-agent-enrichment.md',
+  'SPEC-1b-competitor-monitoring.md',
+];
+
 /**
  * Check specs have pre-flight checklist
- * Returns array of specs missing checklists
+ * Returns array of specs missing checklists (only for NEW specs, not grandfathered ones)
  */
 function checkSpecChecklists() {
   const specsDir = path.join(PROJECT_ROOT, 'specs');
@@ -414,6 +448,11 @@ function checkSpecChecklists() {
   const specFiles = fs.readdirSync(specsDir).filter(f => f.match(/^SPEC-.*\.md$/));
 
   specFiles.forEach(file => {
+    // Skip grandfathered specs - they predate the requirement
+    if (GRANDFATHERED_SPECS.includes(file)) {
+      return;
+    }
+
     const filePath = path.join(specsDir, file);
     const content = fs.readFileSync(filePath, 'utf8');
 
@@ -481,11 +520,11 @@ function main() {
   if (!factsOnly) {
     const specWarnings = checkSpecChecklists();
     if (specWarnings.length > 0) {
-      // Warnings, not errors - existing specs may pre-date the checklist requirement
-      console.log(`⚠️  Specs: ${specWarnings.length} missing Pre-Flight Checklist`);
+      // Warnings, not errors - only applies to specs created after Decision A13
+      console.log(`⚠️  Specs: ${specWarnings.length} new spec(s) missing Pre-Flight Checklist`);
       specWarnings.forEach(w => console.log(`   - ${w.spec}: ${w.issue}`));
     } else {
-      console.log('✅ Specs: all have Pre-Flight Checklists');
+      console.log('✅ Specs: all new specs have Pre-Flight Checklists');
     }
 
     console.log('');

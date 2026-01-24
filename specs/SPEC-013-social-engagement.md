@@ -7,6 +7,22 @@
 
 ---
 
+## Pre-Flight Checklist
+
+Before this spec can be considered complete:
+
+- [ ] `/prep-spec social-engagement` was run before drafting
+- [ ] `specs/NEXT-CONTEXT.md` was reviewed
+- [x] Acceptance criteria copied from ROADMAP.md (Phase 3 section)
+- [x] Guardrails reviewed; applicable ones cited inline where needed
+- [x] Strategy divergence check completed (no divergence — implements Decision A12)
+- [x] Testing plan includes 5+ specific test scenarios
+- [x] Build sequence defines implementation order
+
+**Note**: This spec was created before the Pre-Flight Checklist hook was active. The `/prep-spec` step was not run. The spec content aligns with ROADMAP.md Phase 3 acceptance criteria.
+
+---
+
 ## Goal
 
 Create a daily 15-minute social engagement routine that addresses ADHD inconsistency through AI-curated content and guided sessions.
