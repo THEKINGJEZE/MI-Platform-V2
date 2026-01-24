@@ -8,9 +8,13 @@ MCP (Model Context Protocol) servers extend Claude Code with external tool acces
 - **User-level** (`~/.claude/`) — stdio-based, desktop/CLI only
 - **Project-level** (`.mcp.json`) — HTTP-based, works on web/phone/CLI
 
-## Remote MCP Architecture (Web/Phone Access)
+## Remote MCP Architecture
 
-As of January 2026, this project has remote MCP servers deployed to enable Claude Code access from any environment (web, phone, CLI).
+As of January 2026, this project has remote MCP servers deployed on VPS.
+
+### Important: Web/Phone Limitations
+
+**Claude Code web/phone environments have an egress proxy with a strict host allowlist.** Self-hosted MCP servers (custom IPs, domains, even Cloudflare tunnels) are blocked with `403 host_not_allowed`.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -19,24 +23,40 @@ As of January 2026, this project has remote MCP servers deployed to enable Claud
 │   CLI/Mac    │   Desktop    │  Web/Browser │  Phone App    │
 └──────┬───────┴──────┬───────┴──────┬───────┴───────┬───────┘
        │              │              │               │
-       │ stdio ✓      │ stdio ✓      │ HTTP only ✓   │ HTTP only ✓
+       │ ✅ Works     │ ✅ Works     │ ❌ Blocked    │ ❌ Blocked
        │              │              │               │
        ▼              ▼              ▼               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   REMOTE MCP SERVERS (HTTP)                  │
+│                   SELF-HOSTED MCP SERVERS                    │
 ├─────────────────────────────────────────────────────────────┤
-│  n8n-remote     │  airtable-remote │  HubSpot     │ Make.com │
-│  VPS:3001       │  VPS:3002        │  (Official)  │ (Official)│
-│  (Self-hosted)  │  (Self-hosted)   │              │          │
-└─────────────────┴──────────────────┴──────────────┴──────────┘
+│  n8n-remote     │  airtable-remote │                        │
+│  VPS:3001       │  VPS:3002        │  CLI/Desktop only      │
+│  (Self-hosted)  │  (Self-hosted)   │                        │
+└─────────────────┴──────────────────┴────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                   OFFICIAL MCP SERVERS                       │
+├─────────────────────────────────────────────────────────────┤
+│  HubSpot        │  Make.com        │  Works everywhere      │
+│  (Whitelisted)  │  (Whitelisted)   │  (on allowlist)        │
+└─────────────────┴──────────────────┴────────────────────────┘
 ```
+
+### What Works Where
+
+| MCP Server | CLI/Desktop | Web/Phone |
+|------------|-------------|-----------|
+| n8n-remote (self-hosted) | ✅ | ❌ Blocked |
+| airtable-remote (self-hosted) | ✅ | ❌ Blocked |
+| HubSpot (official) | ✅ | ✅ |
+| Make.com (official) | ✅ | ✅ |
 
 ### Remote Server Endpoints
 
 | Server | URL | Auth | Status |
 |--------|-----|------|--------|
-| n8n-remote | `http://72.61.202.117:3001/mcp` | Bearer token | ✅ Active |
-| airtable-remote | `http://72.61.202.117:3002/mcp` | Bearer token | ✅ Active |
+| n8n-remote | `http://72.61.202.117:3001/mcp` | Bearer token | ✅ CLI/Desktop only |
+| airtable-remote | `http://72.61.202.117:3002/mcp` | Bearer token | ✅ CLI/Desktop only |
 | hubspot-remote | `https://mcp.hubspot.com/anthropic` | OAuth | ⚠️ Needs auth |
 | make | `https://mcp.make.com` | OAuth | ⚠️ Needs auth |
 
@@ -202,6 +222,16 @@ Then restart Claude Code for changes to take effect.
 - Check health endpoint: `curl http://72.61.202.117:3001/health`
 - Verify auth token matches `.env.local` → `MCP_AUTH_TOKEN`
 - Check PM2 logs: `ssh root@72.61.202.117 'pm2 logs'`
+
+### Self-hosted MCP blocked on web/phone (403 host_not_allowed)
+**This is expected.** Claude Code web/phone environments have an egress proxy that only allows whitelisted hosts. Self-hosted servers will ONLY work from CLI/Desktop.
+
+Tested and blocked (Jan 2026):
+- Direct VPS IP (`72.61.202.117:3001`) — blocked
+- Cloudflare Tunnel (`*.trycloudflare.com`) — blocked
+- nginx proxy on port 8080 — blocked
+
+**Workaround**: Use CLI or Desktop app for self-hosted MCP access. Use official MCPs (HubSpot, Make.com) on web/phone.
 
 ### OAuth servers need authentication
 - Run `/mcp` in Claude Code
