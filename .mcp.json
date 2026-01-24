@@ -18,10 +18,5 @@
     "make": {
       "type": "http",
       "url": "https://mcp.make.com"
-    },
-    "hubspot-remote": {
-      "type": "http",
-      "url": "https://mcp.hubspot.com/anthropic"
-    }
-  }
+    }  }
 }

@@ -64,51 +64,13 @@ None.
 
 ## Completed This Session
 
-- ✅ **Remote MCP Servers Deployed**
-  - Deployed n8n-mcp to VPS (`http://72.61.202.117:3001/mcp`)
-  - Deployed airtable-mcp to VPS (`http://72.61.202.117:3002/mcp`)
-  - Added HubSpot remote MCP (official: `https://mcp.hubspot.com/anthropic`)
-  - Created project `.mcp.json` with all remote servers
-  - Set up PM2 ecosystem for auto-restart
-  - Updated MCP-SERVERS.md with remote architecture docs
-  - **Result**: Claude Code on web/phone now has MCP access
-
-- ✅ **Contact Auto-Creator Activated**
-  - Enabled schedule trigger in n8n (runs every 10 minutes)
-  - Workflow ID: `YqLYjvJea9zeIy8l`
-  - Creates HubSpot contacts from UK public sector email senders
-
-- ✅ **Consistency Check Fixes**
-  - Updated `scripts/consistency-check.cjs` to skip archive documents (false positives)
-  - Added SKIP_PATTERNS for prose references (session-start.sh, settings.json)
-  - Grandfathered old specs (SPEC-001 through SPEC-011, SPEC-1b) from Pre-Flight Checklist requirement
-  - Added Pre-Flight Checklist to SPEC-013 (only new spec missing it)
-  - Updated `specs/README.md` with grandfathered specs documentation
-  - Consistency check now passes: `✅ File references: 138 checked, 0 missing`
-
-- ✅ **Session Commands Analysis** (RESOLVED - No action needed)
-  - Investigated "Convert session commands to skills" task
-  - Finding: Commands already work with `/` prefix — no conversion needed
-  - Commands and skills are unified in Claude Code
-  - Current architecture is correct: commands for user workflows, skills for background knowledge
-  - Removed unnecessary task from Next Actions
-
-- ✅ **Implementation Framework Improvements**
-  - Created `.claude/rules/implementation-stages.md` — 6-stage framework reference
-  - Created `.claude/rules/workflow-testing.md` — Standard n8n testing protocol
-  - Created `scripts/inject-test-signal.cjs` — Test data injection utility
-  - Enhanced `/implement` command with ANCHOR.md drift check (Rule 7)
-  - Stage 5 (Verify) now mandatory — cannot be skipped
-
-- ✅ **Session Management Commands**
-  - Created `/start-session` command — Goal setting, context loading, alignment check
-  - Created `/end-session` command — Structured summary, decision log, git commit
-  - Enhanced Stop hook to reference full end-session protocol
-  - Updated CLAUDE.md session protocol documentation
-
-- ✅ **Hook Enforcement Improvements**
-  - Added workflow edit reminder (H1) — Points to 6-stage framework
-  - Added test data injection reference to workflow edit warning
+- ✅ **Remote MCP Validation**
+  - Verified n8n-remote MCP working (listed 5 workflows)
+  - Verified airtable-remote MCP working (listed 11 bases)
+  - Removed hubspot-remote from `.mcp.json` — incompatible auth (doesn't support dynamic client registration)
+  - HubSpot access: Use local stdio MCP (CLI/Desktop only)
+  - Make.com: OAuth available but optional
+  - **Result**: Core remote MCPs (n8n + Airtable) confirmed working for web/phone
 
 ---
 
