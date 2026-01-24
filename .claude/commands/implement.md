@@ -15,6 +15,15 @@ You are implementing SPEC-$ARGUMENTS with structured stages, explicit gates, and
 3. **Explicit gates** — Wait for user "y" before proceeding
 4. **Stop on error** — No auto-retry, surface immediately
 5. **Compact after each stage** — Fresh context for next stage
+6. **Stage 5 VERIFY cannot be skipped** — Every AC must be tested or documented why pending
+7. **ANCHOR.md drift check required** — Complete 4-question check in Stage 1
+
+## Reference Documents
+
+**Read these before starting:**
+- `.claude/rules/implementation-stages.md` — Full 6-stage framework with templates
+- `.claude/rules/workflow-testing.md` — Standard n8n workflow testing protocol
+- `scripts/inject-test-signal.cjs` — Test data injection utility
 
 ## Flags
 
@@ -98,9 +107,22 @@ File: `specs/IMPL-$ARGUMENTS.md`
 2. List each acceptance criterion verbatim
 3. Identify applicable guardrails by ID
 4. Map dependencies (other specs, external systems)
-5. Update tracker with findings
+5. **Complete ANCHOR.md drift check** (4 questions - see template below)
+6. Update tracker with findings
 
-**Output**: Tracker updated with parsed requirements
+**ANCHOR.md Drift Check** (required):
+```markdown
+| Question | Answer | Assessment |
+|----------|--------|------------|
+| Does this serve the Monday morning experience? | | |
+| Does this reduce or increase cognitive load? | | |
+| Does this align with success criteria? | | |
+| Is this in current phase or scope creep? | | |
+```
+
+If any answer is "no" or uncertain: STOP and discuss with user before proceeding.
+
+**Output**: Tracker updated with parsed requirements AND drift check complete
 
 **Gate**:
 ```
@@ -234,17 +256,56 @@ Ready to proceed to VERIFY? (y/n)
 
 ---
 
-### Stage 5: VERIFY
+### Stage 5: VERIFY — CANNOT SKIP
 
 **Purpose**: Confirm acceptance criteria are met
 
+**This stage is MANDATORY. Do not proceed to Stage 6 until all criteria are verified or documented.**
+
+**Pre-Verification**:
+1. Consider using test data injection: `node scripts/inject-test-signal.cjs --type=<type> --force=<force>`
+2. Reference workflow testing protocol: `.claude/rules/workflow-testing.md`
+
 **Actions**:
 1. Re-read acceptance criteria from tracker (not spec — avoid context bloat)
-2. For each criterion: test and record result
-3. Run any automated tests specified in spec
-4. Update tracker with verification results
+2. For each criterion: test using standard workflow testing protocol
+3. Run n8n workflow via MCP: `n8n_test_workflow id=<workflow_id>`
+4. Verify output in Airtable via MCP: `search_records`
+5. Collect metrics: execution time, records processed, cost estimate
+6. Update tracker with verification results
 
-**Output**: Pass/fail for each acceptance criterion
+**For Workflow Implementations**:
+```markdown
+## Verification Evidence
+
+- Execution ID: [from n8n MCP]
+- Duration: [seconds]
+- Records processed: [count]
+- Errors: [none or description]
+
+## Acceptance Criteria
+
+| AC | Description | Status | Evidence |
+|----|-------------|--------|----------|
+| AC-1 | [description] | ✅/⏳ | [evidence] |
+```
+
+**If Verification Blocked**:
+Some criteria may require time or external events (e.g., "wait for new signals"). For these:
+
+1. Document WHY it cannot be verified now
+2. Create specific follow-up trigger
+3. Add to STATUS.md "Pending Verification" section
+4. Mark as ⏳ not ❌
+
+```markdown
+AC-3: ⏳ Awaiting new signals
+- Reason: No new competitor signals since fix deployed
+- Follow-up: After next Bright Data run, verify status=new
+- Added to STATUS.md monitoring checklist
+```
+
+**Output**: Pass/fail for each acceptance criterion, with evidence
 
 **If failures**:
 ```

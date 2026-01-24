@@ -54,14 +54,25 @@ fi
 # ============================================
 # Remind to use workflow-builder agent for n8n workflow changes
 if [[ "$FILE_PATH" =~ n8n/workflows/.*\.json ]]; then
+    # Extract spec number from filename if present (e.g., wf5-agent-enrichment -> 011)
+    WORKFLOW_NAME=$(basename "$FILE_PATH" .json)
+
     echo "" >&2
     echo "⚠️  WORKFLOW EDIT DETECTED" >&2
     echo "" >&2
-    echo "You are editing an n8n workflow file." >&2
-    echo "Remember: Use the workflow-builder agent for workflow changes." >&2
+    echo "You are editing: $WORKFLOW_NAME" >&2
     echo "" >&2
-    echo "Agent provides: validation, error handling, logging patterns" >&2
-    echo "See: CLAUDE.md — Mandatory Agent Usage" >&2
+    echo "IMPLEMENTATION PROTOCOL:" >&2
+    echo "1. Use workflow-builder agent for changes" >&2
+    echo "2. Ensure IMPL-XXX.md tracker exists" >&2
+    echo "3. Follow 6-stage framework: Parse → Audit → Plan → Build → Verify → Document" >&2
+    echo "4. Stage 5 (Verify) cannot be skipped" >&2
+    echo "" >&2
+    echo "Testing: Use n8n MCP (n8n_test_workflow) + Airtable verification" >&2
+    echo "Test data: node scripts/inject-test-signal.cjs --type=<type> --force=<force>" >&2
+    echo "" >&2
+    echo "See: .claude/rules/implementation-stages.md" >&2
+    echo "See: .claude/rules/workflow-testing.md" >&2
     echo "" >&2
     # Warning only, don't block
 fi

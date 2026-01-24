@@ -91,9 +91,37 @@ signal-triage → injects uk-police-market-domain, force-matching
 
 Skills provide domain knowledge; agents apply it with enforcement. The full skill content is available immediately when the agent starts.
 
+## Implementation Protocol
+
+When implementing any spec, follow the **6-stage framework**. This is mandatory, not optional.
+
+| Stage | Name | Purpose |
+|-------|------|---------|
+| 1 | Parse | Extract acceptance criteria, guardrails, dependencies + ANCHOR.md drift check |
+| 2 | Audit | Verify schema, APIs, files exist |
+| 3 | Plan | Order tasks with dependencies, define checkpoints |
+| 4 | Build | Execute and track each task |
+| 5 | **Verify** | Test every acceptance criterion — **CANNOT SKIP** |
+| 6 | Document | Update STATUS.md, commit, record artifacts |
+
+**Key references:**
+- Full framework: @.claude/rules/implementation-stages.md
+- Workflow testing: @.claude/rules/workflow-testing.md
+- Test data injection: `node scripts/inject-test-signal.cjs --type=<type> --force=<force>`
+
+**Use `/implement <spec-number>`** to start stage-gated implementation with automatic IMPL tracker creation.
+
+**Verification (Stage 5) rules:**
+- Every acceptance criterion must be tested or documented why it's pending
+- Use n8n MCP to execute workflows: `n8n_test_workflow id=<workflow_id>`
+- Verify outputs in Airtable via MCP: `search_records`
+- If blocked (e.g., "waiting for new signals"), document follow-up trigger
+
 ## Load On-Demand (Never Memorize)
 | Topic | Reference |
 |-------|-----------|
+| **Implementation stages** | @.claude/rules/implementation-stages.md |
+| **Workflow testing** | @.claude/rules/workflow-testing.md |
 | Sales strategy | @docs/SALES-STRATEGY.md |
 | Skills usage guide | @skills/README.md |
 | Roadmap | @ROADMAP.md |
