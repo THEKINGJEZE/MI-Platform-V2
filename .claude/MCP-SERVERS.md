@@ -2,12 +2,91 @@
 
 ## Overview
 
-MCP (Model Context Protocol) servers extend Claude Code with external tool access. These are configured at the user level (`~/.claude/`) and available to all projects.
+MCP (Model Context Protocol) servers extend Claude Code with external tool access.
+
+**Two configurations exist:**
+- **User-level** (`~/.claude/`) — stdio-based, desktop/CLI only
+- **Project-level** (`.mcp.json`) — HTTP-based, works on web/phone/CLI
+
+## Remote MCP Architecture (Web/Phone Access)
+
+As of January 2026, this project has remote MCP servers deployed to enable Claude Code access from any environment (web, phone, CLI).
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CLAUDE CODE                               │
+├──────────────┬──────────────┬──────────────┬───────────────┤
+│   CLI/Mac    │   Desktop    │  Web/Browser │  Phone App    │
+└──────┬───────┴──────┬───────┴──────┬───────┴───────┬───────┘
+       │              │              │               │
+       │ stdio ✓      │ stdio ✓      │ HTTP only ✓   │ HTTP only ✓
+       │              │              │               │
+       ▼              ▼              ▼               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   REMOTE MCP SERVERS (HTTP)                  │
+├─────────────────────────────────────────────────────────────┤
+│  n8n-remote     │  airtable-remote │  HubSpot     │ Make.com │
+│  VPS:3001       │  VPS:3002        │  (Official)  │ (Official)│
+│  (Self-hosted)  │  (Self-hosted)   │              │          │
+└─────────────────┴──────────────────┴──────────────┴──────────┘
+```
+
+### Remote Server Endpoints
+
+| Server | URL | Auth | Status |
+|--------|-----|------|--------|
+| n8n-remote | `http://72.61.202.117:3001/mcp` | Bearer token | ✅ Active |
+| airtable-remote | `http://72.61.202.117:3002/mcp` | Bearer token | ✅ Active |
+| hubspot-remote | `https://mcp.hubspot.com/anthropic` | OAuth | ⚠️ Needs auth |
+| make | `https://mcp.make.com` | OAuth | ⚠️ Needs auth |
+
+### Configuration Files
+
+- **Project config**: `.mcp.json` (HTTP servers for all environments)
+- **Auth token**: `.env.local` → `MCP_AUTH_TOKEN`
+- **VPS ecosystem**: `/docker/mcp-servers/ecosystem.config.js`
+
+### VPS Management
+
+```bash
+# SSH to VPS
+ssh root@72.61.202.117
+
+# Check MCP server status
+pm2 status
+
+# View logs
+pm2 logs n8n-mcp
+pm2 logs airtable-mcp
+
+# Restart servers
+pm2 restart all
+
+# Health checks
+curl http://72.61.202.117:3001/health
+curl http://72.61.202.117:3002/health
+```
+
+---
 
 ## Active Servers
 
+### n8n (`mcp__n8n-mcp__*`)
+**Purpose**: Workflow automation management
+**Transport**: HTTP (remote) — works on web/phone
+**Endpoint**: `http://72.61.202.117:3001/mcp`
+**Key Tools**:
+- `n8n_create_workflow`, `n8n_update_full_workflow` — Workflow CRUD
+- `n8n_list_workflows`, `n8n_get_workflow` — Query workflows
+- `n8n_test_workflow`, `n8n_validate_workflow` — Testing
+- `search_nodes`, `get_node` — Node documentation
+
+**Project Usage**: Deploy and manage MI Platform workflows
+
 ### Airtable (`mcp__airtable__*`)
 **Purpose**: Direct Airtable database operations
+**Transport**: HTTP (remote) — works on web/phone
+**Endpoint**: `http://72.61.202.117:3002/mcp`
 **Key Tools**:
 - `list_records`, `search_records` — Query tables
 - `create_record`, `update_records`, `delete_records` — CRUD operations
@@ -17,31 +96,27 @@ MCP (Model Context Protocol) servers extend Claude Code with external tool acces
 
 ### HubSpot (`mcp__hubspot__*`)
 **Purpose**: CRM integration for contact and company management
+**Transport**: HTTP (official remote) — works on web/phone
+**Endpoint**: `https://mcp.hubspot.com/anthropic`
 **Key Tools**:
 - `hubspot-search-objects` — Find contacts/companies
 - `hubspot-batch-read-objects` — Bulk data retrieval
 - `hubspot-list-associations` — Relationship mapping
 
 **Project Usage**: Contact research for opportunity enrichment (WF5)
-
-### n8n (`mcp__n8n-mcp__*`)
-**Purpose**: Workflow automation management
-**Key Tools**:
-- `n8n_create_workflow`, `n8n_update_full_workflow` — Workflow CRUD
-- `n8n_list_workflows`, `n8n_get_workflow` — Query workflows
-- `n8n_test_workflow`, `n8n_validate_workflow` — Testing
-- `search_nodes`, `get_node` — Node documentation
-
-**Project Usage**: Deploy and manage MI Platform workflows
+**Note**: Requires OAuth authentication via `/mcp` command
 
 ### Make.com (`mcp__make__*`)
 **Purpose**: Additional automation scenarios and integrations
+**Transport**: HTTP (official remote) — works on web/phone
+**Endpoint**: `https://mcp.make.com`
 **Key Tools**:
 - `scenarios_list`, `scenarios_run` — Manage scenarios
 - Various HubSpot helper tools (calls, meetings, emails, tasks)
 - `s8294946_airtable_search_records` — Cross-platform Airtable access
 
 **Project Usage**: Supplementary integrations and HubSpot engagement tracking
+**Note**: Requires OAuth authentication via `/mcp` command
 
 ### Playwright / Chrome Integration (`mcp__plugin_playwright_playwright__*`)
 **Purpose**: Browser automation for UI testing, verification, and web interaction
@@ -122,13 +197,51 @@ Then restart Claude Code for changes to take effect.
 - Use `ToolSearch` to load deferred tools before calling
 - Check spelling matches exactly
 
+### Remote MCP not connecting
+- Check VPS is running: `ssh root@72.61.202.117 'pm2 status'`
+- Check health endpoint: `curl http://72.61.202.117:3001/health`
+- Verify auth token matches `.env.local` → `MCP_AUTH_TOKEN`
+- Check PM2 logs: `ssh root@72.61.202.117 'pm2 logs'`
+
+### OAuth servers need authentication
+- Run `/mcp` in Claude Code
+- Select the server needing auth
+- Complete OAuth flow in browser
+
 ### Rate limits
 - Airtable: 5 req/sec per base
 - HubSpot: Varies by plan
 - n8n: Self-hosted, no limits
+
+## Deployment
+
+### Redeploy MCP Servers to VPS
+
+```bash
+# From project root
+./scripts/deploy-mcp-servers.sh
+```
+
+Or manually:
+```bash
+ssh root@72.61.202.117
+cd /docker/mcp-servers
+pm2 restart ecosystem.config.js
+```
+
+### Adding Auth Token to New Environments
+
+The `MCP_AUTH_TOKEN` must be set in your environment for remote MCPs to authenticate:
+```bash
+export MCP_AUTH_TOKEN=om+qzbzTox1ccIlB4l7l2NXLFoUWG7McHk/tRqHC2UI=
+```
+
+Or add to `.env.local` (already configured in this project).
 
 ## Related Documentation
 
 - Airtable patterns: @.claude/rules/airtable.md
 - n8n patterns: @.claude/rules/n8n.md
 - HubSpot integration: @skills/hubspot-integration/SKILL.md
+- Project MCP config: @.mcp.json
+- Deployment script: @scripts/deploy-mcp-servers.sh

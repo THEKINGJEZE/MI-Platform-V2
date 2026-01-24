@@ -18,6 +18,7 @@
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
+| Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
 ---
 
@@ -62,6 +63,15 @@ None.
 ---
 
 ## Completed This Session
+
+- ✅ **Remote MCP Servers Deployed**
+  - Deployed n8n-mcp to VPS (`http://72.61.202.117:3001/mcp`)
+  - Deployed airtable-mcp to VPS (`http://72.61.202.117:3002/mcp`)
+  - Added HubSpot remote MCP (official: `https://mcp.hubspot.com/anthropic`)
+  - Created project `.mcp.json` with all remote servers
+  - Set up PM2 ecosystem for auto-restart
+  - Updated MCP-SERVERS.md with remote architecture docs
+  - **Result**: Claude Code on web/phone now has MCP access
 
 - ✅ **Contact Auto-Creator Activated**
   - Enabled schedule trigger in n8n (runs every 10 minutes)
