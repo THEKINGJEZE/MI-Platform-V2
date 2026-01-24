@@ -174,15 +174,34 @@ Design system and domain skills available in `/skills/`. Read `@skills/README.md
 | `uk-public-sector-procurement` | Tender APIs, frameworks (Phase 2+) |
 
 ## Session Protocol
-1. **Start**: Hooks inject context. Read STATUS.md.
-2. **Plan First**: For non-trivial tasks, use plan mode (automatic in worktrees). Research before execution.
-3. **Checkpoint**: Before risky edits (workflow changes, schema changes), note state for `/rewind`.
-4. **Work**: Use @references, not paste. `/compact` every 3-4 turns.
-5. **Spec Creation**: Before writing to `specs/SPEC-*.md`:
+
+### Session Start
+When user says "start session" or similar:
+1. **Hooks auto-run**: `session-start.sh` injects context (phase, health, consistency)
+2. **Set goal**: Use `/start-session [goal]` or pick from STATUS.md "Next Actions"
+3. **Load context**: Read relevant specs/rules based on goal type
+4. **Verify alignment**: Check goal against ANCHOR.md
+
+**Quick start**: `/start-session continue` picks up from STATUS.md next actions.
+
+### During Session
+1. **Plan First**: For non-trivial tasks, use plan mode. Research before execution.
+2. **Checkpoint**: Before risky edits (workflow changes, schema changes), note state for `/rewind`.
+3. **Work**: Use @references, not paste. `/compact` every 3-4 turns.
+4. **Spec Creation**: Before writing to `specs/SPEC-*.md`:
    - Run `/prep-spec <topic>` first
    - Review `specs/NEXT-CONTEXT.md`
    - Hook will block if context brief missing (exit code 2)
-6. **End**: Update STATUS.md. Define next action. git commit && git push.
+
+### Session End
+When user says "end session" or similar, run `/end-session` protocol:
+1. **Update STATUS.md**: "Completed This Session" section
+2. **Check decisions**: Log any implementation choices to DECISIONS.md
+3. **Verify alignment**: Confirm no drift from ANCHOR.md
+4. **Git commit**: Offer to commit and push changes
+5. **Output summary**: Structured format with next actions
+
+**Quick end**: "quick end" → git status + one-line summary + next action
 
 ### When to Use Plan Mode
 - New feature implementation (not bug fixes)
@@ -257,6 +276,8 @@ Run these commands weekly to prevent drift:
 ## Quick Commands
 | Command | Purpose |
 |---------|---------|
+| `/start-session [goal]` | Initialize session with goal and context loading |
+| `/end-session` | Complete session with summary and git commit |
 | `/implement <spec-number>` | Stage-gated spec implementation with progress tracking |
 | `/health-check` | Verify all API connections |
 | `/check-alignment` | Am I on track? |

@@ -97,7 +97,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Before finishing: (1) Is STATUS.md updated? (2) Is next action defined? (3) Any drift from ANCHOR.md? (4) Run git status and ask if user wants to commit changes to GitHub."
+            "prompt": "Run the /end-session protocol: (1) Update STATUS.md 'Completed This Session' section, (2) Check for decisions to log (implementation choices, spec deviations, bug fixes), (3) Verify no ANCHOR.md drift, (4) Run git status and offer to commit, (5) Output structured summary: Completed | Artifacts | Decisions | Next Actions. For quick end: git status + one-line summary + next action."
           }
         ]
       }
