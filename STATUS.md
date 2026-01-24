@@ -2,7 +2,7 @@
 
 **Updated**: 24 January 2026
 **Phase**: 1d + 2a (Parallel)
-**Status**: Decay Scanner tested and verified ✅
+**Status**: Phase 2a-8 complete — Contact Auto-Creator deployed ✅
 
 ---
 
@@ -16,6 +16,7 @@
 | WF9 (Competitor Receiver) | ✅ Fixed | status=new |
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
+| Contact Auto-Creator | ✅ Deployed | WF5 ID: YqLYjvJea9zeIy8l — Phase 2a-8 complete |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 
 ---
@@ -38,10 +39,10 @@
 
 ## Next Actions
 
-1. **Deploy dashboard** — Push latest code to production (decay-alerts API returns 404)
-2. **Build Phase 2a-8**: Contact Auto-Creator workflow (UK public sector domains)
-3. **Daily email quality check** — 5 min spot-check per monitoring protocol
-4. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+1. **Activate Contact Auto-Creator** — Enable schedule trigger in n8n
+2. **Daily email quality check** — 5 min spot-check per monitoring protocol
+3. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+4. **Build Waiting-For Tracker** — Phase 2a-6 gap (WF3)
 
 ---
 
@@ -64,13 +65,25 @@ None.
 
 ## Completed This Session
 
+- ✅ **Dashboard Deployment** — Fixed production API 404
+  - Full rebuild with `docker compose up -d --build`
+  - Created `.env` on VPS with Airtable credentials
+  - `/api/decay-alerts` now working: 15 alerts visible
+  - `/api/opportunities` working
+  - Created `dashboard/deploy.sh` for automated deployments
+
+- ✅ **Phase 2a-8**: Contact Auto-Creator workflow
+  - Added `is_public_sector_sender` field to Emails table (fldXEh9RRJzN5eCTe)
+  - Created `n8n/workflows/contact-auto-creator.json`
+  - Deployed to n8n (ID: YqLYjvJea9zeIy8l)
+  - Covers: *.police.uk, *.gov.uk, *.nhs.uk, *.mod.uk, *.parliament.uk
+  - G-005 compliant: Pattern matching before API calls
+  - G-011 compliant: Check before create (no duplicates)
+
 - ✅ **Phase 2a-7**: Relationship Decay Scanner — tested and verified
   - n8n workflow tested via MCP: Execution 13100 (42.8s)
   - 15 decay alerts created in Airtable (all "cold" status)
-  - OpenAI credential fixed (ID: `KPeEyy20q5aUrUtM`)
-  - Airtable upsert fixed (added `matchingColumns: ["alert_key"]`)
-  - Dashboard API tested locally: stats, grouped, flat endpoints all work
-  - Production API pending deployment (returns 404)
+  - Dashboard API working: stats, grouped, flat endpoints
 
 ---
 
