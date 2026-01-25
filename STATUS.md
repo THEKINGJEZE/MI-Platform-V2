@@ -1,6 +1,6 @@
 # MI Platform — Session Status
 
-**Updated**: 24 January 2026
+**Updated**: 25 January 2026
 **Phase**: 1d + 2a (Parallel)
 **Status**: Phase 2a-8 complete — Contact Auto-Creator deployed ✅
 
@@ -64,14 +64,14 @@ None.
 
 ## Completed This Session
 
-- ✅ **Remote MCP Mobile/Web Testing**
-  - Created custom HTTP wrappers (`scripts/mcp-servers/`) to bypass host validation
-  - Deployed to VPS with proper credentials
-  - **Discovery**: Claude web/phone has egress proxy with strict host allowlist
-  - Tested: Direct IP, Cloudflare Tunnel, nginx proxy — all blocked with `403 host_not_allowed`
-  - Found GitHub issues [#11897](https://github.com/anthropics/claude-code/issues/11897), [#19087](https://github.com/anthropics/claude-code/issues/19087) — known bug
-  - **Result**: Self-hosted MCPs work from CLI/Desktop only; official MCPs (HubSpot, Make) work everywhere
-  - Updated `.claude/MCP-SERVERS.md` with accurate limitations
+- ✅ **Clawdbot Installation & Configuration**
+  - Installed Clawdbot v2026.1.23-1 on Mac Mini
+  - Gateway running as LaunchAgent (auto-starts on boot)
+  - WhatsApp channel linked (+447502229776)
+  - Uses Claude Max subscription via OAuth (no separate API costs)
+  - Agent model: Claude Opus 4.5 (switched to Sonnet to save quota)
+  - Location: `~/.clawdbot/` (outside project repo)
+  - **Potential**: Conversational interface layer for MI Platform (email triage via WhatsApp)
 
 ---
 
