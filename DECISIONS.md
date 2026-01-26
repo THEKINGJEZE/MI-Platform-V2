@@ -293,6 +293,35 @@ Track decisions that **actively affect current work**. Not a historical record �
 **Why**: Client retention is as important as new business. ADHD risk is forgetting to maintain relationships.
 **Affects**: Phase 2a-7 (Decay Scanner workflow), Dashboard design, SPEC-012 §6
 
+#### I5: Clawdbot Replaces n8n AI Agents for Email Processing
+**Date**: 26 January 2026
+**Decision**: Use Clawdbot (Claude Max + Opus 4.5) instead of n8n AI agents for email classification and drafting
+**Context**: SPEC-012 defined n8n AI agent workflows. Clawdbot offers better quality (Opus 4.5 vs gpt-4o-mini), lower cost (uses existing Claude Max subscription), persistent memory, and WhatsApp human-in-loop.
+**Architecture**:
+```
+Outlook → Make.com → Airtable → Clawdbot (curl) → Airtable → n8n executor → Make.com → Outlook
+```
+**Security Layers**:
+- Scoped Airtable token (read Email_Raw, write Emails only)
+- Read-only HubSpot token (classification context, no write)
+- Sub-agent isolation (web research delegated to restricted sub-agents)
+- Prompt hardening (all external content treated as untrusted)
+- Human review before any Outlook action
+**What Clawdbot Replaces**:
+- WF1: Email Classifier (n8n + OpenAI) → Clawdbot skill
+- WF2: Email Drafter (n8n + ReAct Agent) → Clawdbot skill
+- WF4: Decay Scanner → Clawdbot cron
+**What Stays in n8n**:
+- WF3: Waiting-For Tracker (simple pattern matching)
+- WF5: Contact Auto-Creator (simple domain check)
+- Email Executor (dumb pipe: Airtable → Make.com)
+**Files**:
+- Full plan: `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md`
+- Integration doc: `docs/CLAWDBOT-INTEGRATION.md`
+- Spec (pending): `specs/SPEC-014-clawdbot-email-processor.md`
+**Supersedes**: I2 (Email Classifier Uses LLM Chain) — Clawdbot approach replaces n8n AI entirely
+**Affects**: SPEC-012 (becomes fallback), Phase 2a implementation approach
+
 ---
 
 ## Archive Log

@@ -167,7 +167,20 @@ This roadmap breaks the MI Platform build into sequential phases. Each phase has
 
 **Dependencies**: Phase 1e complete
 
-**Spec**: `specs/SPEC-012-email-integration.md` ✅ Spec Written
+**Specs**:
+- `specs/SPEC-012-email-integration.md` ✅ Spec Written (n8n approach — fallback)
+- `specs/SPEC-014-clawdbot-email-processor.md` 📋 Planned (Clawdbot approach — primary)
+
+**Implementation Approach** (Decision 26 Jan 2026):
+Clawdbot replaces n8n AI agents for email processing. Key benefits:
+- **Cost**: Uses Claude Max quota (~$15/mo vs $50-95/mo API fees)
+- **Quality**: Opus 4.5 vs gpt-4o-mini
+- **Memory**: Persistent context across sessions
+- **Human-in-loop**: WhatsApp notifications + Dashboard
+
+Architecture: Outlook → Make.com → Airtable → Clawdbot (curl) → Airtable → n8n executor → Make.com → Outlook
+
+See: `docs/CLAWDBOT-INTEGRATION.md` and `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md`
 
 **Skills used**: `hubspot-integration`
 
@@ -550,8 +563,9 @@ A phase is complete when:
 | SPEC-009: Dashboard V1 Migration | 1c | ✅ Complete |
 | SPEC-010: Pipeline Remediation | 1d | ✅ Complete |
 | SPEC-011: Agent Enrichment | 1e | ✅ Complete |
-| SPEC-012: Email + Relationship Decay | 2a | ✅ Spec Written |
+| SPEC-012: Email + Relationship Decay | 2a | ✅ Spec Written (n8n fallback) |
 | SPEC-013: Social Engagement | 3 | 📋 Planned |
+| SPEC-014: Clawdbot Email Processor | 2a | 📋 Planned (primary approach) |
 | SPEC-1b: Competitor Monitoring | 1b | ✅ Complete |
 
 ---
@@ -566,4 +580,4 @@ A phase is complete when:
 
 ---
 
-*Last updated: 23 January 2026*
+*Last updated: 26 January 2026*

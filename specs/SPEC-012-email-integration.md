@@ -1,11 +1,31 @@
 # SPEC-012: Email Integration + Relationship Decay Alerts
 
-**Status**: Spec Extended (Ready for Phase 2a-6+ implementation)
+**Status**: Fallback Approach (Superseded by SPEC-014 for AI components)
 **Phase**: 2a
-**Priority**: P1 — Active
+**Priority**: P2 — Fallback if Clawdbot approach fails
 **Depends On**: Phase 1d complete ✅, Make.com OAuth valid ✅
 **Created**: 23 January 2026
-**Updated**: 23 January 2026 — Added implementation details for WF3/WF4/WF5
+**Updated**: 26 January 2026 — Marked as fallback; SPEC-014 (Clawdbot) is primary approach
+
+---
+
+> ⚠️ **Note**: This spec documents the **n8n AI agent approach** which is now the **fallback**.
+>
+> **Primary approach**: SPEC-014 (Clawdbot Email Processor) — uses Claude Max + Opus 4.5 via Clawdbot
+>
+> **What this spec still covers**:
+> - Make.com scenarios (email sync, draft creator, email mover) — still needed
+> - Airtable schema (Email_Raw, Emails tables) — still needed
+> - n8n WF3 (Waiting-For Tracker) — simple pattern matching, stays in n8n
+> - n8n WF5 (Contact Auto-Creator) — simple domain check, stays in n8n
+> - n8n Email Executor — dumb pipe from Airtable to Make.com, stays in n8n
+>
+> **What SPEC-014 replaces**:
+> - n8n WF1 (Email Classifier) → Clawdbot skill
+> - n8n WF2 (Email Drafter) → Clawdbot skill
+> - n8n WF4 (Decay Scanner) → Clawdbot cron
+>
+> See `DECISIONS.md I5` for rationale.
 
 ---
 

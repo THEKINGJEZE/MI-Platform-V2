@@ -1,6 +1,6 @@
-# Context Brief: Relationship Decay Scanner
+# Context Brief: Clawdbot Email Processor
 
-Generated: 23 January 2026
+Generated: 26 January 2026
 For: Spec drafting (see .claude/rules/spec-creation.md)
 
 ---
@@ -8,51 +8,39 @@ For: Spec drafting (see .claude/rules/spec-creation.md)
 ## Current State
 
 **Phase**: 1d + 2a (Parallel)
-**Goal**: Quality monitoring + Email integration — next: build relationship decay workflows
+**Goal**: Clawdbot Email Processor (SPEC-014) — primary approach for Phase 2a email integration
 **Blockers**: None
 
 ---
 
-## Acceptance Criteria (from ROADMAP.md)
+## Acceptance Criteria (from ROADMAP.md Phase 2a)
 
-Phase 2a acceptance criteria (relevant to relationship decay):
-
+- [ ] Email ingestion from Outlook working
+- [ ] Email classification working (lead response, opportunity, etc.)
+- [ ] Draft responses generated for emails needing reply
+- [ ] Email queue in dashboard
+- [ ] Can send response from dashboard
 - [ ] Relationship decay tracking active (daily scan)
 - [ ] Dashboard shows "Relationships Need Attention" section
 - [ ] AI-suggested touchpoints for cold contacts
-
-Schema additions required (from ROADMAP.md):
-- `relationship_status` (Single Select: Active/Warming/Cold/At-Risk) on Contacts
-- `last_contact_date` (Date) on Contacts
-- `decay_alert_sent` (DateTime) on Contacts
 
 ---
 
 ## Existing Assets
 
-### Patterns (reuse these, don't recreate)
-- `patterns/force-matching.js` — UK police force name matching (G-005) — 47 patterns
-
 ### Prompts (can extend or reference)
-- `prompts/email-triage.md` — Email classification prompt (may inform touchpoint suggestions)
-- `prompts/opportunity-enrichment.md` — Enrichment patterns for contact context
-- `prompts/contact-research-agent.md` — Contact research prompts
-- `prompts/outreach-drafting-agent.md` — Message drafting patterns (for touchpoint suggestions)
+- `prompts/email-triage.md` — Classification with Urgent/Today/Week/FYI/Archive priorities, HubSpot boost rule
+- `prompts/relationship-touchpoint.md` — AI touchpoint suggestions for cold contacts
 
-### Reference Data (source of truth)
-- `reference-data/uk-police-forces.json` — 48 UK police forces with metadata
+### Schemas (from SPEC-012)
+- **Email_Raw**: message_id, thread_id, sender_email, sender_name, subject, body_preview, received_at, has_attachments, importance, synced_at, processed
+- **Emails**: email_raw (link), classification, priority, action_type, target_folder, key_request, draft_response, confidence, contact (link), status, processed_at, human_decision, sent_at, skip_reason
 
-### Skills & Rules
-- `.claude/skills/hubspot-integration/` — HubSpot API patterns, n8n patterns, gotchas
-- `.claude/skills/n8n-workflow-patterns/` — Scheduled task patterns (for daily scan)
-- `.claude/skills/adhd-interface-design/` — ADHD-first dashboard patterns
-- `.claude/skills/airtable-operations/` — Airtable API patterns
-- `.claude/rules/n8n.md` — n8n workflow structure requirements
+### Plans
+- `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md` — Full approved architecture, security, credentials
 
-### Related Spec Content (from SPEC-012)
-- Section 6: Full two-tier decay architecture already documented
-- Section 10 (Phase 2a-7): Implementation phases outlined
-- Workflow WF4: MI: Relationship Decay Scanner already described
+### Existing Spec (fallback)
+- `specs/SPEC-012-email-integration.md` — n8n approach (fallback), contains schema definitions
 
 ---
 
@@ -60,10 +48,11 @@ Schema additions required (from ROADMAP.md):
 
 | ID | Rule | Relevance |
 |----|------|-----------|
-| G-005 | Fuzzy JS Matching Before AI | Force lookup when matching org to force |
-| G-011 | Upsert Only (No Loop Delete) | When updating contact decay status |
-| G-012 | Value Proposition First | AI touchpoint suggestions must NOT be salesy |
-| G-015 | Message Structure | Follow-up messages use Hook → Bridge → Value → CTA |
+| G-002 | Command Queue for Email Actions | AI writes to Emails table, executor performs Outlook ops |
+| G-006 | Never Direct Outlook Integration | Sync to Airtable first, process, write actions to queue |
+| G-001 | Dumb Scrapers + Smart Agents | Raw emails to Email_Raw first, AI to Emails table |
+| G-012 | Value Proposition First | Drafts must lead with Peel's value proposition |
+| G-015 | Message Structure (Hook → Bridge → Value → CTA) | AI drafts follow four-part structure |
 
 ---
 
@@ -71,57 +60,55 @@ Schema additions required (from ROADMAP.md):
 
 | Decision | Date | Impact |
 |----------|------|--------|
-| **I1**: HubSpot as Primary Data Source | 23 Jan | Query HubSpot directly for engagement data, NOT Airtable copy |
-| **I4**: Include Closed Won Contacts | 23 Jan | Two-tier thresholds: Active Pipeline (8/15/30d) + Closed Won (30/60/90d) |
-| **A12**: V1 Vision Reprioritisation | 23 Jan | Relationship decay moved to Phase 2a (high ADHD value) |
+| I5: Clawdbot Replaces n8n AI | 26 Jan 2026 | Primary architecture for SPEC-014 |
+| I4: Include Closed Won in Decay | 26 Jan 2026 | Two-tier thresholds (active: 8/15/30d, clients: 30/60/90d) |
+| I1: HubSpot as Primary Data Source | 26 Jan 2026 | Use HubSpot for engagement data |
 
 ---
 
-## Strategy Alignment Check
+## Clawdbot Architecture
 
-Before drafting, verify:
-- SPEC-012 Section 6 already contains detailed decay architecture — this spec should reference, not duplicate
-- Decision I1 confirms HubSpot as source — no Airtable duplication
-- Decision I4 confirms two-tier (deal-level + org-level) architecture
-- Three dashboard sections required: "Deal Contacts Going Cold", "Client Check-ins Due", "Organisations Going Quiet"
+```
+Outlook → Make.com → Airtable (Email_Raw)
+                          │
+                     CLAWDBOT (cron + curl every 3h)
+                          │
+          1. Read emails via Airtable API
+          2. Look up sender in HubSpot (read-only)
+          3. Classify with Opus 4.5 + context
+          4. Draft responses
+          5. Write back to Airtable
+          6. WhatsApp James if uncertain
+                          │
+                AIRTABLE (Emails table)
+                          │
+                N8N EXECUTOR (simple, no AI)
+                          │
+                MAKE.COM → OUTLOOK
+```
 
-**No divergence identified** — implementation spec should follow SPEC-012 §6 design.
+### Security Layers
+1. **Scoped Airtable token**: Read Email_Raw, Contacts, Forces; Write Emails only
+2. **Read-only HubSpot token**: crm.objects.*.read ONLY
+3. **Sub-agent isolation**: Web research delegated to tool-restricted sub-agents
+4. **Prompt hardening**: All external content treated as untrusted
+5. **Human review**: No email sent without approval
+
+### What Clawdbot Replaces
+- WF1: Email Classifier → Clawdbot skill
+- WF2: Email Drafter → Clawdbot skill
+- WF4: Decay Scanner → Clawdbot cron
+
+### What Stays in n8n
+- WF3: Waiting-For Tracker (simple pattern matching)
+- WF5: Contact Auto-Creator (simple domain check)
+- Email Executor (dumb pipe: Airtable → Make.com)
 
 ---
 
 ## Notes for Spec Creation
 
-### What This Spec Should Cover
-
-This is a **focused implementation spec** for:
-1. **Phase 2a-7**: MI: Relationship Decay Scanner workflow
-2. **Dashboard components**: Three decay panels
-
-It should NOT re-document the architecture (already in SPEC-012 §6).
-
-### Key HubSpot Fields (from Decision I1)
-- `notes_last_contacted` — Last logged activity
-- `hs_last_sales_activity_timestamp` — Last sales activity
-- `hs_sales_email_last_replied` — Email engagement
-- Deal associations and pipeline stages
-
-### Output Format
-The workflow should output to a format consumable by the dashboard API, not necessarily to Airtable. Consider:
-- JSON endpoint for dashboard to fetch
-- Or lightweight Airtable table for decay alerts only
-
-### Threshold Logic (from SPEC-012 §6)
-| Stage | 8-14d | 15-30d | 30+d |
-|-------|-------|--------|------|
-| Active Pipeline | Yellow | Orange | Red |
-| Closed Won | — | Yellow (31-60d) | Orange (61-90d), Red (90+d) |
-| Organisation | Yellow (31-60d) | Orange (61-90d) | Red (90+d) |
-
-### AI Touchpoint Suggestions
-Must be **non-salesy**:
-- Share relevant article
-- Congratulate on news/achievement
-- Check in on previous project
-- Reference industry development
-
-Reference `prompts/outreach-drafting-agent.md` for tone but adapt for relationship maintenance vs sales outreach.
+- Clawdbot skill goes in `~/ClawdbotFiles/skills/email-processor/`
+- Spec output goes in `specs/SPEC-014-clawdbot-email-processor.md`
+- Keep spec under 200 lines
+- Include Pre-Flight Checklist section per specs/README.md

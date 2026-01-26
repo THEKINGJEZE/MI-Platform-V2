@@ -88,6 +88,8 @@ Examples:
 | [SPEC-008-morning-brief.md](SPEC-008-morning-brief.md) | Future | ⏸️ Deferred |
 | [SPEC-009-dashboard-v1-migration.md](SPEC-009-dashboard-v1-migration.md) | 1c | ✅ Ready |
 | [SPEC-1b-competitor-monitoring.md](SPEC-1b-competitor-monitoring.md) | 1b | ✅ Complete |
+| [SPEC-012-email-integration.md](SPEC-012-email-integration.md) | 2a | 📝 Fallback (n8n approach) |
+| [SPEC-014-clawdbot-email-processor.md](SPEC-014-clawdbot-email-processor.md) | 2a | ✅ Ready |
 
 ## Archived Specs
 

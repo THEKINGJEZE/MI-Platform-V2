@@ -1,0 +1,353 @@
+{
+  "name": "MI: Email Executor",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "email-executor",
+        "webhookId": "email-executor-webhook",
+        "responseMode": "onReceived",
+        "responseData": "allEntries"
+      },
+      "id": "webhook-trigger",
+      "name": "Airtable Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "email-executor-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// MI: Email Executor - Parse webhook payload\n// G-002: Command Queue pattern - execute actions from Airtable status\n\nconst payload = $input.first().json;\n\n// Extract relevant fields\nconst recordId = payload.record_id || payload.id;\nconst status = payload.fields?.status || payload.status;\nconst previousStatus = payload.previous_status;\nconst draftResponse = payload.fields?.draft_response || '';\nconst contactEmail = payload.fields?.contact_email || '';\nconst subject = payload.fields?.subject || 'Re: Your enquiry';\n\n// Determine action based on status change\nlet action = 'none';\nlet webhookUrl = '';\n\nif (status === 'approved' && previousStatus === 'pending') {\n  action = 'create_draft';\n  webhookUrl = $env.MAKE_CREATE_DRAFT_WEBHOOK || '';\n} else if (status === 'sent' && previousStatus === 'approved') {\n  action = 'send_email';\n  webhookUrl = $env.MAKE_SEND_EMAIL_WEBHOOK || '';\n} else if (status === 'archived') {\n  action = 'archive';\n  webhookUrl = $env.MAKE_ARCHIVE_WEBHOOK || '';\n}\n\nreturn [{\n  json: {\n    record_id: recordId,\n    action: action,\n    webhook_url: webhookUrl,\n    draft_response: draftResponse,\n    contact_email: contactEmail,\n    subject: subject,\n    status: status,\n    previous_status: previousStatus,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "parse-webhook",
+      "name": "Parse Webhook Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-actionable",
+      "name": "Has Action?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "create_draft",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Create Draft"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "send_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Send Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "archive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Archive"
+            }
+          ]
+        }
+      },
+      "id": "action-router",
+      "name": "Route by Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\",\n  \"to\": \"{{ $json.contact_email }}\",\n  \"subject\": \"{{ $json.subject }}\",\n  \"body\": {{ JSON.stringify($json.draft_response) }}\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-draft",
+      "name": "Call Make.com: Create Draft",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 180],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-send",
+      "name": "Call Make.com: Send Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-archive",
+      "name": "Call Make.com: Archive",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 420],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "Emails",
+          "mode": "list"
+        },
+        "id": "={{ $('Parse Webhook Payload').item.json.record_id }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sent_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "update-airtable-sent",
+      "name": "Update: Mark Sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1360, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "airtable-mi-base",
+          "name": "Airtable MI Base"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log execution result\nconst input = $input.first().json;\n\nreturn [{\n  json: {\n    workflow: 'MI: Email Executor',\n    execution_id: $execution.id,\n    action: $('Parse Webhook Payload').item.json.action,\n    record_id: $('Parse Webhook Payload').item.json.record_id,\n    status: 'completed',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "log-completion",
+      "name": "Log Completion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 300]
+    }
+  ],
+  "connections": {
+    "Airtable Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Payload": {
+      "main": [
+        [
+          {
+            "node": "Has Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Action?": {
+      "main": [
+        [
+          {
+            "node": "Route by Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Action": {
+      "main": [
+        [
+          {
+            "node": "Call Make.com: Create Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Make.com: Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Make.com: Archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Create Draft": {
+      "main": [
+        [
+          {
+            "node": "Log Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Send Email": {
+      "main": [
+        [
+          {
+            "node": "Update: Mark Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Archive": {
+      "main": [
+        [
+          {
+            "node": "Log Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Mark Sent": {
+      "main": [
+        [
+          {
+            "node": "Log Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "notes": "MI: Email Executor - Simple workflow that executes email actions from Airtable status changes. No AI logic - just bridges Airtable to Make.com. Part of SPEC-014 Clawdbot Email Processor architecture."
+  },
+  "tags": [
+    {
+      "name": "MI Platform"
+    },
+    {
+      "name": "Email"
+    }
+  ]
+}

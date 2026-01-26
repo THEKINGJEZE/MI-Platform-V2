@@ -173,30 +173,104 @@ They **cannot** access the main filesystem, run arbitrary commands, or exfiltrat
 
 ---
 
-## MI Platform Integration Potential
+## MI Platform Integration: Email Processor (SPEC-014)
 
-### Current State
+### Decision (26 January 2026)
 
-Clawdbot is configured but not yet integrated with MI Platform workflows. It's a separate assistant.
+Clawdbot will replace n8n AI agents for email processing. This is documented in:
+- **Full plan**: `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md`
+- **Spec**: `specs/SPEC-014-clawdbot-email-processor.md` (to be created)
 
-### Future Integration Options
+### Architecture
+
+```
+OUTLOOK ──► MAKE.COM ──► AIRTABLE (Email_Raw)
+                              │
+                              ▼
+                         CLAWDBOT
+                    (cron + curl every 3h)
+                              │
+                    1. Read emails via Airtable API
+                    2. Look up sender in HubSpot (read-only)
+                    3. Classify with Opus 4.5 + context
+                    4. Draft responses
+                    5. Write back to Airtable
+                    6. WhatsApp James if uncertain
+                              │
+                              ▼
+                    AIRTABLE (Emails table)
+                              │
+                              ▼
+                    N8N EXECUTOR (simple, no AI)
+                              │
+                              ▼
+                    MAKE.COM ──► OUTLOOK
+```
+
+### Why Clawdbot Instead of n8n AI Agents
+
+| Aspect | n8n AI Agents | Clawdbot |
+|--------|---------------|----------|
+| Cost | ~$50-95/mo (API fees) | ~$15/mo (uses Claude Max quota) |
+| Quality | gpt-4o-mini | Opus 4.5 |
+| Memory | None | Persistent across sessions |
+| Human-in-loop | Dashboard only | WhatsApp + Dashboard |
+| Security | Full n8n access | Sandboxed, curl-only |
+
+### Security Enhancements
+
+| Layer | Purpose |
+|-------|---------|
+| Scoped Airtable token | Read Email_Raw, Write Emails only |
+| Read-only HubSpot token | Context lookup, no write access |
+| Sub-agent isolation | Web search delegated to restricted sub-agents |
+| Prompt hardening | System prompt treats all content as untrusted |
+| Human review | No email sent without approval |
+
+### API Access (~/ClawdbotFiles/.env.*)
+
+| Service | File | Scope |
+|---------|------|-------|
+| Airtable | `.env.airtable` | Read Email_Raw, Contacts, Forces; Write Emails |
+| HubSpot | `.env.hubspot` | crm.objects.*.read ONLY |
+
+### Sub-Agent Configuration
+
+Add to `~/.clawdbot/clawdbot.json`:
+
+```json
+{
+  "tools": {
+    "subagents": {
+      "tools": {
+        "allow": ["web_search", "web_fetch"]
+      }
+    }
+  }
+}
+```
+
+This ensures web research is delegated to sub-agents that cannot access curl or files.
+
+### Implementation Status
+
+- [x] Plan approved
+- [x] SPEC-014 created (`specs/SPEC-014-clawdbot-email-processor.md`)
+- [x] Sub-agent isolation configured (`~/.clawdbot/clawdbot.json`)
+- [x] API credentials created (`~/ClawdbotFiles/.env.airtable`, `.env.hubspot`)
+- [x] Email-processor skill built (`~/ClawdbotFiles/skills/email-processor/SKILL.md`)
+- [x] n8n executor workflow built (`n8n/workflows/email-executor.json`)
+- [ ] End-to-end testing complete
+
+---
+
+## Other Potential Integrations
 
 | Integration | How | Value |
 |-------------|-----|-------|
-| **Email triage via WhatsApp** | Clawdbot reads from Airtable Email_Actions table via curl | Review emails without opening laptop |
 | **Opportunity status** | Query Airtable Opportunities via curl | Quick status checks on the go |
 | **Daily digest** | Cron job sends morning brief to WhatsApp | ADHD-friendly: info comes to you |
 | **Quick approvals** | Reply "approve" to send drafted emails | Reduce friction for routine tasks |
-
-### Implementation Pattern
-
-Since Clawdbot only has curl (no direct Airtable MCP), integrations would use:
-
-```
-Clawdbot → curl → n8n webhook → Airtable
-```
-
-Or create a simple n8n "Clawdbot API" workflow that Clawdbot can call via curl.
 
 ---
 
