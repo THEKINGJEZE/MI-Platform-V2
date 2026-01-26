@@ -17,7 +17,7 @@
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
-| Email Executor | ✅ Ready | ID: PWy1PYwJ24Me0LV7 — Env vars set |
+| Email Executor | ✅ Tested | ID: PWy1PYwJ24Me0LV7 — Webhook parsing fixed |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 | Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
@@ -45,8 +45,9 @@
 2. ~~**Deploy n8n executor**~~ ✅ Done — ID: `PWy1PYwJ24Me0LV7`
 3. ~~**Configure Make.com webhooks**~~ ✅ Found — Existing scenarios 8260100, 8260117
 4. ~~**Set n8n env vars**~~ ✅ Done — Added to `/docker/n8n/.env` and `docker-compose.yml`, container restarted
-5. **Test end-to-end flow** — Ready to test now
-6. **Daily email quality check** — 5 min spot-check per monitoring protocol
+5. ~~**Test end-to-end flow**~~ ✅ Done — Clawdbot→Airtable→n8n working, Make.com 500 error (separate issue)
+6. **Fix Make.com archive scenario** — Returns 500, scenario needs debugging
+7. **Daily email quality check** — 5 min spot-check per monitoring protocol
 
 ---
 
@@ -74,6 +75,10 @@ None.
 - ✅ Fixed SPEC-012/014 documentation inconsistency (WF4 stays in n8n)
 - ✅ Set n8n env vars on VPS (`MAKE_CREATE_DRAFT_WEBHOOK`, `MAKE_ARCHIVE_WEBHOOK`)
 - ✅ Restarted n8n container — env vars confirmed available
+- ✅ Fixed HubSpot DNS issue (added /etc/hosts entry for api.hubapi.com)
+- ✅ End-to-end test: Clawdbot email-processor → HubSpot lookup working → Emails table write
+- ✅ Fixed Email Executor webhook parsing (query params not extracted)
+- ✅ Verified n8n Email Executor routes correctly to Make.com webhooks
 
 ---
 
