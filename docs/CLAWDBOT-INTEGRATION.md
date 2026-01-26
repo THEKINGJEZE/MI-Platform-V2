@@ -56,14 +56,16 @@ Clawdbot is installed on the Mac Mini as a WhatsApp-based AI assistant that can 
 
 ### Location
 
-All Clawdbot config lives outside this repo at `~/.clawdbot/`:
+All Clawdbot config lives **outside this repo** at `~/.clawdbot/`:
 
-| File | Purpose |
-|------|---------|
-| `clawdbot.json` | Main configuration |
-| `exec-approvals.json` | Exec command allowlist |
-| `.env` | API keys (encrypted) |
-| `credentials/` | WhatsApp session data |
+> **Note**: These files are NOT in the MI-Platform-V2 repository. They live in James's home directory on the Mac Mini where Clawdbot is installed. References to these files are for documentation purposes only.
+
+| File | Full Path | Purpose |
+|------|-----------|---------|
+| `clawdbot.json` | `~/.clawdbot/clawdbot.json` | Main configuration |
+| `exec-approvals.json` | `~/.clawdbot/exec-approvals.json` | Exec command allowlist |
+| `.env` | `~/.clawdbot/.env` | API keys (encrypted) |
+| `credentials/` | `~/.clawdbot/credentials/` | WhatsApp session data |
 
 ### Key Configuration: clawdbot.json
 
@@ -260,6 +262,9 @@ This ensures web research is delegated to sub-agents that cannot access curl or 
 - [x] API credentials created (`~/ClawdbotFiles/.env.airtable`, `.env.hubspot`)
 - [x] Email-processor skill built (`~/ClawdbotFiles/skills/email-processor/SKILL.md`)
 - [x] n8n executor workflow built (`n8n/workflows/email-executor.json`)
+- [x] n8n executor deployed (ID: `PWy1PYwJ24Me0LV7`)
+- [x] n8n env vars set (`MAKE_CREATE_DRAFT_WEBHOOK`, `MAKE_ARCHIVE_WEBHOOK`) — 26 Jan 2026
+- [ ] Clawdbot cron activated (every 3h)
 - [ ] End-to-end testing complete
 
 ---

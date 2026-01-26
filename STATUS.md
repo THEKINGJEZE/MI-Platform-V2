@@ -17,6 +17,7 @@
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
+| Email Executor | ✅ Ready | ID: PWy1PYwJ24Me0LV7 — Env vars set |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 | Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
@@ -40,12 +41,12 @@
 
 ## Next Actions
 
-1. ~~**Create API tokens**~~ ✅ Done — `~/ClawdbotFiles/.env.airtable` and `.env.hubspot` configured
-2. **Deploy n8n executor** — Import `n8n/workflows/email-executor.json` to n8n
-3. **Configure Make.com webhooks** — Set up draft/send/archive endpoints
-4. **Test end-to-end flow** — Email → Clawdbot → Dashboard → Outlook
-5. **Daily email quality check** — 5 min spot-check per monitoring protocol
-6. **Run jobs audit after monitoring**: `node scripts/data-quality-audit.cjs`
+1. ~~**Create API tokens**~~ ✅ Done
+2. ~~**Deploy n8n executor**~~ ✅ Done — ID: `PWy1PYwJ24Me0LV7`
+3. ~~**Configure Make.com webhooks**~~ ✅ Found — Existing scenarios 8260100, 8260117
+4. ~~**Set n8n env vars**~~ ✅ Done — Added to `/docker/n8n/.env` and `docker-compose.yml`, container restarted
+5. **Test end-to-end flow** — Ready to test now
+6. **Daily email quality check** — 5 min spot-check per monitoring protocol
 
 ---
 
@@ -69,46 +70,18 @@ None.
 
 ## Completed This Session
 
-- ✅ **Clawdbot Installation & Configuration**
-  - Installed Clawdbot v2026.1.23-1 on Mac Mini
-  - Gateway running as LaunchAgent (auto-starts on boot)
-  - WhatsApp channel linked (+447502229776)
-  - Uses Claude Max subscription via OAuth (no separate API costs)
-  - Agent model: Claude Opus 4.5 (switched to Sonnet to save quota)
-  - Location: `~/.clawdbot/` (outside project repo)
-  - **Potential**: Conversational interface layer for MI Platform (email triage via WhatsApp)
-
-- ✅ **Clawdbot Security Hardening**
-  - Sandbox mode enabled (Docker isolation)
-  - Exec restricted to curl-only via `exec-approvals.json`
-  - Key config: `host: "gateway"` + `security: "allowlist"` ensures exec runs on Mac with allowlist
-  - Memory files moved to `~/ClawdbotFiles/memory/` (enables read+write, not just read)
-  - Tools matrix documented: curl works, ls/rm/bash blocked
-  - Security review written: `~/ClawdbotFiles/SECURITY-REVIEW.md`
-  - **Integration doc created**: `docs/CLAWDBOT-INTEGRATION.md`
-
-- ✅ **Clawdbot Email Processor Plan Approved**
-  - Clawdbot replaces n8n AI agents for email classification + drafting
-  - Architecture: Outlook → Make.com → Airtable → Clawdbot (curl) → Airtable → n8n executor
-  - Security: Scoped tokens (Airtable write-limited, HubSpot read-only)
-  - Security: Sub-agent isolation for web search (no curl/file access)
-  - Cost: ~$15/mo vs $50-95/mo (uses Claude Max quota)
-  - Quality: Opus 4.5 vs gpt-4o-mini
-  - Plan saved: `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md`
-
-- ✅ **SPEC-014 Implementation (Code Complete)**
-  - Created `specs/SPEC-014-clawdbot-email-processor.md` — full spec with security rules
-  - Configured sub-agent isolation in `~/.clawdbot/clawdbot.json`
-  - API credentials configured: `~/ClawdbotFiles/.env.airtable`, `.env.hubspot`
-  - Built Clawdbot skill: `~/ClawdbotFiles/skills/email-processor/SKILL.md`
-  - Built n8n executor workflow: `n8n/workflows/email-executor.json`
-  - **Remaining (manual)**: Deploy n8n workflow, configure Make.com webhooks, test
+- ✅ SPEC-014 comprehensive verification (all components exist and are active)
+- ✅ Fixed SPEC-012/014 documentation inconsistency (WF4 stays in n8n)
+- ✅ Set n8n env vars on VPS (`MAKE_CREATE_DRAFT_WEBHOOK`, `MAKE_ARCHIVE_WEBHOOK`)
+- ✅ Restarted n8n container — env vars confirmed available
 
 ---
 
 ## Completed Work (Archived)
 
 See `docs/archive/status-2026-01.md` for:
+- Clawdbot installation and security hardening details (26 Jan)
+- SPEC-014 implementation details (26 Jan)
 - SPEC-010 Pipeline Remediation details
 - SPEC-011 Agent Enrichment details
 - Phase 2a-1 to 2a-5 Email Integration details
