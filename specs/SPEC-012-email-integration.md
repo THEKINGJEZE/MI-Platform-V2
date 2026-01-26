@@ -22,8 +22,7 @@
 >
 > **What SPEC-014 replaces**:
 > - n8n WF1 (Email Classifier) → Clawdbot skill
-> - n8n WF2 (Email Drafter) → Clawdbot skill
-> - n8n WF4 (Decay Scanner) → Clawdbot cron
+> - n8n WF2 (Email Drafter) → Clawdbot skill (merged into email-processor)
 >
 > See `DECISIONS.md I5` for rationale.
 

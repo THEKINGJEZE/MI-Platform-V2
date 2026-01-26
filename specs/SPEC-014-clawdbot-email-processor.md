@@ -1,7 +1,7 @@
 # SPEC-014: Clawdbot Email Processor
 
 **Phase**: 2a
-**Status**: Ready for Implementation
+**Status**: Implementation In Progress (80%)
 **Created**: 26 January 2026
 **Replaces**: SPEC-012 n8n AI workflows (now fallback)
 
@@ -252,9 +252,9 @@ From ROADMAP.md Phase 2a:
 - [ ] Draft responses generated (G-012, G-015 compliant)
 - [ ] Email queue in dashboard (existing Emails view)
 - [ ] Can send response from dashboard (n8n Executor)
-- [ ] Relationship decay tracking active (Clawdbot cron)
+- [ ] Relationship decay tracking active (n8n WF4 — separate from Clawdbot)
 - [ ] Dashboard shows decay section
-- [ ] AI-suggested touchpoints for cold contacts
+- [ ] AI-suggested touchpoints for cold contacts (n8n WF4)
 
 ---
 
@@ -290,8 +290,25 @@ From ROADMAP.md Phase 2a:
 | Workflow | Purpose | Why Keep |
 |----------|---------|----------|
 | WF3: Waiting-For Tracker | Pattern matching | Simple, no AI needed |
+| WF4: Decay Scanner | Relationship decay | Already built ✅, uses HubSpot + OpenAI |
 | WF5: Contact Auto-Creator | Domain check | Simple, already built |
 | Email Executor | Status → Make.com | Dumb pipe, no AI |
+
+**Clarification**: The Decay Scanner (WF4) stays in n8n. The existing `relationship-decay-scanner.json` workflow is functional and uses OpenAI gpt-4o-mini for touchpoint suggestions. Clawdbot replaces only the Email Classifier and Email Drafter (both merged into the email-processor skill).
+
+---
+
+## 13. Cross-References to SPEC-012 (Fallback)
+
+The following SPEC-012 sections remain authoritative for components that stay in n8n:
+
+| Section | Content | Status |
+|---------|---------|--------|
+| §8a | WF4 (Decay Scanner) node-by-node implementation | Built ✅ |
+| §8b | WF5 (Contact Auto-Creator) implementation | Built ✅ |
+| §8c | WF3 (Waiting-For Tracker) implementation | Not built yet |
+| §8d | Dashboard components (React specs) | Reference |
+| §9 | Make.com scenarios (email sync, draft, mover) | Required |
 
 ---
 
