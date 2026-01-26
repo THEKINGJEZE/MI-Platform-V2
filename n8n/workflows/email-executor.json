@@ -54,6 +54,33 @@
     },
     {
       "parameters": {
+        "operation": "get",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
+        },
+        "id": "={{ $json.record_id }}"
+      },
+      "id": "fetch-email-record",
+      "name": "Fetch Email Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "rules": {
           "values": [
             {
@@ -65,7 +92,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.action }}",
+                    "leftValue": "={{ $('Parse Webhook Payload').item.json.action }}",
                     "rightValue": "create_draft",
                     "operator": {
                       "type": "string",
@@ -87,7 +114,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.action }}",
+                    "leftValue": "={{ $('Parse Webhook Payload').item.json.action }}",
                     "rightValue": "send_email",
                     "operator": {
                       "type": "string",
@@ -109,7 +136,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.action }}",
+                    "leftValue": "={{ $('Parse Webhook Payload').item.json.action }}",
                     "rightValue": "archive",
                     "operator": {
                       "type": "string",
@@ -129,15 +156,15 @@
       "name": "Route by Action",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [900, 300]
+      "position": [1120, 300]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $json.webhook_url }}",
+        "url": "={{ $('Parse Webhook Payload').item.json.webhook_url }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\",\n  \"to\": \"{{ $json.contact_email }}\",\n  \"subject\": \"{{ $json.subject }}\",\n  \"body\": {{ JSON.stringify($json.draft_response) }}\n}",
+        "jsonBody": "={\n  \"record_id\": \"{{ $('Parse Webhook Payload').item.json.record_id }}\",\n  \"to\": \"{{ $('Parse Webhook Payload').item.json.contact_email }}\",\n  \"subject\": \"{{ $('Parse Webhook Payload').item.json.subject }}\",\n  \"body\": {{ JSON.stringify($('Parse Webhook Payload').item.json.draft_response) }}\n}",
         "options": {
           "timeout": 30000
         }
@@ -146,16 +173,16 @@
       "name": "Call Make.com: Create Draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1140, 180],
+      "position": [1360, 180],
       "continueOnFail": true
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $json.webhook_url }}",
+        "url": "={{ $('Parse Webhook Payload').item.json.webhook_url }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\"\n}",
+        "jsonBody": "={\n  \"record_id\": \"{{ $('Parse Webhook Payload').item.json.record_id }}\"\n}",
         "options": {
           "timeout": 30000
         }
@@ -164,16 +191,16 @@
       "name": "Call Make.com: Send Email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1140, 300],
+      "position": [1360, 300],
       "continueOnFail": true
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $json.webhook_url }}",
+        "url": "={{ $('Parse Webhook Payload').item.json.webhook_url }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\"\n}",
+        "jsonBody": "={\n  \"email_id\": \"{{ $json.email_id }}\",\n  \"target_folder\": \"archive\"\n}",
         "options": {
           "timeout": 30000
         }
@@ -182,7 +209,7 @@
       "name": "Call Make.com: Archive",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1140, 420],
+      "position": [1360, 420],
       "continueOnFail": true
     },
     {
@@ -195,8 +222,8 @@
         },
         "table": {
           "__rl": true,
-          "value": "Emails",
-          "mode": "list"
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
         },
         "id": "={{ $('Parse Webhook Payload').item.json.record_id }}",
         "columns": {
@@ -210,24 +237,24 @@
       "name": "Update: Mark Sent",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2,
-      "position": [1360, 300],
+      "position": [1580, 300],
       "credentials": {
         "airtableTokenApi": {
-          "id": "airtable-mi-base",
-          "name": "Airtable MI Base"
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
         }
       },
       "continueOnFail": true
     },
     {
       "parameters": {
-        "jsCode": "// Log execution result\nconst input = $input.first().json;\n\nreturn [{\n  json: {\n    workflow: 'MI: Email Executor',\n    execution_id: $execution.id,\n    action: $('Parse Webhook Payload').item.json.action,\n    record_id: $('Parse Webhook Payload').item.json.record_id,\n    status: 'completed',\n    timestamp: new Date().toISOString()\n  }\n}];"
+        "jsCode": "// Log execution result\nconst input = $input.first().json;\n\nreturn [{\n  json: {\n    workflow: 'MI: Email Executor',\n    execution_id: $execution.id,\n    action: $('Parse Webhook Payload').item.json.action,\n    record_id: $('Parse Webhook Payload').item.json.record_id,\n    email_id: $('Fetch Email Record').item.json.email_id || 'N/A',\n    status: 'completed',\n    timestamp: new Date().toISOString()\n  }\n}];"
       },
       "id": "log-completion",
       "name": "Log Completion",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1580, 300]
+      "position": [1800, 300]
     }
   ],
   "connections": {
@@ -254,6 +281,17 @@
       ]
     },
     "Has Action?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Email Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Email Record": {
       "main": [
         [
           {
