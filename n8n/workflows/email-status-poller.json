@@ -77,7 +77,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Determine action based on status\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const status = item.json.status;\n  const previousStatus = item.json.previous_status || '';\n  \n  let action = 'none';\n  let webhookUrl = '';\n  \n  // Only process if previous_status indicates this hasn't been actioned yet\n  if (status === 'approved' && previousStatus !== 'approved_actioned') {\n    action = 'create_draft';\n    webhookUrl = $env.MAKE_CREATE_DRAFT_WEBHOOK || '';\n  } else if (status === 'sent' && previousStatus === 'approved') {\n    action = 'send_email';\n    webhookUrl = $env.MAKE_SEND_EMAIL_WEBHOOK || '';\n  } else if (status === 'archived' && previousStatus !== 'archived_actioned') {\n    action = 'archive';\n    webhookUrl = $env.MAKE_ARCHIVE_WEBHOOK || '';\n  }\n  \n  if (action !== 'none') {\n    results.push({\n      json: {\n        record_id: item.json.id,\n        email_id: item.json.email_id,\n        action: action,\n        webhook_url: webhookUrl,\n        draft_response: item.json.draft_response || '',\n        contact_email: item.json.contact_email || '',\n        subject: item.json.subject || 'Re: Your enquiry',\n        status: status,\n        previous_status: previousStatus\n      }\n    });\n  }\n}\n\nreturn results;"
+        "jsCode": "// Determine action based on status\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const status = item.json.status;\n  const previousStatus = item.json.previous_status || '';\n  const contactEmail = item.json.contact_email || '';\n  const draftResponse = item.json.draft_response || '';\n  \n  let action = 'none';\n  let webhookUrl = '';\n  let skipReason = '';\n  \n  // Only process if previous_status indicates this hasn't been actioned yet\n  if (status === 'approved' && previousStatus !== 'approved_actioned') {\n    // For create_draft, require contact_email and draft_response\n    if (!contactEmail) {\n      skipReason = 'Missing contact_email';\n    } else if (!draftResponse) {\n      skipReason = 'Missing draft_response';\n    } else {\n      action = 'create_draft';\n      webhookUrl = $env.MAKE_CREATE_DRAFT_WEBHOOK || '';\n    }\n  } else if (status === 'sent' && previousStatus === 'approved') {\n    action = 'send_email';\n    webhookUrl = $env.MAKE_SEND_EMAIL_WEBHOOK || '';\n  } else if (status === 'archived' && previousStatus !== 'archived_actioned') {\n    action = 'archive';\n    webhookUrl = $env.MAKE_ARCHIVE_WEBHOOK || '';\n  }\n  \n  if (action !== 'none') {\n    results.push({\n      json: {\n        record_id: item.json.id,\n        email_id: item.json.email_id,\n        action: action,\n        webhook_url: webhookUrl,\n        draft_response: draftResponse,\n        contact_email: contactEmail,\n        subject: item.json.subject || 'Re: Your enquiry',\n        status: status,\n        previous_status: previousStatus\n      }\n    });\n  } else if (skipReason) {\n    // Log skipped items (action=none but not because already actioned)\n    console.log('Skipping record ' + item.json.id + ': ' + skipReason);\n  }\n}\n\nreturn results;"
       },
       "id": "determine-action",
       "name": "Determine Action",
@@ -258,7 +258,7 @@
           "value": "tblaeAuzLbmzW8ktJ",
           "mode": "id"
         },
-        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "id": "={{ $('Route by Action').item.json.record_id }}",
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -292,7 +292,7 @@
           "value": "tblaeAuzLbmzW8ktJ",
           "mode": "id"
         },
-        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "id": "={{ $('Route by Action').item.json.record_id }}",
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -327,7 +327,7 @@
           "value": "tblaeAuzLbmzW8ktJ",
           "mode": "id"
         },
-        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "id": "={{ $('Route by Action').item.json.record_id }}",
         "columns": {
           "mappingMode": "defineBelow",
           "value": {

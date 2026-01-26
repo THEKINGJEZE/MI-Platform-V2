@@ -18,7 +18,7 @@
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
 | Email Executor | ✅ Fixed | ID: PWy1PYwJ24Me0LV7 — Now fetches email_id for archive |
-| Email Status Poller | ✅ Deployed | ID: hNc60oB6UvOG5cZv — Needs activation in n8n UI |
+| Email Status Poller | ✅ Fixed | ID: hNc60oB6UvOG5cZv — Bug fixed, reactivated |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 | Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
@@ -51,10 +51,10 @@
 7. ~~**Document Airtable Automation setup**~~ ✅ Done — `docs/AIRTABLE-AUTOMATION-SETUP.md`
 8. ~~**Document Clawdbot cron setup**~~ ✅ Done — `docs/CLAWDBOT-CRON-SETUP.md`
 9. ~~**Configure Airtable Automation**~~ ✅ Replaced — n8n Email Status Poller (ID: `hNc60oB6UvOG5cZv`)
-10. **Activate Email Status Poller** — Toggle active in n8n UI
+10. ~~**Activate Email Status Poller**~~ ✅ Done — Activated via n8n MCP
 11. **Configure Clawdbot cron** — Manual setup on Mac Mini (see docs)
-11. **Fix Make.com archive scenario** — Returns 500, needs Make.com debugging
-12. **Daily email quality check** — 5 min spot-check per monitoring protocol
+12. ~~**Make.com archive scenario**~~ ✅ Verified working — 404s expected when emails moved/deleted
+13. **Daily email quality check** — 5 min spot-check per monitoring protocol
 
 ---
 
@@ -90,6 +90,10 @@ None.
 - ✅ Created `docs/AIRTABLE-AUTOMATION-SETUP.md` — Webhook trigger setup guide
 - ✅ Created `docs/CLAWDBOT-CRON-SETUP.md` — Cron schedule setup guide
 - ✅ Created n8n Email Status Poller (ID: `hNc60oB6UvOG5cZv`) — Replaces Airtable Automation
+- ✅ Activated Email Status Poller — Now polling every minute for status changes
+- ✅ Verified Make.com archive scenario (8260117) — Working correctly, 404s are expected when emails already moved
+- ✅ Fixed Email Status Poller bugs (missing field validation, node references)
+- ✅ Created missing Airtable fields: `previous_status`, `contact_email`, `subject` in Emails table
 
 ---
 
