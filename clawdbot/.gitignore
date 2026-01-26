@@ -23,6 +23,7 @@ workspace/projects/
 # =====================
 config/.env
 config/.env.*
+config/clawdbot.json
 config/credentials/
 config/cron/
 config/devices/
@@ -34,6 +35,9 @@ config/browser/
 
 # Config sessions (contain conversation history)
 config/agents/*/sessions/
+
+# Auth profiles (contain OAuth tokens)
+config/agents/*/agent/auth-profiles.json
 
 # Config identity (device-specific auth)
 config/identity/device-auth.json
