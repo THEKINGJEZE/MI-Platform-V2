@@ -72,39 +72,30 @@
 
 ## Blockers
 
-None.
+- **Calendar webhooks**: Microsoft connection (ID: 6957096) needs `Calendars.Read` + `Calendars.ReadWrite` scopes — requires admin reauthorization in Make.com
 
 ---
 
 ## Completed This Session
 
-- ✅ SPEC-014 comprehensive verification (all components exist and are active)
-- ✅ Fixed SPEC-012/014 documentation inconsistency (WF4 stays in n8n)
-- ✅ Set n8n env vars on VPS (`MAKE_CREATE_DRAFT_WEBHOOK`, `MAKE_ARCHIVE_WEBHOOK`)
-- ✅ Restarted n8n container — env vars confirmed available
-- ✅ Fixed HubSpot DNS issue (added /etc/hosts entry for api.hubapi.com)
-- ✅ End-to-end test: Clawdbot email-processor → HubSpot lookup working → Emails table write
-- ✅ Fixed Email Executor webhook parsing (query params not extracted)
-- ✅ Verified n8n Email Executor routes correctly to Make.com webhooks
-- ✅ Fixed Email Executor archive action (now fetches `email_id` from Airtable)
-- ✅ Created `docs/AIRTABLE-AUTOMATION-SETUP.md` — Webhook trigger setup guide
-- ✅ Created `docs/CLAWDBOT-CRON-SETUP.md` — Cron schedule setup guide
-- ✅ Created n8n Email Status Poller (ID: `hNc60oB6UvOG5cZv`) — Replaces Airtable Automation
-- ✅ Activated Email Status Poller — Now polling every minute for status changes
-- ✅ Verified Make.com archive scenario (8260117) — Working correctly, 404s are expected when emails already moved
-- ✅ Fixed Email Status Poller bugs (missing field validation, node references)
-- ✅ Created missing Airtable fields: `previous_status`, `contact_email`, `subject` in Emails table
+- ✅ Created `make-curl` wrapper for domain-restricted Make.com webhooks
+- ✅ Configured Clawdbot exec allowlist for auto-approval of Make.com calls
+- ✅ Standardized Make.com scenario naming (all now "Agent Tool – X" format)
+- ✅ Fixed incorrect scenario IDs in documentation (List: 8271886, Delete: 8271894, Availability: 8271181)
+- ✅ Updated `~/ClawdbotFiles/.env.makecom` with correct names/IDs
+- ✅ Updated Clawdbot skills: `outlook-email/SKILL.md`, `outlook-calendar/SKILL.md`
+- ✅ Debugged calendar webhook timeout — root cause: Microsoft connection missing Calendar OAuth scopes
+- ⏳ Calendar permissions deferred (requires admin authority)
 
 ---
 
 ## Completed Work (Archived)
 
 See `docs/archive/status-2026-01.md` for:
-- Clawdbot installation and security hardening details (26 Jan)
-- SPEC-014 implementation details (26 Jan)
-- SPEC-010 Pipeline Remediation details
-- SPEC-011 Agent Enrichment details
-- Phase 2a-1 to 2a-5 Email Integration details
+- Clawdbot Make.com auto-approval setup (26 Jan)
+- SPEC-014 implementation and verification (26 Jan)
+- n8n Email Status Poller setup (26 Jan)
+- Phase 2a Email Integration details
 - Branch consolidation summary
 
 ---
