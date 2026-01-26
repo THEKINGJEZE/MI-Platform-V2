@@ -1,0 +1,483 @@
+{
+  "name": "MI: Email Status Poller",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every Minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
+        },
+        "filterByFormula": "OR({status}='approved', {status}='sent', {status}='archived')",
+        "options": {
+          "fields": ["email_id", "status", "previous_status", "draft_response", "contact_email", "subject"]
+        }
+      },
+      "id": "fetch-actionable",
+      "name": "Fetch Actionable Emails",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-has-records",
+      "name": "Has Records?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Determine action based on status\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const status = item.json.status;\n  const previousStatus = item.json.previous_status || '';\n  \n  let action = 'none';\n  let webhookUrl = '';\n  \n  // Only process if previous_status indicates this hasn't been actioned yet\n  if (status === 'approved' && previousStatus !== 'approved_actioned') {\n    action = 'create_draft';\n    webhookUrl = $env.MAKE_CREATE_DRAFT_WEBHOOK || '';\n  } else if (status === 'sent' && previousStatus === 'approved') {\n    action = 'send_email';\n    webhookUrl = $env.MAKE_SEND_EMAIL_WEBHOOK || '';\n  } else if (status === 'archived' && previousStatus !== 'archived_actioned') {\n    action = 'archive';\n    webhookUrl = $env.MAKE_ARCHIVE_WEBHOOK || '';\n  }\n  \n  if (action !== 'none') {\n    results.push({\n      json: {\n        record_id: item.json.id,\n        email_id: item.json.email_id,\n        action: action,\n        webhook_url: webhookUrl,\n        draft_response: item.json.draft_response || '',\n        contact_email: item.json.contact_email || '',\n        subject: item.json.subject || 'Re: Your enquiry',\n        status: status,\n        previous_status: previousStatus\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "determine-action",
+      "name": "Determine Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-actionable-2",
+      "name": "Has Action?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "create_draft",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Create Draft"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "send_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Send Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "archive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Archive"
+            }
+          ]
+        }
+      },
+      "id": "action-router",
+      "name": "Route by Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\",\n  \"to\": \"{{ $json.contact_email }}\",\n  \"subject\": \"{{ $json.subject }}\",\n  \"body\": {{ JSON.stringify($json.draft_response) }}\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-draft",
+      "name": "Call Make.com: Create Draft",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1580, 180],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"record_id\": \"{{ $json.record_id }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-send",
+      "name": "Call Make.com: Send Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1580, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email_id\": \"{{ $json.email_id }}\",\n  \"target_folder\": \"archive\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-make-archive",
+      "name": "Call Make.com: Archive",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1580, 420],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
+        },
+        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "previous_status": "approved_actioned"
+          }
+        }
+      },
+      "id": "mark-draft-actioned",
+      "name": "Mark: Draft Actioned",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1800, 180],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
+        },
+        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "previous_status": "sent_actioned",
+            "sent_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "mark-sent-actioned",
+      "name": "Mark: Sent Actioned",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1800, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appEEWaGtGUwOyOhm",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaeAuzLbmzW8ktJ",
+          "mode": "id"
+        },
+        "id": "={{ $('Determine Action').item.json.record_id }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "previous_status": "archived_actioned"
+          }
+        }
+      },
+      "id": "mark-archive-actioned",
+      "name": "Mark: Archive Actioned",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1800, 420],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RT6YbgGPCR8jmYFl",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Fetch Actionable Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Actionable Emails": {
+      "main": [
+        [
+          {
+            "node": "Has Records?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Records?": {
+      "main": [
+        [
+          {
+            "node": "Determine Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Action": {
+      "main": [
+        [
+          {
+            "node": "Has Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Action?": {
+      "main": [
+        [
+          {
+            "node": "Route by Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Action": {
+      "main": [
+        [
+          {
+            "node": "Call Make.com: Create Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Make.com: Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Make.com: Archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Create Draft": {
+      "main": [
+        [
+          {
+            "node": "Mark: Draft Actioned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Send Email": {
+      "main": [
+        [
+          {
+            "node": "Mark: Sent Actioned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Make.com: Archive": {
+      "main": [
+        [
+          {
+            "node": "Mark: Archive Actioned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "notes": "MI: Email Status Poller - Polls Airtable every minute for status changes and triggers Make.com actions. Replaces need for Airtable Automation webhook. Part of SPEC-014."
+  },
+  "tags": [
+    {
+      "name": "MI Platform"
+    },
+    {
+      "name": "Email"
+    }
+  ]
+}

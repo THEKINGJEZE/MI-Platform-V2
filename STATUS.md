@@ -18,6 +18,7 @@
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
 | Email Executor | ✅ Fixed | ID: PWy1PYwJ24Me0LV7 — Now fetches email_id for archive |
+| Email Status Poller | ✅ Deployed | ID: hNc60oB6UvOG5cZv — Needs activation in n8n UI |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 | Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
@@ -49,8 +50,9 @@
 6. ~~**Fix n8n archive action**~~ ✅ Done — Now sends `email_id` (Make.com scenario issue separate)
 7. ~~**Document Airtable Automation setup**~~ ✅ Done — `docs/AIRTABLE-AUTOMATION-SETUP.md`
 8. ~~**Document Clawdbot cron setup**~~ ✅ Done — `docs/CLAWDBOT-CRON-SETUP.md`
-9. **Configure Airtable Automation** — Manual setup in Airtable UI (see docs)
-10. **Configure Clawdbot cron** — Manual setup on Mac Mini (see docs)
+9. ~~**Configure Airtable Automation**~~ ✅ Replaced — n8n Email Status Poller (ID: `hNc60oB6UvOG5cZv`)
+10. **Activate Email Status Poller** — Toggle active in n8n UI
+11. **Configure Clawdbot cron** — Manual setup on Mac Mini (see docs)
 11. **Fix Make.com archive scenario** — Returns 500, needs Make.com debugging
 12. **Daily email quality check** — 5 min spot-check per monitoring protocol
 
@@ -87,6 +89,7 @@ None.
 - ✅ Fixed Email Executor archive action (now fetches `email_id` from Airtable)
 - ✅ Created `docs/AIRTABLE-AUTOMATION-SETUP.md` — Webhook trigger setup guide
 - ✅ Created `docs/CLAWDBOT-CRON-SETUP.md` — Cron schedule setup guide
+- ✅ Created n8n Email Status Poller (ID: `hNc60oB6UvOG5cZv`) — Replaces Airtable Automation
 
 ---
 
