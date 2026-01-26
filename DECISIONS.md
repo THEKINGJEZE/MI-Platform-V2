@@ -309,12 +309,13 @@ Outlook → Make.com → Airtable → Clawdbot (curl) → Airtable → n8n execu
 - Human review before any Outlook action
 **What Clawdbot Replaces**:
 - WF1: Email Classifier (n8n + OpenAI) → Clawdbot skill
-- WF2: Email Drafter (n8n + ReAct Agent) → Clawdbot skill
-- WF4: Decay Scanner → Clawdbot cron
+- WF2: Email Drafter (n8n + ReAct Agent) → Clawdbot skill (merged into email-processor)
 **What Stays in n8n**:
 - WF3: Waiting-For Tracker (simple pattern matching)
+- WF4: Decay Scanner (already built, uses HubSpot + OpenAI gpt-4o-mini) ✅
 - WF5: Contact Auto-Creator (simple domain check)
 - Email Executor (dumb pipe: Airtable → Make.com)
+**Clarification (26 Jan 2026)**: WF4 (Decay Scanner) was originally listed as "Clawdbot cron" but the n8n workflow `n8n/workflows/relationship-decay-scanner.json` was built and tested. It remains in n8n.
 **Files**:
 - Full plan: `~/ClawdbotFiles/plans/CLAWDBOT-EMAIL-PROCESSOR-PLAN.md`
 - Integration doc: `docs/CLAWDBOT-INTEGRATION.md`

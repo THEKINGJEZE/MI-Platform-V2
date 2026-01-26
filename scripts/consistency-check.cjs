@@ -102,6 +102,10 @@ const SKIP_PATTERNS = [
   /^docs-fetcher\.md$/,
   /^config-auditor\.md$/,
   /^improvement-planner\.md$/,
+
+  // Clawdbot config files (outside repo at ~/.clawdbot/)
+  /^clawdbot\.json$/,
+  /^exec-approvals\.json$/,
 ];
 
 /**
