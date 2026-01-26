@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.1.23-1",
+    "lastTouchedAt": "2026-01-26T12:00:00.000Z"
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-opus-4-5"
+      },
+      "models": {
+        "anthropic/claude-opus-4-5": {
+          "alias": "opus"
+        },
+        "anthropic/claude-sonnet-4-5": {
+          "alias": "sonnet"
+        }
+      },
+      "workspace": "/Users/jamesjeram/ClawdbotFiles",
+      "memorySearch": {
+        "enabled": true,
+        "provider": "openai",
+        "model": "text-embedding-3-small"
+      },
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      },
+      "sandbox": {
+        "mode": "all",
+        "workspaceAccess": "rw"
+      }
+    }
+  },
+  "tools": {
+    "exec": {
+      "host": "gateway",
+      "security": "allowlist"
+    },
+    "sandbox": {
+      "tools": {
+        "deny": [
+          "process",
+          "browser",
+          "apply_patch"
+        ],
+        "allow": [
+          "exec",
+          "cron",
+          "read",
+          "write",
+          "edit",
+          "web_search",
+          "web_fetch",
+          "memory_search",
+          "sessions_list",
+          "image"
+        ]
+      }
+    },
+    "subagents": {
+      "tools": {
+        "allow": [
+          "web_search",
+          "web_fetch"
+        ]
+      }
+    },
+    "web": {
+      "search": {
+        "apiKey": "BSAyeWyxOpmAG_qgPGD7o4OBLtA5kzL"
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "channels": {
+    "whatsapp": {
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "+447502229776"
+      ],
+      "groupPolicy": "allowlist",
+      "mediaMaxMb": 50,
+      "debounceMs": 0
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "WbzLLscLgjM-DR0_HpRrbqCmLwW8aWEBCH2yujL5Mes"
+    },
+    "remote": {
+      "url": "ws://Mac.local:18789",
+      "sshTarget": "jamesjeram@Mac.local"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      }
+    }
+  }
+}

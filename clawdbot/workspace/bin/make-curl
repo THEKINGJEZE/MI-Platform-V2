@@ -1,0 +1,39 @@
+#!/bin/bash
+# make-curl: Domain-restricted curl for Make.com webhooks only
+# Location: ~/ClawdbotFiles/bin/make-curl
+#
+# This wrapper ensures curl can ONLY be used to call Make.com webhook URLs.
+# All other domains are blocked, preventing prompt injection attacks from
+# exfiltrating data to arbitrary URLs.
+#
+# Allowed domains:
+#   - hook.eu2.make.com (current)
+#   - hook.eu*.make.com (future EU regions)
+#   - hook.us*.make.com (future US regions)
+
+set -e
+
+# Find URL in arguments (look for https://)
+URL=""
+for arg in "$@"; do
+  if [[ "$arg" =~ ^https:// ]]; then
+    URL="$arg"
+    break
+  fi
+done
+
+# Validate URL exists
+if [[ -z "$URL" ]]; then
+  echo '{"success": false, "error": "No URL found in arguments"}' >&2
+  exit 1
+fi
+
+# Validate URL is Make.com webhook
+# Pattern: https://hook.{region}.make.com/{path}
+if [[ ! "$URL" =~ ^https://hook\.(eu[0-9]+|us[0-9]+)\.make\.com/ ]]; then
+  echo '{"success": false, "error": "Only make.com webhooks allowed", "blocked_url": "'"$URL"'"}' >&2
+  exit 1
+fi
+
+# Pass through to real curl
+exec /usr/bin/curl "$@"

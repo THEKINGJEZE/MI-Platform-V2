@@ -29,6 +29,8 @@ When you change document X, you need to check documents Y and Z. This map preven
 | n8n monitoring patterns | docs/STRATEGY-N8N.md | Anywhere (reference only) |
 | Agentic architecture | docs/STRATEGY-AGENTS.md | Anywhere (reference only) |
 | Clawdbot integration | docs/CLAWDBOT-INTEGRATION.md | Anywhere (reference only) |
+| Clawdbot config | clawdbot/config/clawdbot.json | Anywhere |
+| Clawdbot skills | clawdbot/workspace/skills/ | Anywhere |
 | Reference data (forces, etc.) | reference-data/*.json | Anywhere (link only) |
 | Reusable patterns | patterns/*.js | Anywhere (link only) |
 | AI prompts | prompts/*.md | Anywhere (link only) |
@@ -227,6 +229,12 @@ All documents that contain project information:
 | docs/STRATEGY-N8N.md | n8n monitoring | → docs/STRATEGY.md |
 | docs/STRATEGY-AGENTS.md | Agentic architecture | → docs/STRATEGY.md |
 | docs/QUALITY-IMPROVEMENT-PLAN.md | Pipeline fixes | → ROADMAP (Phase 1d), workflows |
+| docs/CLAWDBOT-INTEGRATION.md | Clawdbot docs | → clawdbot/, SPEC-014 |
+| docs/CLAWDBOT-CRON-SETUP.md | Clawdbot cron | → clawdbot/config/ |
+| clawdbot/config/clawdbot.json | Clawdbot main config | None (version controlled) |
+| clawdbot/config/exec-approvals.json | Exec allowlist | None (version controlled) |
+| clawdbot/workspace/skills/*.md | Clawdbot skills | → SPEC-014 |
+| clawdbot/workspace/plans/*.md | Clawdbot plans | → DECISIONS.md |
 | .claude/hooks/*.sh | Automation | ← CLAUDE.md, DOCUMENT-HYGIENE |
 | specs/*.md | Build specs | ← ROADMAP acceptance criteria |
 | skills/*.md | Design patterns | ← skills/README.md |

@@ -56,16 +56,29 @@ Clawdbot is installed on the Mac Mini as a WhatsApp-based AI assistant that can 
 
 ### Location
 
-All Clawdbot config lives **outside this repo** at `~/.clawdbot/`:
+As of 26 January 2026, all Clawdbot files are consolidated into this repository under `clawdbot/`:
 
-> **Note**: These files are NOT in the MI-Platform-V2 repository. They live in James's home directory on the Mac Mini where Clawdbot is installed. References to these files are for documentation purposes only.
+```
+MI-Platform-V2/
+└── clawdbot/
+    ├── workspace/    # Clawdbot workspace (skills, plans, etc.)
+    └── config/       # Clawdbot configuration (clawdbot.json, etc.)
+```
 
-| File | Full Path | Purpose |
+Symlinks maintain backward compatibility:
+- `~/ClawdbotFiles` → `MI-Platform-V2/clawdbot/workspace/`
+- `~/.clawdbot` → `MI-Platform-V2/clawdbot/config/`
+
+| File | Repo Path | Purpose |
 |------|-----------|---------|
-| `clawdbot.json` | `~/.clawdbot/clawdbot.json` | Main configuration |
-| `exec-approvals.json` | `~/.clawdbot/exec-approvals.json` | Exec command allowlist |
-| `.env` | `~/.clawdbot/.env` | API keys (encrypted) |
-| `credentials/` | `~/.clawdbot/credentials/` | WhatsApp session data |
+| `clawdbot.json` | `clawdbot/config/clawdbot.json` | Main configuration |
+| `exec-approvals.json` | `clawdbot/config/exec-approvals.json` | Exec command allowlist |
+| `.env` | `clawdbot/config/.env` | API keys (encrypted) — **gitignored** |
+| `credentials/` | `clawdbot/config/credentials/` | WhatsApp session — **gitignored** |
+| Skills | `clawdbot/workspace/skills/` | MI Platform integration skills |
+| Plans | `clawdbot/workspace/plans/` | Architecture decision docs |
+
+> **Security Note**: Secrets (`.env*`, `credentials/`, `memory/`, `cron/`) are excluded from git via `clawdbot/.gitignore`. Only non-sensitive config and documentation files are version controlled.
 
 ### Key Configuration: clawdbot.json
 

@@ -1,0 +1,55 @@
+# Clawdbot .gitignore
+# Secrets and runtime files that should NOT be version controlled
+
+# =====================
+# WORKSPACE SECRETS
+# =====================
+workspace/.env*
+workspace/memory/
+workspace/MEMORY.md
+workspace/USER.md
+workspace/HEARTBEAT.md
+workspace/IDENTITY.md
+workspace/audit-test.txt
+workspace/test-write.txt
+
+# Workspace runtime/media (not needed in git)
+workspace/media/
+workspace/docker-build/
+workspace/projects/
+
+# =====================
+# CONFIG SECRETS
+# =====================
+config/.env
+config/.env.*
+config/credentials/
+config/cron/
+config/devices/
+config/logs/
+config/media/
+config/memory/
+config/sandbox/
+config/browser/
+
+# Config sessions (contain conversation history)
+config/agents/*/sessions/
+
+# Config identity (device-specific auth)
+config/identity/device-auth.json
+
+# Runtime files
+config/*.sock
+config/*.lock
+config/update-check.json
+
+# Backup files (contain same secrets)
+config/*.bak
+config/*.bak.*
+
+# =====================
+# GENERAL
+# =====================
+*.log
+*.jsonl
+.DS_Store
