@@ -1,0 +1,49 @@
+#!/bin/bash
+# notion-curl: Domain-restricted curl for Notion API only
+# Location: ~/ClawdbotFiles/bin/notion-curl
+#
+# This wrapper ensures curl can ONLY be used to call Notion API.
+# All other domains are blocked, preventing prompt injection attacks from
+# exfiltrating data to arbitrary URLs.
+#
+# Features:
+#   - Only allows api.notion.com
+#   - Auto-injects Authorization header from ~/.config/notion/api_key
+#   - Auto-injects Notion-Version header (2022-06-28)
+#
+# Usage:
+#   notion-curl -s "https://api.notion.com/v1/users/me"
+#   notion-curl -s -X POST "https://api.notion.com/v1/pages" -H "Content-Type: application/json" -d '{...}'
+
+set -e
+
+# Find URL in arguments (look for https://)
+URL=""
+for arg in "$@"; do
+  if [[ "$arg" =~ ^https:// ]]; then
+    URL="$arg"
+    break
+  fi
+done
+
+# Validate URL exists
+if [[ -z "$URL" ]]; then
+  echo '{"success": false, "error": "No URL found in arguments"}' >&2
+  exit 1
+fi
+
+# Validate URL is Notion API
+if [[ ! "$URL" =~ ^https://api\.notion\.com/ ]]; then
+  echo '{"success": false, "error": "Only api.notion.com allowed", "blocked_url": "'"$URL"'"}' >&2
+  exit 1
+fi
+
+# Load API key
+NOTION_KEY=$(cat ~/.config/notion/api_key 2>/dev/null)
+if [[ -z "$NOTION_KEY" ]]; then
+  echo '{"success": false, "error": "Notion API key not found at ~/.config/notion/api_key"}' >&2
+  exit 1
+fi
+
+# Pass through to real curl with auth headers injected
+exec /usr/bin/curl -H "Authorization: Bearer $NOTION_KEY" -H "Notion-Version: 2022-06-28" "$@"

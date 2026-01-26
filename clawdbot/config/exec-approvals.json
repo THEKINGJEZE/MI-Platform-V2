@@ -30,6 +30,11 @@
           "lastUsedAt": 1769465439277,
           "lastUsedCommand": "~/ClawdbotFiles/bin/make-curl -s -X POST \"https://hook.eu2.make.com/yj03a82bd0jdrbne2mdz0l6gmfzw7t9d\" -H \"Content-Type: application/json\" -d '{}'",
           "lastResolvedPath": "/Users/jamesjeram/ClawdbotFiles/bin/make-curl"
+        },
+        {
+          "id": "NOTION-CURL-WRAPPER",
+          "pattern": "~/ClawdbotFiles/bin/notion-curl",
+          "description": "Domain-restricted curl for Notion API with auto-auth"
         }
       ],
       "security": "allowlist"

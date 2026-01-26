@@ -57,9 +57,10 @@ curl -s "https://api.notion.com/v1/..." \
 **Current allowlist entries**:
 | Binary | Path | Purpose |
 |--------|------|---------|
-| curl | /usr/bin/curl | Notion API, general HTTP (requires approval) |
+| curl | /usr/bin/curl | General HTTP (requires approval) |
 | curl | /opt/homebrew/bin/curl | Homebrew curl (requires approval) |
 | make-curl | ~/ClawdbotFiles/bin/make-curl | Make.com webhooks ONLY (auto-approved) |
+| notion-curl | ~/ClawdbotFiles/bin/notion-curl | Notion API ONLY (auto-approved, auto-auth) |
 
 ### make-curl Wrapper
 
@@ -85,6 +86,39 @@ make-curl -s -X POST "$MAKECOM_EMAIL_SEARCH" -H "Content-Type: application/json"
 - All calls logged via Make.com
 
 **If you need to call a different domain**: Use regular `curl` (requires manual approval)
+
+### notion-curl Wrapper
+
+Domain-restricted curl that only allows calls to Notion API, with automatic authentication.
+
+**Location**: `~/ClawdbotFiles/bin/notion-curl`
+
+**Features**:
+- Only allows `api.notion.com`
+- Auto-injects Authorization header from `~/.config/notion/api_key`
+- Auto-injects Notion-Version header (`2022-06-28`)
+
+**Usage**:
+```bash
+# Simple GET
+notion-curl -s "https://api.notion.com/v1/users/me"
+
+# POST with JSON body
+notion-curl -s -X POST "https://api.notion.com/v1/pages" \
+  -H "Content-Type: application/json" \
+  -d '{"parent": {...}, "properties": {...}}'
+
+# Query a database
+notion-curl -s -X POST "https://api.notion.com/v1/databases/DB_ID/query" \
+  -H "Content-Type: application/json" \
+  -d '{"filter": {...}}'
+```
+
+**Security benefits**:
+- Auto-approved (no manual confirmation needed)
+- Blocks any non-Notion URLs
+- Prevents prompt injection data exfiltration
+- API key never exposed in command line
 
 ---
 
