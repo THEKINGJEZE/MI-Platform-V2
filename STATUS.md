@@ -17,7 +17,7 @@
 | Email Classifier | ✅ Live | MI: Email Classifier (V2) |
 | Decay Scanner | ✅ Tested | WF4 ID: j7pvULBq70hKD47j — 15 alerts generated |
 | Contact Auto-Creator | ✅ Active | ID: YqLYjvJea9zeIy8l — Runs every 10 min |
-| Email Executor | ✅ Tested | ID: PWy1PYwJ24Me0LV7 — Webhook parsing fixed |
+| Email Executor | ✅ Fixed | ID: PWy1PYwJ24Me0LV7 — Now fetches email_id for archive |
 | Data Quality | ⏳ Monitoring | Target: >70/100 health score |
 | Remote MCP Servers | ✅ Live | n8n + Airtable on VPS:3001/3002 |
 
@@ -45,9 +45,14 @@
 2. ~~**Deploy n8n executor**~~ ✅ Done — ID: `PWy1PYwJ24Me0LV7`
 3. ~~**Configure Make.com webhooks**~~ ✅ Found — Existing scenarios 8260100, 8260117
 4. ~~**Set n8n env vars**~~ ✅ Done — Added to `/docker/n8n/.env` and `docker-compose.yml`, container restarted
-5. ~~**Test end-to-end flow**~~ ✅ Done — Clawdbot→Airtable→n8n working, Make.com 500 error (separate issue)
-6. **Fix Make.com archive scenario** — Returns 500, scenario needs debugging
-7. **Daily email quality check** — 5 min spot-check per monitoring protocol
+5. ~~**Test end-to-end flow**~~ ✅ Done — Clawdbot→Airtable→n8n working
+6. ~~**Fix n8n archive action**~~ ✅ Done — Now sends `email_id` (Make.com scenario issue separate)
+7. ~~**Document Airtable Automation setup**~~ ✅ Done — `docs/AIRTABLE-AUTOMATION-SETUP.md`
+8. ~~**Document Clawdbot cron setup**~~ ✅ Done — `docs/CLAWDBOT-CRON-SETUP.md`
+9. **Configure Airtable Automation** — Manual setup in Airtable UI (see docs)
+10. **Configure Clawdbot cron** — Manual setup on Mac Mini (see docs)
+11. **Fix Make.com archive scenario** — Returns 500, needs Make.com debugging
+12. **Daily email quality check** — 5 min spot-check per monitoring protocol
 
 ---
 
@@ -79,6 +84,9 @@ None.
 - ✅ End-to-end test: Clawdbot email-processor → HubSpot lookup working → Emails table write
 - ✅ Fixed Email Executor webhook parsing (query params not extracted)
 - ✅ Verified n8n Email Executor routes correctly to Make.com webhooks
+- ✅ Fixed Email Executor archive action (now fetches `email_id` from Airtable)
+- ✅ Created `docs/AIRTABLE-AUTOMATION-SETUP.md` — Webhook trigger setup guide
+- ✅ Created `docs/CLAWDBOT-CRON-SETUP.md` — Cron schedule setup guide
 
 ---
 
