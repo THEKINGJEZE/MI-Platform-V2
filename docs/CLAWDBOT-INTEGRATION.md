@@ -141,10 +141,11 @@ This file restricts the `exec` tool to only allow `curl` commands:
 | Capability | Notes |
 |------------|-------|
 | Read/write files in `~/ClawdbotFiles` | Sandboxed workspace |
+| Read/write memory files | `~/ClawdbotFiles/memory/` (moved from ~/clawd/memory) |
 | Search the web | Native tool |
 | Fetch web pages | Native tool |
 | Make HTTP requests via curl | For APIs (Notion, etc.) |
-| Search memory files | Via symlink to `~/clawd/memory` |
+| Search memory files | `~/ClawdbotFiles/memory/` (native, not symlinked) |
 | Schedule tasks (cron) | For reminders |
 | Send WhatsApp messages | To James only (allowlist) |
 

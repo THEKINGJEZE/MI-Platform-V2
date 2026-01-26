@@ -77,7 +77,7 @@ None.
   - Sandbox mode enabled (Docker isolation)
   - Exec restricted to curl-only via `exec-approvals.json`
   - Key config: `host: "gateway"` + `security: "allowlist"` ensures exec runs on Mac with allowlist
-  - Memory symlink created: `~/ClawdbotFiles/memory` → `~/clawd/memory`
+  - Memory files moved to `~/ClawdbotFiles/memory/` (enables read+write, not just read)
   - Tools matrix documented: curl works, ls/rm/bash blocked
   - Security review written: `~/ClawdbotFiles/SECURITY-REVIEW.md`
   - **Integration doc created**: `docs/CLAWDBOT-INTEGRATION.md`
