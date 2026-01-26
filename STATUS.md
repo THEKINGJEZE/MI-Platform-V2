@@ -1,6 +1,6 @@
 # MI Platform — Session Status
 
-**Updated**: 25 January 2026
+**Updated**: 26 January 2026
 **Phase**: 1d + 2a (Parallel)
 **Status**: Phase 2a-8 complete — Contact Auto-Creator deployed ✅
 
@@ -73,6 +73,15 @@ None.
   - Location: `~/.clawdbot/` (outside project repo)
   - **Potential**: Conversational interface layer for MI Platform (email triage via WhatsApp)
 
+- ✅ **Clawdbot Security Hardening**
+  - Sandbox mode enabled (Docker isolation)
+  - Exec restricted to curl-only via `exec-approvals.json`
+  - Key config: `host: "gateway"` + `security: "allowlist"` ensures exec runs on Mac with allowlist
+  - Memory symlink created: `~/ClawdbotFiles/memory` → `~/clawd/memory`
+  - Tools matrix documented: curl works, ls/rm/bash blocked
+  - Security review written: `~/ClawdbotFiles/SECURITY-REVIEW.md`
+  - **Integration doc created**: `docs/CLAWDBOT-INTEGRATION.md`
+
 ---
 
 ## Completed Work (Archived)
@@ -85,4 +94,4 @@ See `docs/archive/status-2026-01.md` for:
 
 ---
 
-*Last aligned with ANCHOR.md: 24 January 2026*
+*Last aligned with ANCHOR.md: 26 January 2026*

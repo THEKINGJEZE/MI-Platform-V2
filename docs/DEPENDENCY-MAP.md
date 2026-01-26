@@ -28,6 +28,7 @@ When you change document X, you need to check documents Y and Z. This map preven
 | Platform strategy | docs/STRATEGY.md | Anywhere (reference only) |
 | n8n monitoring patterns | docs/STRATEGY-N8N.md | Anywhere (reference only) |
 | Agentic architecture | docs/STRATEGY-AGENTS.md | Anywhere (reference only) |
+| Clawdbot integration | docs/CLAWDBOT-INTEGRATION.md | Anywhere (reference only) |
 | Reference data (forces, etc.) | reference-data/*.json | Anywhere (link only) |
 | Reusable patterns | patterns/*.js | Anywhere (link only) |
 | AI prompts | prompts/*.md | Anywhere (link only) |
