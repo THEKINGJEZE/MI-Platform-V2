@@ -58,8 +58,12 @@ Run a comprehensive security audit:
    - Check for missing patterns that should be ignored
 
 4. **Dependency Vulnerabilities**
-   - Review package.json for known vulnerable packages
-   - Note any outdated critical dependencies
+   - Run: npm audit --json 2>/dev/null | head -100 (capture output)
+   - Run: npm outdated 2>/dev/null (check for outdated packages)
+   - Review package.json and package-lock.json for known vulnerable packages
+   - Check dashboard/package.json if it exists (Next.js frontend)
+   - Note any critical/high severity vulnerabilities
+   - Check for outdated critical dependencies (especially security-related)
 
 5. **Sensitive Directories**
    - Check clawdbot/config/ for exposed credentials
@@ -140,6 +144,17 @@ Use this format:
 - [ ] No hardcoded credentials in skill files
 
 ### Risk Level: [Low/Medium/High/Critical]
+
+## Dependency Audit
+
+### npm audit results
+- Critical: [count]
+- High: [count]
+- Moderate: [count]
+- Low: [count]
+
+### Outdated packages
+[List any outdated packages, especially security-critical ones]
 
 ## Recommendations
 [Prioritized list of actions]

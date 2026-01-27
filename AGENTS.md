@@ -59,14 +59,15 @@ Scan for security vulnerabilities and exposed secrets:
 - Credentials in `clawdbot/config/` directory
 - Sensitive data in git history (`git log -p --all -S 'password'`)
 - Insecure patterns: SQL injection, XSS, command injection
-- Dependency vulnerabilities in `package.json` / `package-lock.json`
+- Dependency vulnerabilities — run `npm audit` and `npm outdated`
 - Missing `.gitignore` entries for sensitive files
 - Overly permissive file permissions
 
 **Files to Check:**
 - `*.js`, `*.ts`, `*.json` — for hardcoded secrets
 - `.gitignore` — completeness
-- `package.json` — known vulnerable packages
+- `package.json`, `package-lock.json` — run `npm audit --json` for vulnerabilities
+- `dashboard/package.json` — if Next.js frontend exists, audit it too
 - `clawdbot/config/` — credential files
 - `clawdbot/config/identity/device.json` — key material (must not include private keys in git)
 - `n8n/workflows/*.json` — embedded credentials

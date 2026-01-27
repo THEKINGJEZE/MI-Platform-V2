@@ -15,12 +15,25 @@ This file tracks all Codex audit activities for coordination with Claude Code an
 | P0 | Add `device.json` to .gitignore | **OPEN** | codex-orientation.md |
 | P1 | Split exec-approvals.json (allowlist vs runtime) | **OPEN** | codex-orientation.md |
 | P2 | Restrict raw curl in exec allowlist | **OPEN** | codex-orientation.md |
+| P2 | Dashboard: 5 high-severity npm vulnerabilities (d3-color ReDoS) | **OPEN** | codex-activity-log.md |
 
 *Codex: Update status to DONE when Claude Code confirms fix. Claude Code: Mark DONE after remediation.*
 
 ---
 
 ## Activity Log
+
+### 2026-01-27 - npm Audit Enhancement (Claude Code)
+
+**Task**: Enhanced Codex security audit to include npm dependency checks
+**Findings**:
+- Dashboard has 5 high-severity vulnerabilities (d3-color ReDoS via react-simple-maps)
+- Main project clean (0 vulnerabilities)
+**Updates Made**:
+- `scripts/codex-security-audit.sh` — Added explicit `npm audit` and `npm outdated` commands
+- `AGENTS.md` — Clarified dependency audit instructions
+**Next Actions**:
+- Run `cd dashboard && npm audit fix --force` to fix vulnerabilities (breaking change to react-simple-maps)
 
 ### 2026-01-26 - Remediation Plan
 
