@@ -76,30 +76,52 @@ Run a comprehensive security audit:
    - Look for command injection (exec, spawn with user input)
 
 7. **CLAWDBOT SECURITY AUDIT (Critical)**
-   Clawdbot is an autonomous AI agent - requires extra scrutiny:
+   Clawdbot is an autonomous AI agent with WhatsApp, email, and command execution access.
+   This is the HIGHEST RISK component. Audit ALL aspects thoroughly.
 
-   a) Credential Protection:
-      - Run: git ls-files clawdbot/config/credentials (should be empty)
-      - Run: git ls-files clawdbot/config/agents (check for auth-profiles.json)
-      - Verify clawdbot/.gitignore excludes credentials/, sessions/, auth-profiles.json
+   a) **Credential Exposure** (Critical):
+      - Run: git ls-files clawdbot/config/credentials (MUST be empty)
+      - Run: git ls-files clawdbot/config/agents (check for auth-profiles.json, sessions/)
+      - Run: git log -p --all -S "privateKeyPem" -- clawdbot/ (check git history)
+      - Check config/identity/device.json for privateKeyPem (if present = CRITICAL)
+      - Check config/exec-approvals.json for socketToken field
+      - Verify .gitignore excludes: credentials/, sessions/, auth-profiles.json, memory/, MEMORY.md
 
-   b) Exec Approvals Review:
-      - Read clawdbot/config/exec-approvals.json (this IS tracked)
-      - Check for dangerous auto-approved commands
-      - Verify webhook URLs don't expose secrets in the URL itself
+   b) **Command Injection / Exec Approvals** (High):
+      - Read clawdbot/config/exec-approvals.json
+      - Check allowlist for dangerous patterns:
+        * rm -rf, sudo, chmod 777, eval, curl|sh, wget|bash
+        * Raw curl without domain restriction
+        * Wildcards in paths (*, **)
+      - Verify domain-restricted wrappers are used where possible
 
-   c) Skill Security:
-      - Review clawdbot/workspace/skills/*/SKILL.md for hardcoded credentials
-      - Check for API keys or tokens in skill files
+   c) **Prompt Injection** (High):
+      - Review clawdbot/workspace/AGENTS.md for guardrails
+      - Check if there are "refuse to..." boundaries
+      - Review SOUL.md for exploitable personality traits
+      - Check skills for input validation before acting
 
-   d) Memory/Identity:
-      - Verify workspace/memory/ and workspace/MEMORY.md are NOT in git
-      - Check config/identity/device.json for exposed secrets (it IS tracked)
+   d) **Skill Security** (Medium-High):
+      - Review ALL skills in clawdbot/workspace/skills/*/SKILL.md
+      - Check for hardcoded API keys, tokens, passwords
+      - Check webhook URLs for embedded secrets (?token=xxx)
+      - Verify skills follow least privilege
+      - Check if skills validate inputs before processing
 
-   e) Tracked Sensitive Files:
-      - config/exec-approvals.json - review for safety
-      - config/identity/device.json - check for secrets
-      - workspace/AGENTS.md, SOUL.md - check for leaked context
+   e) **Data Exposure / Privacy** (Medium):
+      - Verify workspace/memory/ is NOT tracked
+      - Verify workspace/MEMORY.md is NOT tracked
+      - Check workspace/plans/ for sensitive context
+      - Check for PII in any tracked files
+
+   f) **Cross-System Access** (Medium):
+      - Document what systems Clawdbot can access (Make.com, Outlook, Airtable, WhatsApp)
+      - Verify integration credentials are NOT in tracked files
+      - Check if access is appropriately scoped
+
+   g) **Supply Chain** (Low):
+      - Note Clawdbot npm version: npm list -g clawdbot
+      - Flag if severely outdated or known CVEs
 
 Write your findings to: ${OUTPUT_FILE}
 
@@ -131,19 +153,46 @@ Use this format:
 
 ## Clawdbot Security Assessment
 
-### Credential Protection
-- [ ] No credentials in git (git ls-files clawdbot/config/credentials = empty)
-- [ ] No OAuth tokens in git
+**Overall Risk Level:** [Low/Medium/High/Critical]
+
+### Credential Exposure
 - [ ] .gitignore properly configured
+- [ ] No secrets in tracked config files
+- [ ] No secrets in git history (checked with git log -S)
+- [ ] No privateKeyPem in tracked identity files
+- [ ] No OAuth tokens in tracked files
 
-### Exec Approvals
-- [ ] No dangerous auto-approved commands (rm -rf, sudo, etc.)
-- [ ] Webhook URLs don't expose secrets
+### Command Injection / Exec Approvals
+- [ ] No dangerous auto-approved commands (rm -rf, sudo, chmod 777, eval)
+- [ ] No raw curl/wget without domain restriction
+- [ ] No overly permissive wildcards
+- [ ] Domain-restricted wrappers used
 
-### Skills
+### Prompt Injection
+- [ ] AGENTS.md has behavioral guardrails
+- [ ] Skills validate inputs before acting
+- [ ] No obvious injection vectors in SOUL.md
+
+### Skill Security
 - [ ] No hardcoded credentials in skill files
+- [ ] Webhook URLs don't embed secrets
+- [ ] Skills follow least privilege principle
+- [ ] All skills reviewed: [list skills checked]
 
-### Risk Level: [Low/Medium/High/Critical]
+### Data Exposure
+- [ ] workspace/memory/ not tracked
+- [ ] workspace/MEMORY.md not tracked
+- [ ] No PII in tracked workspace files
+
+### Cross-System Access
+- [ ] Make.com credentials not exposed
+- [ ] Outlook access appropriately scoped
+- [ ] Airtable access appropriately scoped
+
+### Issues Found
+| Severity | Issue | File | Recommendation |
+|----------|-------|------|----------------|
+| [Crit/High/Med/Low] | [description] | [path] | [fix] |
 
 ## Dependency Audit
 

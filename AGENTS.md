@@ -75,86 +75,214 @@ Scan for security vulnerabilities and exposed secrets:
 
 ### 1b. Clawdbot Security Audit (Critical)
 
-Clawdbot is an AI agent with access to WhatsApp, email, and Make.com webhooks.
-It requires **extra scrutiny** due to its autonomous capabilities.
+Clawdbot is an autonomous AI agent with access to WhatsApp, email, Make.com webhooks, and system commands.
+**This is the highest-risk component** — a compromised Clawdbot could send messages, access email, or execute commands.
 
-**Architecture Note:**
-- **Clawdbot npm package** — Installed globally at `~/.npm-global/lib/node_modules/clawdbot/`. This is the Clawdbot project itself (not our code). Don't audit the package dependencies — that's maintained by the Clawdbot project.
-- **Clawdbot config/workspace** — Lives in this repo at `clawdbot/`. This IS our configuration and MUST be audited for credential exposure.
+**What to Audit:**
+- `clawdbot/` directory in this repo contains ALL configuration and workspace files
+- The Clawdbot npm package itself (`~/.npm-global/lib/node_modules/clawdbot/`) is third-party code — don't audit that
 
-**Clawdbot Structure (in this repo):**
+**Clawdbot Structure:**
 ```
 clawdbot/
 ├── .gitignore              # CRITICAL: Must exclude secrets
-├── config/                 # Contains sensitive files
-│   ├── clawdbot.json       # Main config (should be git-ignored)
-│   ├── exec-approvals.json # Command allowlist (tracked or split per policy)
-│   ├── credentials/        # WhatsApp keys (MUST be git-ignored)
-│   ├── identity/           # Device auth (partially tracked)
+├── config/                 # Configuration files
+│   ├── clawdbot.json       # Main config
+│   ├── exec-approvals.json # Command allowlist + runtime state
+│   ├── credentials/        # WhatsApp keys
+│   ├── identity/           # Device auth keys
 │   └── agents/             # Agent sessions and OAuth tokens
 └── workspace/              # Agent's working directory
-    ├── AGENTS.md           # Clawdbot's own instructions
+    ├── AGENTS.md           # Agent instructions
     ├── SOUL.md             # Agent personality
-    ├── skills/             # Callable skills (review for security)
-    └── memory/             # Conversation history (should be git-ignored)
+    ├── TOOLS.md            # Available tools
+    ├── skills/             # Callable skills
+    ├── plans/              # Agent plans
+    └── memory/             # Conversation history
 ```
 
-**Clawdbot Security Checks:**
+---
 
-1. **Credential Exposure**
-   - Verify `clawdbot/.gitignore` excludes:
-     - `config/clawdbot.json`
-     - `config/credentials/`
-     - `config/agents/*/sessions/`
-     - `config/agents/*/agent/auth-profiles.json`
-     - `workspace/memory/`
-     - `workspace/MEMORY.md`
-   - Check no WhatsApp pre-keys are in git: `git ls-files clawdbot/config/credentials`
-   - Check no OAuth tokens in git: `git ls-files clawdbot/config/agents`
+#### 1b.1 Credential Exposure (Critical)
 
-2. **Exec Approvals (Command Allowlist)**
-   - Review `clawdbot/config/exec-approvals.json` (if tracked)
-   - Check for overly permissive patterns
-   - Ensure no dangerous commands auto-approved (rm -rf, sudo, etc.)
-   - Verify Make.com webhook URLs don't expose secrets
-   - Prefer split model: tracked allowlist only; runtime tokens/command history ignored
+**Check .gitignore completeness:**
+```bash
+# These MUST be git-ignored:
+git ls-files clawdbot/config/credentials     # Should be empty
+git ls-files clawdbot/config/agents          # Check for auth-profiles.json, sessions/
+git ls-files clawdbot/workspace/memory       # Should be empty
+```
 
-3. **Skill Security**
-   - Review `clawdbot/workspace/skills/*/SKILL.md`
-   - Check for hardcoded API keys or tokens
-   - Verify skills follow principle of least privilege
-   - Check webhook URLs in skills for exposed secrets
+**Check for secrets in tracked files:**
+- `config/clawdbot.json` — Should NOT contain API keys (use env vars)
+- `config/identity/device.json` — If contains `privateKeyPem`, CRITICAL (must rotate)
+- `config/exec-approvals.json` — Check for tokens in `socketToken` field
+- `workspace/MEMORY.md` — Should NOT be tracked (contains personal context)
 
-4. **Memory/Identity Exposure**
-   - Verify `workspace/memory/` is git-ignored
-   - Verify `workspace/MEMORY.md` is git-ignored (contains personal context)
-   - If `config/identity/device.json` contains a private key, treat as critical; it must be git-ignored and rotated
+**Check git history for leaked secrets:**
+```bash
+git log -p --all -S "privateKeyPem" -- clawdbot/
+git log -p --all -S "Bearer" -- clawdbot/
+git log -p --all -S "api_key" -- clawdbot/
+```
 
-5. **Cross-System Access**
-   - Clawdbot can call Make.com webhooks
-   - Clawdbot can access Outlook via Make.com
-   - Clawdbot can access Airtable
-   - Verify these integrations don't expose credentials in tracked files
+---
 
-**Clawdbot-Specific Report Section:**
+#### 1b.2 Command Injection / Exec Approvals (High)
+
+**Review `clawdbot/config/exec-approvals.json`:**
+
+Check the `allowlist` array for dangerous patterns:
+- ❌ `rm -rf` or `rm -r` — Could delete files
+- ❌ `sudo` — Privilege escalation
+- ❌ `chmod 777` — Insecure permissions
+- ❌ `curl | sh` or `wget | bash` — Remote code execution
+- ❌ `eval` — Code injection
+- ❌ Wildcards in paths (`*`, `**`) — Overly permissive
+- ❌ Raw `curl` without domain restriction — Can call any URL
+
+Check for command injection vectors:
+- Are user inputs sanitized before being passed to commands?
+- Can an attacker craft a message that becomes part of a command?
+
+**Recommended patterns:**
+- ✅ Domain-restricted wrappers (e.g., `make-curl` that only calls Make.com)
+- ✅ Specific command paths (e.g., `/usr/bin/git status`)
+- ✅ Read-only commands where possible
+
+---
+
+#### 1b.3 Prompt Injection / Agent Instructions (High)
+
+**Review `clawdbot/workspace/AGENTS.md`:**
+- Does it have guardrails against malicious instructions?
+- Are there boundaries on what the agent can/cannot do?
+- Is there a "refuse if asked to..." section?
+
+**Review `clawdbot/workspace/SOUL.md`:**
+- Could personality instructions be exploited?
+- Are there constraints on behavior?
+
+**Check skills for prompt injection vectors:**
+```bash
+# Review all skill files
+ls clawdbot/workspace/skills/*/SKILL.md
+```
+- Do skills validate inputs before processing?
+- Could a malicious email/message trigger unintended behavior?
+
+---
+
+#### 1b.4 Skill Security (Medium-High)
+
+**For EACH skill in `clawdbot/workspace/skills/*/`:**
+
+1. **Hardcoded credentials** — Search for API keys, tokens, passwords
+2. **Webhook URLs** — Are secrets embedded in URLs? (e.g., `?token=xxx`)
+3. **Input validation** — Does the skill validate inputs before acting?
+4. **Scope creep** — Does the skill do more than necessary?
+5. **Error handling** — Could errors leak sensitive information?
+6. **External calls** — What APIs/services does it call? Are they necessary?
+
+**Common skill vulnerabilities:**
+- Webhook URLs with embedded tokens → Move to env vars
+- Skills that can access arbitrary files → Restrict to specific paths
+- Skills that can send to any recipient → Restrict to known contacts
+
+---
+
+#### 1b.5 Data Exposure / Privacy (Medium)
+
+**Check for PII in tracked files:**
+- `workspace/plans/` — May contain personal context
+- `workspace/TOOLS.md` — Check for embedded URLs or tokens
+- `config/agents/*/` — Session data, conversation history
+
+**Verify memory isolation:**
+- `workspace/memory/` must be git-ignored
+- `workspace/MEMORY.md` must be git-ignored
+- Old conversation data should not persist in tracked files
+
+---
+
+#### 1b.6 Cross-System Access Control (Medium)
+
+**Review integrations:**
+| System | Access Method | Risk |
+|--------|--------------|------|
+| Make.com | Webhook URLs | URLs could be extracted and abused |
+| Outlook | Via Make.com | Email access — high sensitivity |
+| Airtable | API token | Data access — check scope |
+| WhatsApp | Credentials | Message access — high sensitivity |
+
+**For each integration, verify:**
+- Credentials are NOT in tracked files
+- Access is scoped to minimum necessary
+- Audit trail exists for actions taken
+
+---
+
+#### 1b.7 Denial of Service / Resource Abuse (Low-Medium)
+
+**Check for:**
+- Rate limiting on API calls
+- Timeouts on long-running operations
+- Limits on message frequency
+- Guards against infinite loops in skills
+
+---
+
+#### 1b.8 Supply Chain / Dependency Risk (Low)
+
+**Note:** The Clawdbot npm package is third-party. We don't audit its code, but:
+- Check which version is installed: `npm list -g clawdbot`
+- Note if it's severely outdated
+- Flag if there are known CVEs for the version
+
+---
+
+**Clawdbot Security Report Template:**
 ```markdown
 ### Clawdbot Security Assessment
 
-**Credential Protection:**
+**Overall Risk Level:** [Low/Medium/High/Critical]
+
+#### Credential Exposure
 - [ ] .gitignore properly configured
-- [ ] No credentials in git history
-- [ ] WhatsApp keys protected
-- [ ] OAuth tokens protected
+- [ ] No secrets in tracked config files
+- [ ] No secrets in git history
+- [ ] Identity keys protected (no privateKeyPem in tracked files)
 
-**Exec Approvals:**
+#### Command Injection / Exec Approvals
 - [ ] No dangerous auto-approved commands
-- [ ] Webhook URLs don't expose secrets
+- [ ] No overly permissive patterns
+- [ ] Domain-restricted wrappers used where possible
+- [ ] No raw curl/wget without restrictions
 
-**Skills:**
-- [ ] No hardcoded credentials
-- [ ] Follows least privilege
+#### Prompt Injection
+- [ ] AGENTS.md has behavioral guardrails
+- [ ] Skills validate inputs
+- [ ] No obvious injection vectors
 
-**Risk Level:** [Low/Medium/High/Critical]
+#### Skill Security
+- [ ] No hardcoded credentials in skills
+- [ ] Webhook URLs don't embed secrets
+- [ ] Skills follow least privilege
+
+#### Data Exposure
+- [ ] Memory/history not tracked
+- [ ] No PII in tracked files
+- [ ] Plans don't leak sensitive context
+
+#### Cross-System Access
+- [ ] Integration credentials not exposed
+- [ ] Access appropriately scoped
+
+#### Issues Found
+| Severity | Issue | File | Recommendation |
+|----------|-------|------|----------------|
+| Critical | [description] | [path:line] | [fix] |
+| High | [description] | [path:line] | [fix] |
 ```
 
 **Report Format:**
@@ -382,6 +510,7 @@ Claude Code will see your reports and can act on your findings.
 - **2026-01-26**: Added self-improvement protocol and activity logging
 - **2026-01-26**: Clarified identity key exposure check, exec-approvals split model, and write-scope reminder in behavioral guidelines
 - **2026-01-27**: Clarified Clawdbot architecture — npm package is external (don't audit), config/workspace in repo (do audit)
+- **2026-01-27**: Expanded Clawdbot audit to cover ALL vulnerability types: credential exposure, command injection, prompt injection, skill security, data exposure, cross-system access, supply chain
 
 ---
 
