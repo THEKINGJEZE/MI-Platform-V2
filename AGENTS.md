@@ -78,7 +78,11 @@ Scan for security vulnerabilities and exposed secrets:
 Clawdbot is an AI agent with access to WhatsApp, email, and Make.com webhooks.
 It requires **extra scrutiny** due to its autonomous capabilities.
 
-**Clawdbot Structure:**
+**Architecture Note:**
+- **Clawdbot npm package** — Installed globally at `~/.npm-global/lib/node_modules/clawdbot/`. This is the Clawdbot project itself (not our code). Don't audit the package dependencies — that's maintained by the Clawdbot project.
+- **Clawdbot config/workspace** — Lives in this repo at `clawdbot/`. This IS our configuration and MUST be audited for credential exposure.
+
+**Clawdbot Structure (in this repo):**
 ```
 clawdbot/
 ├── .gitignore              # CRITICAL: Must exclude secrets
@@ -377,6 +381,7 @@ Claude Code will see your reports and can act on your findings.
 - **2026-01-26**: Added write permissions for docs/audits/, AGENTS.md, .codex/
 - **2026-01-26**: Added self-improvement protocol and activity logging
 - **2026-01-26**: Clarified identity key exposure check, exec-approvals split model, and write-scope reminder in behavioral guidelines
+- **2026-01-27**: Clarified Clawdbot architecture — npm package is external (don't audit), config/workspace in repo (do audit)
 
 ---
 
