@@ -40,11 +40,11 @@ codex \
   -c 'sandbox_mode="read-only"' \
   -c 'approval_policy="never"' \
   -c 'model_reasoning_effort="high"' \
-  "You are the Security Auditor for MI Platform V2. Read AGENTS.md first.
+  "You are the Security Auditor for MI Platform V2. Read AGENTS.md first for comprehensive audit instructions.
 
-Run a comprehensive security audit:
+Run a comprehensive security audit covering:
 
-1. **Secret Scanning**
+1. **Secret Scanning** (Critical)
    - Search all files for hardcoded API keys, tokens, passwords
    - Check for patterns like: API_KEY, SECRET, TOKEN, PASSWORD, Bearer
    - Look in: *.js, *.ts, *.json, *.md, *.sh files
@@ -58,70 +58,55 @@ Run a comprehensive security audit:
    - Check for missing patterns that should be ignored
 
 4. **Dependency Vulnerabilities**
-   - Run: npm audit --json 2>/dev/null | head -100 (capture output)
-   - Run: npm outdated 2>/dev/null (check for outdated packages)
-   - Review package.json and package-lock.json for known vulnerable packages
-   - Check dashboard/package.json if it exists (Next.js frontend)
+   - Run: npm audit --json 2>/dev/null | head -100
+   - Run: npm outdated 2>/dev/null
+   - Check dashboard/package.json if it exists
    - Note any critical/high severity vulnerabilities
-   - Check for outdated critical dependencies (especially security-related)
 
 5. **Sensitive Directories**
    - Check clawdbot/config/ for exposed credentials
    - Check n8n/workflows/ for embedded API keys
    - Verify credentials/ folder is git-ignored
 
-6. **Code Security Patterns**
-   - Look for SQL injection risks (raw queries)
-   - Look for XSS vulnerabilities (unescaped user input)
-   - Look for command injection (exec, spawn with user input)
+6. **OWASP Top 10 Coverage**
+   See AGENTS.md Section 1a for full details:
+   - 1a.1: Secrets & Credential Exposure
+   - 1a.2: Injection Vulnerabilities (SQL, command, XSS, template, path traversal)
+   - 1a.3: Broken Authentication & Session Management
+   - 1a.4: Sensitive Data Exposure
+   - 1a.5: Security Misconfiguration (CORS, headers, cookies)
+   - 1a.6: Insecure Dependencies
+   - 1a.7: Cryptographic Failures
+   - 1a.8: SSRF
+   - 1a.9: Insecure Deserialization
+   - 1a.10: Insufficient Logging & Monitoring
+   - 1a.11: API Security
 
 7. **CLAWDBOT SECURITY AUDIT (Critical)**
-   Clawdbot is an autonomous AI agent with WhatsApp, email, and command execution access.
-   This is the HIGHEST RISK component. Audit ALL aspects thoroughly.
+   See AGENTS.md Section 1b for full details:
+   - 1b.1: Credential Exposure (git ls-files, git log -S)
+   - 1b.2: Command Injection / Exec Approvals
+   - 1b.3: Prompt Injection / Agent Instructions
+   - 1b.4: Skill Security
+   - 1b.5: Data Exposure / Privacy
+   - 1b.6: Cross-System Access Control
+   - 1b.7: Denial of Service / Resource Abuse
+   - 1b.8: Supply Chain / Dependency Risk
 
-   a) **Credential Exposure** (Critical):
-      - Run: git ls-files clawdbot/config/credentials (MUST be empty)
-      - Run: git ls-files clawdbot/config/agents (check for auth-profiles.json, sessions/)
-      - Run: git log -p --all -S "privateKeyPem" -- clawdbot/ (check git history)
-      - Check config/identity/device.json for privateKeyPem (if present = CRITICAL)
-      - Check config/exec-approvals.json for socketToken field
-      - Verify .gitignore excludes: credentials/, sessions/, auth-profiles.json, memory/, MEMORY.md
+8. **n8n Workflow Security**
+   See AGENTS.md Section 1c:
+   - Credential exposure in workflow JSON
+   - Code node security
+   - Expression injection
+   - Webhook security
+   - Error handling
 
-   b) **Command Injection / Exec Approvals** (High):
-      - Read clawdbot/config/exec-approvals.json
-      - Check allowlist for dangerous patterns:
-        * rm -rf, sudo, chmod 777, eval, curl|sh, wget|bash
-        * Raw curl without domain restriction
-        * Wildcards in paths (*, **)
-      - Verify domain-restricted wrappers are used where possible
-
-   c) **Prompt Injection** (High):
-      - Review clawdbot/workspace/AGENTS.md for guardrails
-      - Check if there are "refuse to..." boundaries
-      - Review SOUL.md for exploitable personality traits
-      - Check skills for input validation before acting
-
-   d) **Skill Security** (Medium-High):
-      - Review ALL skills in clawdbot/workspace/skills/*/SKILL.md
-      - Check for hardcoded API keys, tokens, passwords
-      - Check webhook URLs for embedded secrets (?token=xxx)
-      - Verify skills follow least privilege
-      - Check if skills validate inputs before processing
-
-   e) **Data Exposure / Privacy** (Medium):
-      - Verify workspace/memory/ is NOT tracked
-      - Verify workspace/MEMORY.md is NOT tracked
-      - Check workspace/plans/ for sensitive context
-      - Check for PII in any tracked files
-
-   f) **Cross-System Access** (Medium):
-      - Document what systems Clawdbot can access (Make.com, Outlook, Airtable, WhatsApp)
-      - Verify integration credentials are NOT in tracked files
-      - Check if access is appropriately scoped
-
-   g) **Supply Chain** (Low):
-      - Note Clawdbot npm version: npm list -g clawdbot
-      - Flag if severely outdated or known CVEs
+9. **Dashboard Security (Next.js)**
+   See AGENTS.md Section 1d:
+   - API route security
+   - Client-side security
+   - Environment variables
+   - Authentication
 
 Write your findings to: ${OUTPUT_FILE}
 
@@ -131,7 +116,7 @@ Use this format:
 
 **Auditor**: Codex Security Auditor
 **Project**: MI Platform V2
-**Scope**: Full repository scan
+**Scope**: Full repository scan (OWASP Top 10 + Platform-specific)
 
 ## Executive Summary
 [1-2 sentence overview]
@@ -151,6 +136,20 @@ Use this format:
 ## Clean Areas
 [Areas with no issues found]
 
+## OWASP Top 10 Assessment
+| Category | Status | Notes |
+|----------|--------|-------|
+| Injection (SQL, Cmd, XSS) | ✅/⚠️/❌ | |
+| Broken Authentication | ✅/⚠️/❌ | |
+| Sensitive Data Exposure | ✅/⚠️/❌ | |
+| Security Misconfiguration | ✅/⚠️/❌ | |
+| Insecure Dependencies | ✅/⚠️/❌ | |
+| Cryptographic Failures | ✅/⚠️/❌ | |
+| SSRF | ✅/⚠️/❌ | |
+| Insecure Deserialization | ✅/⚠️/❌ | |
+| Insufficient Logging | ✅/⚠️/❌ | |
+| API Security | ✅/⚠️/❌ | |
+
 ## Clawdbot Security Assessment
 
 **Overall Risk Level:** [Low/Medium/High/Critical]
@@ -163,7 +162,7 @@ Use this format:
 - [ ] No OAuth tokens in tracked files
 
 ### Command Injection / Exec Approvals
-- [ ] No dangerous auto-approved commands (rm -rf, sudo, chmod 777, eval)
+- [ ] No dangerous auto-approved commands (rm -rf, sudo, chmod 777)
 - [ ] No raw curl/wget without domain restriction
 - [ ] No overly permissive wildcards
 - [ ] Domain-restricted wrappers used
@@ -193,6 +192,20 @@ Use this format:
 | Severity | Issue | File | Recommendation |
 |----------|-------|------|----------------|
 | [Crit/High/Med/Low] | [description] | [path] | [fix] |
+
+## n8n Workflow Assessment
+- [ ] No hardcoded credentials in workflow JSON
+- [ ] Code nodes use safe patterns
+- [ ] Expression injection risks checked
+- [ ] Webhook authentication in place
+- [ ] Error handling doesn't leak data
+
+## Dashboard Assessment
+- [ ] API routes require authentication
+- [ ] No client-side secrets
+- [ ] NEXT_PUBLIC_* vars are safe
+- [ ] XSS protections in place
+- [ ] Redirects validated
 
 ## Dependency Audit
 

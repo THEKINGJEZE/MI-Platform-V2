@@ -51,27 +51,307 @@ Before any audit task, read these files to understand project context:
 
 ### 1. Security Audit
 
-Scan for security vulnerabilities and exposed secrets:
+Comprehensive security audit covering OWASP Top 10 and platform-specific vulnerabilities.
 
-**Check For:**
-- Hardcoded API keys, tokens, passwords in source files
-- `.env` files accidentally tracked in git
-- Credentials in `clawdbot/config/` directory
-- Sensitive data in git history (`git log -p --all -S 'password'`)
-- Insecure patterns: SQL injection, XSS, command injection
-- Dependency vulnerabilities — run `npm audit` and `npm outdated`
-- Missing `.gitignore` entries for sensitive files
-- Overly permissive file permissions
+---
+
+#### 1a.1 Secrets & Credential Exposure (Critical)
+
+**Hardcoded Secrets:**
+- API keys, tokens, passwords in source files (`*.js`, `*.ts`, `*.json`)
+- Search patterns: `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`, `Bearer`, `apikey`, `api-key`
+- Private keys: `privateKeyPem`, `-----BEGIN`, `PRIVATE KEY`
+- Connection strings: `mongodb://`, `postgres://`, `mysql://`, `redis://`
+
+**Git History:**
+```bash
+git log -p --all -S 'password'
+git log -p --all -S 'api_key'
+git log -p --all -S 'Bearer'
+git log -p --all -S 'privateKeyPem'
+```
+
+**.gitignore Verification:**
+Must include: `.env`, `.env.local`, `.env.*`, `credentials/`, `*.pem`, `*.key`, `*.p12`
 
 **Files to Check:**
 - `*.js`, `*.ts`, `*.json` — for hardcoded secrets
 - `.gitignore` — completeness
-- `package.json`, `package-lock.json` — run `npm audit --json` for vulnerabilities
-- `dashboard/package.json` — if Next.js frontend exists, audit it too
+- `.env.example` — ensure no real values (only placeholders)
 - `clawdbot/config/` — credential files
-- `clawdbot/config/identity/device.json` — key material (must not include private keys in git)
+- `clawdbot/config/identity/device.json` — key material
 - `n8n/workflows/*.json` — embedded credentials
-- `.env.example` — ensure no real values
+
+---
+
+#### 1a.2 Injection Vulnerabilities (High)
+
+**SQL Injection:**
+- Raw SQL queries with string concatenation
+- Search for: `query(`, `execute(`, `rawQuery(`, template literals with SQL
+- Look for unsanitized user input in queries
+
+**Command Injection:**
+- `exec()`, `execSync()`, `spawn()`, `spawnSync()` with user input
+- Shell commands constructed from variables
+- `child_process` usage without input validation
+
+**Cross-Site Scripting (XSS):**
+- `dangerouslySetInnerHTML` in React components
+- Unescaped user input in templates
+- `innerHTML` assignments
+- URL parameters rendered without sanitization
+
+**Template Injection:**
+- Dynamic template construction with user input
+- n8n expression injection: `{{ $json.userInput }}`
+- Handlebars/Mustache with unescaped content
+
+**Path Traversal:**
+- File operations with user-controlled paths
+- `../` in file paths not validated
+- `fs.readFile()`, `fs.writeFile()` with dynamic paths
+
+---
+
+#### 1a.3 Broken Authentication & Session Management (High)
+
+**Check For:**
+- Hardcoded credentials in code
+- Session tokens in URLs
+- Weak session identifiers
+- Missing session expiration
+- Credentials transmitted over HTTP (not HTTPS)
+- Password/token comparison vulnerable to timing attacks
+
+**In n8n Workflows:**
+- Credentials referenced by name (good) vs hardcoded (bad)
+- API keys in workflow JSON files
+- Bearer tokens in HTTP Request nodes
+
+---
+
+#### 1a.4 Sensitive Data Exposure (High)
+
+**Check For:**
+- PII in logs or console output
+- Sensitive data in error messages
+- Credentials in URL parameters
+- Sensitive data in local storage recommendations
+- Unencrypted sensitive data at rest
+- Debug/verbose logging in production
+
+---
+
+#### 1a.5 Security Misconfiguration (Medium)
+
+**CORS Configuration:**
+- Overly permissive origins (`*`)
+- `Access-Control-Allow-Credentials: true` with wildcard origin
+- Check `next.config.js`, API route handlers
+
+**HTTP Headers:**
+- Missing `X-Content-Type-Options: nosniff`
+- Missing `X-Frame-Options`
+- Missing `Content-Security-Policy`
+- Insecure `Access-Control-*` headers
+
+**Cookie Security:**
+- Missing `HttpOnly` flag on sensitive cookies
+- Missing `Secure` flag
+- Missing `SameSite` attribute
+- Overly long expiration
+
+**Default Configurations:**
+- Default admin passwords
+- Debug mode enabled in production
+- Verbose error messages exposed
+
+---
+
+#### 1a.6 Insecure Dependencies (Medium)
+
+**npm Audit:**
+```bash
+npm audit --json
+npm outdated
+cd dashboard && npm audit --json
+cd dashboard && npm outdated
+```
+
+**Check For:**
+- Critical/High severity vulnerabilities
+- Outdated security-critical packages
+- Packages with known CVEs
+- Unmaintained dependencies
+
+---
+
+#### 1a.7 Cryptographic Failures (Medium)
+
+**Check For:**
+- Weak hashing algorithms (MD5, SHA1 for passwords)
+- Hardcoded encryption keys
+- Weak random number generation (`Math.random()` for security)
+- Missing or weak salt for password hashing
+- Outdated TLS configurations
+
+---
+
+#### 1a.8 Server-Side Request Forgery (SSRF) (Medium)
+
+**Check For:**
+- User-controlled URLs in fetch/axios/http calls
+- Webhook URLs from user input
+- URL redirects without validation
+- Internal network access via user-supplied URLs
+
+**In n8n:**
+- HTTP Request nodes with dynamic URLs from user input
+- Webhook responses that fetch user-provided URLs
+
+---
+
+#### 1a.9 Insecure Deserialization (Low-Medium)
+
+**Check For:**
+- `JSON.parse()` on untrusted input without validation
+- `eval()` usage
+- `Function()` constructor with user input
+- YAML/XML parsing of untrusted content
+- Object prototype pollution vulnerabilities
+
+---
+
+#### 1a.10 Insufficient Logging & Monitoring (Low)
+
+**Check For:**
+- Security events not logged (failed logins, access denials)
+- Logs without timestamps
+- Sensitive data in logs
+- No log rotation (could fill disk)
+- No alerting on suspicious activity
+
+---
+
+#### 1a.11 API Security (Medium)
+
+**Check For:**
+- Missing authentication on API endpoints
+- Missing rate limiting
+- No input validation on API parameters
+- Excessive data exposure in responses
+- Missing authorization checks (IDOR vulnerabilities)
+- GraphQL-specific: introspection enabled, no depth limiting
+
+---
+
+### 1c. n8n Workflow Security
+
+n8n workflows are a critical attack surface — they process external data and can execute code.
+
+#### 1c.1 Credential Exposure
+
+**Check `n8n/workflows/*.json` for:**
+- Hardcoded API keys, tokens, passwords
+- Bearer tokens in HTTP Request nodes
+- Credentials that should use n8n credential manager
+
+**Good pattern:** `"credentials": { "anthropicApi": { "id": "xxx", "name": "Anthropic Claude" } }`
+**Bad pattern:** `"headers": { "Authorization": "Bearer sk-ant-xxx" }`
+
+#### 1c.2 Code Node Security
+
+**Check Code nodes for:**
+- `exec()`, `spawn()` — command injection risk
+- `eval()`, `Function()` — code injection risk
+- File system operations without validation
+- Network requests to user-controlled URLs
+- `require()` of user-controlled modules
+
+#### 1c.3 Expression Injection
+
+**Check for dangerous patterns:**
+- `{{ $json.userInput }}` used in sensitive contexts
+- Expressions that could be manipulated via input
+- Dynamic URLs, paths, or commands from expressions
+
+#### 1c.4 Webhook Security
+
+**Check webhook nodes:**
+- Missing authentication (anyone can trigger)
+- Sensitive data in webhook responses
+- Missing input validation on webhook payload
+- webhookId present (G-008 compliance)
+
+#### 1c.5 Error Handling
+
+**Check for:**
+- Sensitive data in error outputs
+- Errors that reveal system information
+- Missing `continueOnFail` for non-critical nodes
+
+---
+
+### 1d. Dashboard Security (Next.js)
+
+The dashboard (`dashboard/`) is a Next.js application with specific security concerns.
+
+#### 1d.1 API Route Security
+
+**Check `dashboard/app/api/` for:**
+- Missing authentication on routes
+- Missing authorization checks
+- Input validation on request bodies
+- Rate limiting implementation
+- Error responses that leak info
+
+#### 1d.2 Client-Side Security
+
+**Check for:**
+- Sensitive data in client-side code
+- API keys exposed to browser
+- `dangerouslySetInnerHTML` usage
+- Unvalidated URL parameters in components
+- localStorage/sessionStorage security
+
+#### 1d.3 Environment Variables
+
+**Check:**
+- `NEXT_PUBLIC_*` variables don't contain secrets
+- Server-only env vars not exposed to client
+- `.env.local` in `.gitignore`
+
+#### 1d.4 Authentication
+
+**Check:**
+- Session management implementation
+- Token storage security
+- CSRF protection
+- Redirect validation (open redirect vulnerabilities)
+
+---
+
+### Security Report Template
+
+```markdown
+## Security Audit Report - [DATE]
+
+### Critical (Fix Immediately)
+- [file:line] Description of issue
+
+### High (Fix This Week)
+- [file:line] Description of issue
+
+### Medium (Fix Soon)
+- [file:line] Description of issue
+
+### Low (Nice to Have)
+- [file:line] Description of issue
+
+### Clean Areas
+- [area] No issues found
+```
 
 ### 1b. Clawdbot Security Audit (Critical)
 
@@ -511,6 +791,9 @@ Claude Code will see your reports and can act on your findings.
 - **2026-01-26**: Clarified identity key exposure check, exec-approvals split model, and write-scope reminder in behavioral guidelines
 - **2026-01-27**: Clarified Clawdbot architecture — npm package is external (don't audit), config/workspace in repo (do audit)
 - **2026-01-27**: Expanded Clawdbot audit to cover ALL vulnerability types: credential exposure, command injection, prompt injection, skill security, data exposure, cross-system access, supply chain
+- **2026-01-27**: Expanded general Security Audit (Section 1a) with OWASP Top 10 coverage: injection vulnerabilities (SQL, command, XSS, template, path traversal), authentication, session management, sensitive data exposure, security misconfiguration, insecure dependencies, cryptographic failures, SSRF, deserialization, logging/monitoring, API security
+- **2026-01-27**: Added n8n Workflow Security section (1c): credential exposure, code node security, expression injection, webhook security, error handling
+- **2026-01-27**: Added Dashboard Security section (1d): API route security, client-side security, environment variables, authentication
 
 ---
 
