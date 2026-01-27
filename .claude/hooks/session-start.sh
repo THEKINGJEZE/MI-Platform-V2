@@ -61,6 +61,28 @@ else
 fi
 echo ""
 
+# Codex activity check
+echo "🤖 CODEX AUDIT STATUS:"
+if [ -f "docs/audits/codex-activity-log.md" ]; then
+    # Get most recent entry date
+    LAST_CODEX=$(grep -E "^## [0-9]{4}-[0-9]{2}-[0-9]{2}" docs/audits/codex-activity-log.md | head -1 | sed 's/## //' | cut -d' ' -f1)
+    if [ -n "$LAST_CODEX" ]; then
+        echo "   Last Codex activity: $LAST_CODEX"
+        # Check for unread findings (files newer than activity log)
+        NEW_AUDITS=$(find docs/audits -name "codex-*.md" -newer docs/audits/codex-activity-log.md 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$NEW_AUDITS" -gt 0 ]; then
+            echo "   ⚠️  $NEW_AUDITS new Codex audit report(s) to review"
+        fi
+        # Check for critical/urgent findings
+        if grep -l "\[URGENT\]\|Critical:" docs/audits/codex-*.md 2>/dev/null | head -1 > /dev/null; then
+            echo "   🚨 URGENT: Codex found critical issues — review docs/audits/"
+        fi
+    fi
+else
+    echo "   ℹ️  No Codex activity log found"
+fi
+echo ""
+
 # Recently modified files
 echo "📝 RECENTLY MODIFIED (last 24h):"
 find . -type f \( -name "*.js" -o -name "*.json" -o -name "*.md" \) \

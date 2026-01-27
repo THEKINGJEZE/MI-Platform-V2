@@ -1,0 +1,103 @@
+# MI Platform V2 - Codex CLI Configuration
+# This file configures Codex as Security Auditor with limited write access
+# See: https://developers.openai.com/codex/config-reference/
+
+# ============================================================
+# MODEL SETTINGS
+# ============================================================
+
+# Use GPT-5-Codex for audit tasks
+model = "gpt-5-codex"
+
+# High reasoning for thorough security analysis
+model_reasoning_effort = "high"
+
+# ============================================================
+# SANDBOX MODE: Workspace Write (Restricted)
+# ============================================================
+
+# Codex can write to specific directories only:
+# - docs/audits/ (audit reports)
+# - AGENTS.md (self-improvement)
+# - .codex/ (its own configuration)
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Only allow writes to these specific paths
+writable_roots = [
+    "docs/audits",
+    "AGENTS.md",
+    ".codex"
+]
+# Keep network disabled for security
+network_access = false
+
+# ============================================================
+# APPROVAL POLICY
+# ============================================================
+
+# Require approval for commands, but allow file writes to permitted paths
+approval_policy = "on-failure"
+
+# ============================================================
+# FEATURES
+# ============================================================
+
+[features]
+# Allow web searches for CVE databases, security advisories
+web_search_request = true
+
+# Cache shell state for faster repeated commands
+shell_snapshot = true
+
+# ============================================================
+# ENVIRONMENT SECURITY
+# ============================================================
+
+[shell_environment_policy]
+# Start with core environment only (PATH, HOME, etc.)
+inherit = "core"
+
+# NEVER expose these secrets to subprocesses
+# Even in read-only mode, we don't want Codex to see API keys
+exclude = [
+    "AIRTABLE_*",
+    "HUBSPOT_*",
+    "ANTHROPIC_*",
+    "N8N_*",
+    "MCP_*",
+    "OPENAI_*",
+    "CLAUDE_*",
+    "*_API_KEY",
+    "*_SECRET",
+    "*_TOKEN",
+    "*_PASSWORD",
+    "AWS_*",
+    "AZURE_*"
+]
+
+# ============================================================
+# MCP SERVERS (Optional - for future integration)
+# ============================================================
+
+# Uncomment to allow Codex to use project MCP servers
+# [mcp_servers.airtable]
+# url = "http://72.61.202.117:3002/mcp"
+# enabled_tools = ["list_records", "search_records"]  # Read-only tools only
+
+# ============================================================
+# NOTES
+# ============================================================
+#
+# This configuration is deliberately restrictive:
+# - read-only sandbox prevents any file modifications
+# - environment exclusions prevent secret exposure
+# - approval_policy = "on-failure" allows automated audits
+#
+# To run security audits:
+#   ./scripts/codex-security-audit.sh
+#
+# To run document drift checks:
+#   ./scripts/codex-doc-audit.sh
+#
+# Never change sandbox_mode for audit tasks.
